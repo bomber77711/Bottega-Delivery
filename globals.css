@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --green-primary: #2E7D32;
+  --green-accent: #4CAF50;
+  --green-dark: #1B5E20;
+  --green-hover: #2D6A4F;
+  --tomato: #D32F2F;
+  --bg-light: #F0F7EE;
+  --bg-dark: #0A0A0A;
+  --bg-panel: #060D06;
+  --text-primary: #1A1A1A;
+  --text-secondary: #555555;
+  --white: #FFFFFF;
+  --nav-height: 60px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+  background: var(--bg-light);
+  overflow: hidden;
+}
+
+h1, h2, h3, h4, h5 { font-family: 'Playfair Display', Georgia, serif; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(46,125,50,0.25); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(46,125,50,0.45); }
+
+@keyframes badgePop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes cartPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes markerPulse {
+  0%, 100% { opacity: 0.9; r: attr(r); }
+  50% { opacity: 0.5; }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes drawerSlide {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes dashMove {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -20; }
+}
