@@ -4,7 +4,7 @@ import { geoMercator, geoPath } from 'd3-geo';
 import { regionData, regionCentroids } from './regionData';
 import { gastronomySpots, spotTypeColors } from './gastronomySpots';
 
-// Spot label ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ entity type + id mapping for mini-cards
+// Spot label ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ entity type + id mapping for mini-cards
 const SPOT_ENTITY_MAP = {
   'Carbonara': { type: 'recipes', id: 'cacio-e-pepe' },
   'Parmigiano': { type: 'ingredients', id: 'parmigiano-reggiano' },
@@ -38,11 +38,11 @@ const LAYER_TYPE_MAP = {
 function normalizeRegionName(name) {
   if (!name) return '';
   const map = {
-    "Valle d'Aosta/VallÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©e d'Aoste": 'valle_daosta',
+    "Valle d'Aosta/VallÃÂÃÂÃÂÃÂ©e d'Aoste": 'valle_daosta',
     "Valle d'Aosta": 'valle_daosta',
     'Piemonte': 'piemonte',
     'Lombardia': 'lombardia',
-    'Trentino-Alto Adige/SÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼dtirol': 'trentino_alto_adige',
+    'Trentino-Alto Adige/SÃÂÃÂÃÂÃÂ¼dtirol': 'trentino_alto_adige',
     'Trentino-Alto Adige': 'trentino_alto_adige',
     'Veneto': 'veneto',
     'Friuli-Venezia Giulia': 'friuli_venezia_giulia',
@@ -63,8 +63,8 @@ function normalizeRegionName(name) {
   };
   if (map[name]) return map[name];
   return name.toLowerCase()
-    .replace(/[ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢]/g, 'a').replace(/[ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¨ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª]/g, 'e').replace(/[ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ­ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ®]/g, 'i')
-    .replace(/[ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ²ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ´]/g, 'o').replace(/[ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¹ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂºÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ»]/g, 'u')
+    .replace(/[ÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ¡ÃÂÃÂÃÂÃÂ¢]/g, 'a').replace(/[ÃÂÃÂÃÂÃÂ¨ÃÂÃÂÃÂÃÂ©ÃÂÃÂÃÂÃÂª]/g, 'e').replace(/[ÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ­ÃÂÃÂÃÂÃÂ®]/g, 'i')
+    .replace(/[ÃÂÃÂÃÂÃÂ²ÃÂÃÂÃÂÃÂ³ÃÂÃÂÃÂÃÂ´]/g, 'o').replace(/[ÃÂÃÂÃÂÃÂ¹ÃÂÃÂÃÂÃÂºÃÂÃÂÃÂÃÂ»]/g, 'u')
     .replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 }
 
@@ -272,7 +272,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
             );
           })}
 
-          {/* Gastronomy spot markers ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ with layer filtering */}
+          {/* Gastronomy spot markers ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ with layer filtering */}
           {Object.entries(gastronomySpots).map(([regionId, spots]) => {
             const bb = regionBBoxes[regionId];
             if (!bb) return null;
@@ -324,7 +324,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               const handleSpotClick = (e) => {
                 e.stopPropagation();
                 if (selectedRegion === regionId) {
-                  // Region already selected ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ open mini-card
+                  // Region already selected ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ open mini-card
                   const rect = containerRef.current?.getBoundingClientRect();
                   if (!rect) return;
                   const entity = SPOT_ENTITY_MAP[spot.label];
@@ -341,13 +341,11 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
 
               const isZoomed = selectedRegion === regionId;
               const s = isZoomed ? zoomTransform.scale : 1;
-              var mR = (isZoomed ? 20 : 9) / s;
-              var mD = mR * 2;
-              var bW = (isZoomed ? 2.5 : 1.2) / s;
+              var mSz = (isZoomed ? 40 : 18) / s;
+              var brd = (isZoomed ? 2.5 : 1.2) / s;
               var tp = spot.type;
               var cat = spot.category || "";
-
-              var photoMap = {
+              var pMap = {
                 "Olive Oil": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=80&h=80&fit=crop",
                 "Wine": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=80&h=80&fit=crop",
                 "Cheese": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=80&h=80&fit=crop",
@@ -357,14 +355,14 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
                 "Pasta": "https://images.unsplash.com/photo-1551183053-bf91798d2233?w=80&h=80&fit=crop",
                 "Truffle": "https://images.unsplash.com/photo-1609501676614-6f01f0f3d0ea?w=80&h=80&fit=crop",
               };
-              var typePhotos = {
+              var tMap = {
                 "producer": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=80&h=80&fit=crop",
                 "ingredient": "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=80&h=80&fit=crop",
                 "experience": "https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?w=80&h=80&fit=crop",
                 "wine": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=80&h=80&fit=crop",
                 "dish": "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=80&h=80&fit=crop",
               };
-              var imgUrl = photoMap[cat] || typePhotos[tp] || typePhotos.producer;
+              var iUrl = pMap[cat] || tMap[tp] || tMap.producer;
 
               return (
                 <g
@@ -378,25 +376,19 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
                   }}
                   onMouseLeave={function() { setHoveredSpot(null); }}
                 >
-                  <circle cx={pos[0]} cy={pos[1]} r={mR + 2/s} fill={spotColor} opacity={0.12} />
-                  <circle cx={pos[0]} cy={pos[1]} r={mR} fill={spotColor} />
-                  <foreignObject x={pos[0] - mR + bW/2} y={pos[1] - mR + bW/2} width={mD - bW} height={mD - bW}>
-                    <div xmlns="http://www.w3.org/1999/xhtml" style={{
-                      width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden"
-                    }}>
-                      <img src={imgUrl} alt="" style={{
-                        width: "100%", height: "100%", objectFit: "cover", display: "block"
-                      }} />
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 2 / s} fill={spotColor} opacity={0.12} />
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2} fill={spotColor} />
+                  <foreignObject x={pos[0] - mSz / 2 + brd} y={pos[1] - mSz / 2 + brd} width={mSz - brd * 2} height={mSz - brd * 2} style={{ overflow: "hidden" }}>
+                    <div style={{ width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden" }}>
+                      <img src={iUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                     </div>
                   </foreignObject>
-                </g>
-              );
                 </g>
               );
             });
           })}
 
-          {/* Region centroid producer count dots ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ hidden when non-producer layer active */}
+          {/* Region centroid producer count dots ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ hidden when non-producer layer active */}
           {activeLayer === 'all' || activeLayer === 'producers' ? Object.entries(regionCentroids).map(([regionId, centroid]) => {
             const pos = getPos(centroid.lng, centroid.lat);
             if (!pos) return null;
@@ -442,7 +434,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.3)', fontSize: 13, gap: 8 }}>
           <div style={{ width: 16, height: 16, border: '2px solid rgba(76,175,80,0.4)', borderTop: '2px solid #4CAF50', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-          Loading atlasÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¦
+          Loading atlasÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¦
         </div>
       )}
 
@@ -487,7 +479,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               onMouseEnter={e => e.currentTarget.style.background = '#1B5E20'}
               onMouseLeave={e => e.currentTarget.style.background = '#2E7D32'}
             >
-              Explore ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ
+              Explore ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ
             </button>
           )}
 
@@ -495,7 +487,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
           <button
             onClick={() => setMiniCard(null)}
             style={{ position: 'absolute', top: 7, right: 8, background: 'rgba(0,0,0,0.35)', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</button>
+          >ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</button>
         </div>
       )}
 
@@ -512,8 +504,8 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
         }}>
           <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, marginBottom: 3, fontFamily: "'Playfair Display',serif" }}>{tooltip.name}</p>
           <p style={{ color: '#4CAF50', fontSize: 11, fontWeight: 700, marginBottom: 6, fontFamily: "'DM Mono',monospace" }}>{tooltip.count} Producers</p>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, lineHeight: 1.5 }}>{tooltip.products.join(' ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· ')}</p>
-          <p style={{ color: 'rgba(76,175,80,0.6)', fontSize: 10, marginTop: 6, fontWeight: 600 }}>Click to explore ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</p>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, lineHeight: 1.5 }}>{tooltip.products.join(' ÃÂÃÂÃÂÃÂ· ')}</p>
+          <p style={{ color: 'rgba(76,175,80,0.6)', fontSize: 10, marginTop: 6, fontWeight: 600 }}>Click to explore ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</p>
         </div>
       )}
     </div>
