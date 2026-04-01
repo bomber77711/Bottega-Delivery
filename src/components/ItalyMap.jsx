@@ -341,38 +341,22 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
 
               const isZoomed = selectedRegion === regionId;
               const s = isZoomed ? zoomTransform.scale : 1;
-              var sz = (isZoomed ? 20 : 9) / s;
+              var mSz = (isZoomed ? 38 : 17) / s;
               var tp = spot.type;
               var cat = spot.category || "";
-              var tform = "translate(" + pos[0] + "," + pos[1] + ") scale(" + (sz/14) + ")";
 
-              var bgMap = {
-                "Olive Oil": "#7A8C2A", "Wine": "#8C2040", "Cheese": "#D4A020",
-                "Coffee": "#5C3A1E", "Cured Meats": "#B83848", "Honey": "#C88520",
-                "Pasta": "#C06830", "Truffle": "#6B4830",
-              };
-              var tBg = { producer: "#4A7A3A", ingredient: "#3A8828", experience: "#C89028", wine: "#8C2040", dish: "#C84040" };
-              var bg = bgMap[cat] || tBg[tp] || tBg.producer;
-              var ic = "#FFF5E0";
-              var sw = 1.8;
-
-              var iconPath = "";
-              if (cat === "Olive Oil" || cat === "Truffle") iconPath = "M-2,-5 L-2,2 Q-2,5 0,5 Q2,5 2,2 L2,-5 M-1,-7 L-1,-5 L1,-5 L1,-7 M-0.5,-1 Q0,1 0.5,-1";
-              else if (cat === "Wine" || tp === "wine") iconPath = "M-3.5,-6 L-2,0 Q-2,3 0,3.5 Q2,3 2,0 L3.5,-6 M0,3.5 L0,6 M-2.5,6 L2.5,6";
-              else if (cat === "Cheese") iconPath = "M-6,2 L6,2 L6,-2 Z M-6,2 L-6,4 L6,4 L6,2";
-              else if (cat === "Coffee") iconPath = "M-4,-1 L-4,4 Q-4,6 -2,6 L2,6 Q4,6 4,4 L4,-1 M4,0.5 Q6.5,0.5 6.5,2.5 Q6.5,4.5 4,4.5 M-1.5,-3 Q-1,-5 -0.5,-3 M1,-3 Q1.5,-5 2,-3";
-              else if (cat === "Cured Meats") iconPath = "M-5,0 Q-3,-4 0,-4 Q3,-4 5,0 Q3,4 0,4 Q-3,4 -5,0 M-2,0 Q0,-1.5 2,0 Q0,1.5 -2,0";
-              else if (cat === "Honey") iconPath = "M-3,6 L-3,-1 Q-3,-4 0,-4 Q3,-4 3,-1 L3,6 M-3.5,-4.5 L3.5,-4.5 M2,-4.5 L3.5,-7 M-2,1 L2,1 M-2,3.5 L2,3.5";
-              else if (cat === "Pasta") iconPath = "M-1,-7 L-1,3 Q-1,6 0,6 Q1,6 1,3 L1,-7 M-4,-7 L-4,-1 M4,-7 L4,-1 M-3,6 L3,6";
-              else if (tp === "ingredient") iconPath = "M0,1 C-5,-1 -6,-5 -3.5,-7 Q-1,-8 0,-5 Q1,-8 3.5,-7 C6,-5 5,-1 0,1 M0,1 L0,7";
-              else if (tp === "experience") iconPath = "M-5,4 L0,-5 L5,4 Z M-3,4 L-3,7 L3,7 L3,4 M-1,5 L-1,7 L1,7 L1,5";
-              else if (tp === "dish") iconPath = "M-6,3 Q-5,-4 0,-5 Q5,-4 6,3 M-7,3 L7,3 M0,-5 L0,-7";
-              else iconPath = "M0,-4 Q4,-4 4,0 Q4,4 0,4 Q-4,4 -4,0 Q-4,-4 0,-4 M-1,-1 L1,1 M1,-1 L-1,1";
+              var catColors = { "Olive Oil": "#6B8E23", "Wine": "#8C2040", "Cheese": "#C8960A", "Coffee": "#5C3A1E", "Cured Meats": "#A8404A", "Honey": "#C07820", "Pasta": "#C06830", "Truffle": "#5A4A3A" };
+              var tpColors = { "producer": "#5A7A2A", "ingredient": "#2E7D32", "experience": "#C89028", "wine": "#8C2040", "dish": "#C84040" };
+              var catIcons = { "Olive Oil": "droplets", "Wine": "grape", "Cheese": "circle-dot", "Coffee": "coffee", "Cured Meats": "beef", "Honey": "flask-round", "Pasta": "wheat", "Truffle": "flower-2" };
+              var tpIcons = { "producer": "wheat", "ingredient": "leaf", "experience": "map-pin", "wine": "wine", "dish": "utensils-crossed" };
+              var bg = catColors[cat] || tpColors[tp] || "#5A7A2A";
+              var ic = catIcons[cat] || tpIcons[tp] || "wheat";
+              var iconUrl = "https://api.iconify.design/lucide/" + ic + ".svg?color=%23FFF3D0&width=64";
 
               return (
                 <g
                   key={regionId + "-spot-" + si}
-                  style={{ cursor: "pointer", transition: "opacity 0.15s ease" }}
+                  style={{ cursor: "pointer", transition: "opacity 0.2s ease" }}
                   opacity={spotOpacity}
                   onClick={handleSpotClick}
                   onMouseEnter={function(e) {
@@ -381,11 +365,12 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
                   }}
                   onMouseLeave={function() { setHoveredSpot(null); }}
                 >
-                  <circle cx={pos[0]} cy={pos[1]} r={sz / 2 + 2 / s} fill={bg} opacity={0.15} />
-                  <circle cx={pos[0]} cy={pos[1]} r={sz / 2} fill={bg} />
-                  <g transform={tform}>
-                    <path d={iconPath} fill="none" stroke={ic} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />
-                  </g>
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 2 / s} fill={bg} opacity={0.15} />
+                  <foreignObject x={pos[0] - mSz / 2} y={pos[1] - mSz / 2} width={mSz} height={mSz}>
+                    <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
+                      <img src={iconUrl} alt="" style={{ width: "52%", height: "52%", objectFit: "contain", display: "block" }} />
+                    </div>
+                  </foreignObject>
                 </g>
               );
             });
