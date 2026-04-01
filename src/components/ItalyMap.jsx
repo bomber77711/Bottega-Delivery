@@ -342,16 +342,28 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               const isZoomed = selectedRegion === regionId;
               const s = isZoomed ? zoomTransform.scale : 1;
               var mSz = (isZoomed ? 38 : 17) / s;
+              var eSz = (isZoomed ? 20 : 9) / s;
               var tp = spot.type;
               var cat = spot.category || "";
 
-              var catColors = { "Olive Oil": "#6B8E23", "Wine": "#8C2040", "Cheese": "#C8960A", "Coffee": "#5C3A1E", "Cured Meats": "#A8404A", "Honey": "#C07820", "Pasta": "#C06830", "Truffle": "#5A4A3A" };
-              var tpColors = { "producer": "#5A7A2A", "ingredient": "#2E7D32", "experience": "#C89028", "wine": "#8C2040", "dish": "#C84040" };
-              var catIcons = { "Olive Oil": "droplets", "Wine": "grape", "Cheese": "circle-dot", "Coffee": "coffee", "Cured Meats": "beef", "Honey": "flask-round", "Pasta": "wheat", "Truffle": "flower-2" };
-              var tpIcons = { "producer": "wheat", "ingredient": "leaf", "experience": "map-pin", "wine": "wine", "dish": "utensils-crossed" };
-              var bg = catColors[cat] || tpColors[tp] || "#5A7A2A";
-              var ic = catIcons[cat] || tpIcons[tp] || "wheat";
-              var iconUrl = "https://api.iconify.design/lucide/" + ic + ".svg?color=%23FFF3D0&width=64";
+              var catCfg = {
+                "Olive Oil": { bg: "#6B8E23", em: "\u{1FAD2}" },
+                "Wine": { bg: "#7B2040", em: "\u{1F377}" },
+                "Cheese": { bg: "#C8960A", em: "\u{1F9C0}" },
+                "Coffee": { bg: "#5C3A1E", em: "\u2615" },
+                "Cured Meats": { bg: "#A8404A", em: "\u{1F969}" },
+                "Honey": { bg: "#C07820", em: "\u{1F36F}" },
+                "Pasta": { bg: "#C06830", em: "\u{1F35D}" },
+                "Truffle": { bg: "#5A4A3A", em: "\u{1F344}" },
+              };
+              var tpCfg = {
+                "producer": { bg: "#5A7A2A", em: "\u{1F33E}" },
+                "ingredient": { bg: "#2E7D32", em: "\u{1F33F}" },
+                "experience": { bg: "#B8860B", em: "\u{1F3E1}" },
+                "wine": { bg: "#7B2040", em: "\u{1F377}" },
+                "dish": { bg: "#C84040", em: "\u{1F37D}\uFE0F" },
+              };
+              var cfg = catCfg[cat] || tpCfg[tp] || tpCfg.producer;
 
               return (
                 <g
@@ -365,12 +377,9 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
                   }}
                   onMouseLeave={function() { setHoveredSpot(null); }}
                 >
-                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 2 / s} fill={bg} opacity={0.15} />
-                  <foreignObject x={pos[0] - mSz / 2} y={pos[1] - mSz / 2} width={mSz} height={mSz}>
-                    <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
-                      <img src={iconUrl} alt="" style={{ width: "52%", height: "52%", objectFit: "contain", display: "block" }} />
-                    </div>
-                  </foreignObject>
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 2 / s} fill={cfg.bg} opacity={0.15} />
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2} fill={cfg.bg} />
+                  <text x={pos[0]} y={pos[1]} textAnchor="middle" dominantBaseline="central" fontSize={eSz} style={{ userSelect: "none" }}>{cfg.em}</text>
                 </g>
               );
             });
