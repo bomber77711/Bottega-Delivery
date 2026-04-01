@@ -4,7 +4,7 @@ import { geoMercator, geoPath } from 'd3-geo';
 import { regionData, regionCentroids } from './regionData';
 import { gastronomySpots, spotTypeColors } from './gastronomySpots';
 
-// Spot label Ã¢ÂÂ entity type + id mapping for mini-cards
+// Spot label ÃÂ¢ÃÂÃÂ entity type + id mapping for mini-cards
 const SPOT_ENTITY_MAP = {
   'Carbonara': { type: 'recipes', id: 'cacio-e-pepe' },
   'Parmigiano': { type: 'ingredients', id: 'parmigiano-reggiano' },
@@ -38,11 +38,11 @@ const LAYER_TYPE_MAP = {
 function normalizeRegionName(name) {
   if (!name) return '';
   const map = {
-    "Valle d'Aosta/VallÃÂ©e d'Aoste": 'valle_daosta',
+    "Valle d'Aosta/VallÃÂÃÂ©e d'Aoste": 'valle_daosta',
     "Valle d'Aosta": 'valle_daosta',
     'Piemonte': 'piemonte',
     'Lombardia': 'lombardia',
-    'Trentino-Alto Adige/SÃÂ¼dtirol': 'trentino_alto_adige',
+    'Trentino-Alto Adige/SÃÂÃÂ¼dtirol': 'trentino_alto_adige',
     'Trentino-Alto Adige': 'trentino_alto_adige',
     'Veneto': 'veneto',
     'Friuli-Venezia Giulia': 'friuli_venezia_giulia',
@@ -63,8 +63,8 @@ function normalizeRegionName(name) {
   };
   if (map[name]) return map[name];
   return name.toLowerCase()
-    .replace(/[ÃÂ ÃÂ¡ÃÂ¢]/g, 'a').replace(/[ÃÂ¨ÃÂ©ÃÂª]/g, 'e').replace(/[ÃÂ¬ÃÂ­ÃÂ®]/g, 'i')
-    .replace(/[ÃÂ²ÃÂ³ÃÂ´]/g, 'o').replace(/[ÃÂ¹ÃÂºÃÂ»]/g, 'u')
+    .replace(/[ÃÂÃÂ ÃÂÃÂ¡ÃÂÃÂ¢]/g, 'a').replace(/[ÃÂÃÂ¨ÃÂÃÂ©ÃÂÃÂª]/g, 'e').replace(/[ÃÂÃÂ¬ÃÂÃÂ­ÃÂÃÂ®]/g, 'i')
+    .replace(/[ÃÂÃÂ²ÃÂÃÂ³ÃÂÃÂ´]/g, 'o').replace(/[ÃÂÃÂ¹ÃÂÃÂºÃÂÃÂ»]/g, 'u')
     .replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 }
 
@@ -272,7 +272,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
             );
           })}
 
-          {/* Gastronomy spot markers Ã¢ÂÂ with layer filtering */}
+          {/* Gastronomy spot markers ÃÂ¢ÃÂÃÂ with layer filtering */}
           {Object.entries(gastronomySpots).map(([regionId, spots]) => {
             const bb = regionBBoxes[regionId];
             if (!bb) return null;
@@ -324,7 +324,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               const handleSpotClick = (e) => {
                 e.stopPropagation();
                 if (selectedRegion === regionId) {
-                  // Region already selected Ã¢ÂÂ open mini-card
+                  // Region already selected ÃÂ¢ÃÂÃÂ open mini-card
                   const rect = containerRef.current?.getBoundingClientRect();
                   if (!rect) return;
                   const entity = SPOT_ENTITY_MAP[spot.label];
@@ -342,51 +342,20 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               const isZoomed = selectedRegion === regionId;
               const s = isZoomed ? zoomTransform.scale : 1;
 
-              const isZm = isZoomed;
-              const sz = (isZm ? 16 : 7) / s;
-              const st = (isZm ? 1.4 : 0.8) / s;
-              const glSz = (isZm ? 22 : 10) / s;
-              const fillDark = 'rgba(10,16,10,0.75)';
-              const sType = spot.type;
-
-              /* Shape paths centered at 0,0 - each category gets a unique silhouette */
-              const shapeEl = (() => {
-                const half = sz / 2;
-                if (sType === 'producer') {
-                  /* Circle - artisan seal */
-                  return <circle cx={pos[0]} cy={pos[1]} r={half} fill={fillDark} stroke={spotColor} strokeWidth={st} />;
-                } else if (sType === 'ingredient') {
-                  /* Rounded square - product capsule */
-                  return <rect x={pos[0]-half} y={pos[1]-half} width={sz} height={sz} rx={half*0.3} fill={fillDark} stroke={spotColor} strokeWidth={st} />;
-                } else if (sType === 'experience') {
-                  /* Diamond - compass point */
-                  const d = half * 0.85;
-                  return <polygon points={`${pos[0]},${pos[1]-d} ${pos[0]+d},${pos[1]} ${pos[0]},${pos[1]+d} ${pos[0]-d},${pos[1]}`} fill={fillDark} stroke={spotColor} strokeWidth={st} />;
-                } else if (sType === 'wine') {
-                  /* Droplet / vertical pill */
-                  const rx = half * 0.55;
-                  const ry = half * 0.85;
-                  return <ellipse cx={pos[0]} cy={pos[1]} rx={rx} ry={ry} fill={fillDark} stroke={spotColor} strokeWidth={st} />;
-                } else if (sType === 'dish') {
-                  /* Hexagon - plated */
-                  const r = half * 0.8;
-                  const pts = [0,1,2,3,4,5].map(i => {
-                    const a = Math.PI / 3 * i - Math.PI / 6;
-                    return `${pos[0] + r * Math.cos(a)},${pos[1] + r * Math.sin(a)}`;
-                  }).join(' ');
-                  return <polygon points={pts} fill={fillDark} stroke={spotColor} strokeWidth={st} />;
-                }
-                /* Fallback: small circle */
-                return <circle cx={pos[0]} cy={pos[1]} r={half*0.7} fill={fillDark} stroke={spotColor} strokeWidth={st} />;
-              })();
-
-              /* Inner symbol: tiny dot in category color */
-              const innerR = (isZm ? 3 : 1.5) / s;
+              const isZm = selectedRegion === regionId;
+              const scl = isZm ? zoomTransform.scale : 1;
+              const sz = (isZm ? 14 : 6) / scl;
+              const strokeW = (isZm ? 1.3 : 0.7) / scl;
+              const innerDot = (isZm ? 2.5 : 1.2) / scl;
+              const glR = (isZm ? 16 : 8) / scl;
+              const dark = "rgba(10,16,10,0.78)";
+              const half = sz / 2;
+              const tp = spot.type;
 
               return (
                 <g
                   key={`${regionId}-spot-${si}`}
-                  style={{ cursor: 'pointer', transition: 'opacity 0.2s ease' }}
+                  style={{ cursor: "pointer", transition: "opacity 0.2s ease" }}
                   opacity={spotOpacity}
                   onClick={handleSpotClick}
                   onMouseEnter={(e) => {
@@ -395,18 +364,20 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
                   }}
                   onMouseLeave={() => setHoveredSpot(null)}
                 >
-                  {/* Subtle glow */}
-                  <circle cx={pos[0]} cy={pos[1]} r={glSz} fill={spotColor} opacity={0.06} />
-                  {/* Category shape */}
-                  {shapeEl}
-                  {/* Inner luminous dot */}
-                  <circle cx={pos[0]} cy={pos[1]} r={innerR} fill={spotColor} opacity={0.9} />
+                  <circle cx={pos[0]} cy={pos[1]} r={glR} fill={spotColor} opacity={0.05} />
+                  {tp === "producer" && <circle cx={pos[0]} cy={pos[1]} r={half} fill={dark} stroke={spotColor} strokeWidth={strokeW} />}
+                  {tp === "ingredient" && <rect x={pos[0]-half} y={pos[1]-half} width={sz} height={sz} rx={half*0.28} fill={dark} stroke={spotColor} strokeWidth={strokeW} />}
+                  {tp === "experience" && <rect x={pos[0]-half*0.7} y={pos[1]-half*0.7} width={sz*0.7} height={sz*0.7} rx={1/scl} fill={dark} stroke={spotColor} strokeWidth={strokeW} transform={`rotate(45 ${pos[0]} ${pos[1]})`} />}
+                  {tp === "wine" && <ellipse cx={pos[0]} cy={pos[1]} rx={half*0.55} ry={half*0.85} fill={dark} stroke={spotColor} strokeWidth={strokeW} />}
+                  {tp === "dish" && <circle cx={pos[0]} cy={pos[1]} r={half*0.78} fill={dark} stroke={spotColor} strokeWidth={strokeW} strokeDasharray={`${2/scl} ${1.5/scl}`} />}
+                  {!["producer","ingredient","experience","wine","dish"].includes(tp) && <circle cx={pos[0]} cy={pos[1]} r={half*0.6} fill={dark} stroke={spotColor} strokeWidth={strokeW} />}
+                  <circle cx={pos[0]} cy={pos[1]} r={innerDot} fill={spotColor} opacity={0.85} />
                 </g>
               );
             });
           })}
 
-          {/* Region centroid producer count dots Ã¢ÂÂ hidden when non-producer layer active */}
+          {/* Region centroid producer count dots ÃÂ¢ÃÂÃÂ hidden when non-producer layer active */}
           {activeLayer === 'all' || activeLayer === 'producers' ? Object.entries(regionCentroids).map(([regionId, centroid]) => {
             const pos = getPos(centroid.lng, centroid.lat);
             if (!pos) return null;
@@ -452,7 +423,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.3)', fontSize: 13, gap: 8 }}>
           <div style={{ width: 16, height: 16, border: '2px solid rgba(76,175,80,0.4)', borderTop: '2px solid #4CAF50', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-          Loading atlasÃ¢ÂÂ¦
+          Loading atlasÃÂ¢ÃÂÃÂ¦
         </div>
       )}
 
@@ -497,7 +468,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               onMouseEnter={e => e.currentTarget.style.background = '#1B5E20'}
               onMouseLeave={e => e.currentTarget.style.background = '#2E7D32'}
             >
-              Explore Ã¢ÂÂ
+              Explore ÃÂ¢ÃÂÃÂ
             </button>
           )}
 
@@ -505,7 +476,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
           <button
             onClick={() => setMiniCard(null)}
             style={{ position: 'absolute', top: 7, right: 8, background: 'rgba(0,0,0,0.35)', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >Ã¢ÂÂ</button>
+          >ÃÂ¢ÃÂÃÂ</button>
         </div>
       )}
 
@@ -522,8 +493,8 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
         }}>
           <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, marginBottom: 3, fontFamily: "'Playfair Display',serif" }}>{tooltip.name}</p>
           <p style={{ color: '#4CAF50', fontSize: 11, fontWeight: 700, marginBottom: 6, fontFamily: "'DM Mono',monospace" }}>{tooltip.count} Producers</p>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, lineHeight: 1.5 }}>{tooltip.products.join(' ÃÂ· ')}</p>
-          <p style={{ color: 'rgba(76,175,80,0.6)', fontSize: 10, marginTop: 6, fontWeight: 600 }}>Click to explore Ã¢ÂÂ</p>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, lineHeight: 1.5 }}>{tooltip.products.join(' ÃÂÃÂ· ')}</p>
+          <p style={{ color: 'rgba(76,175,80,0.6)', fontSize: 10, marginTop: 6, fontWeight: 600 }}>Click to explore ÃÂ¢ÃÂÃÂ</p>
         </div>
       )}
     </div>
