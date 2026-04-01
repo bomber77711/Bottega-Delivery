@@ -54,3 +54,21 @@ export const productsData = [
   { id: "p48", name: "Amaro del Capo", producer: "Caffo", region: "Calabria", regionId: "calabria", category: "Liqueur", price: 14.90, weight: "700ml", certifications: [], image: "https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=400&q=80", description: "Calabrian bitter with 29 herbs. Serve frozen.", tags: ["Herbal", "Frozen"] },
   { id: "p49", name: "Grappa di Moscato", producer: "Distilleria Berta", region: "Piedmont", regionId: "piemonte", category: "Liqueur", price: 24.90, weight: "500ml", certifications: [], image: "https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=400&q=80", description: "Aromatic Moscato grappa. Floral, smooth.", tags: ["Premium", "Aromatic"] },
 ];
+
+export const categories = [
+  { name: "All", emoji: "\u{1F37D}\uFE0F" },
+  { name: "Olive Oil", emoji: "\u{1FAD2}" },
+  { name: "Wine", emoji: "\u{1F377}" },
+  { name: "Cheese", emoji: "\u{1F9C0}" },
+  { name: "Pasta", emoji: "\u{1F35D}" },
+  { name: "Cured Meats", emoji: "\u{1F969}" },
+  { name: "Condiments", emoji: "\u{1F33F}" },
+  { name: "Truffle", emoji: "\u{1F344}" },
+  { name: "Honey", emoji: "\u{1F36F}" },
+  { name: "Coffee", emoji: "\u2615" },
+  { name: "Seafood", emoji: "\u{1F41F}" },
+  { name: "Nuts", emoji: "\u{1F95C}" },
+  { name: "Dolci", emoji: "\u{1F370}" },
+  { name: "Rice", emoji: "\u{1F33E}" },
+  { name: "Liqueur", emoji: "\u{1F378}" },
+];
