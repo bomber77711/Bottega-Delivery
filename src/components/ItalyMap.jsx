@@ -341,33 +341,38 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
 
               const isZoomed = selectedRegion === regionId;
               const s = isZoomed ? zoomTransform.scale : 1;
-              var mSz = (isZoomed ? 40 : 18) / s;
-              var brd = (isZoomed ? 2.5 : 1.2) / s;
+              var sz = (isZoomed ? 20 : 9) / s;
               var tp = spot.type;
               var cat = spot.category || "";
-              var pMap = {
-                "Olive Oil": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=80&h=80&fit=crop",
-                "Wine": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=80&h=80&fit=crop",
-                "Cheese": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=80&h=80&fit=crop",
-                "Coffee": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=80&h=80&fit=crop",
-                "Cured Meats": "https://images.unsplash.com/photo-1559054663-e8d23213f55c?w=80&h=80&fit=crop",
-                "Honey": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=80&h=80&fit=crop",
-                "Pasta": "https://images.unsplash.com/photo-1551183053-bf91798d2233?w=80&h=80&fit=crop",
-                "Truffle": "https://images.unsplash.com/photo-1609501676614-6f01f0f3d0ea?w=80&h=80&fit=crop",
+              var tform = "translate(" + pos[0] + "," + pos[1] + ") scale(" + (sz/14) + ")";
+
+              var bgMap = {
+                "Olive Oil": "#7A8C2A", "Wine": "#8C2040", "Cheese": "#D4A020",
+                "Coffee": "#5C3A1E", "Cured Meats": "#B83848", "Honey": "#C88520",
+                "Pasta": "#C06830", "Truffle": "#6B4830",
               };
-              var tMap = {
-                "producer": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=80&h=80&fit=crop",
-                "ingredient": "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=80&h=80&fit=crop",
-                "experience": "https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?w=80&h=80&fit=crop",
-                "wine": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=80&h=80&fit=crop",
-                "dish": "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=80&h=80&fit=crop",
-              };
-              var iUrl = pMap[cat] || tMap[tp] || tMap.producer;
+              var tBg = { producer: "#4A7A3A", ingredient: "#3A8828", experience: "#C89028", wine: "#8C2040", dish: "#C84040" };
+              var bg = bgMap[cat] || tBg[tp] || tBg.producer;
+              var ic = "#FFF5E0";
+              var sw = 1.8;
+
+              var iconPath = "";
+              if (cat === "Olive Oil" || cat === "Truffle") iconPath = "M-2,-5 L-2,2 Q-2,5 0,5 Q2,5 2,2 L2,-5 M-1,-7 L-1,-5 L1,-5 L1,-7 M-0.5,-1 Q0,1 0.5,-1";
+              else if (cat === "Wine" || tp === "wine") iconPath = "M-3.5,-6 L-2,0 Q-2,3 0,3.5 Q2,3 2,0 L3.5,-6 M0,3.5 L0,6 M-2.5,6 L2.5,6";
+              else if (cat === "Cheese") iconPath = "M-6,2 L6,2 L6,-2 Z M-6,2 L-6,4 L6,4 L6,2";
+              else if (cat === "Coffee") iconPath = "M-4,-1 L-4,4 Q-4,6 -2,6 L2,6 Q4,6 4,4 L4,-1 M4,0.5 Q6.5,0.5 6.5,2.5 Q6.5,4.5 4,4.5 M-1.5,-3 Q-1,-5 -0.5,-3 M1,-3 Q1.5,-5 2,-3";
+              else if (cat === "Cured Meats") iconPath = "M-5,0 Q-3,-4 0,-4 Q3,-4 5,0 Q3,4 0,4 Q-3,4 -5,0 M-2,0 Q0,-1.5 2,0 Q0,1.5 -2,0";
+              else if (cat === "Honey") iconPath = "M-3,6 L-3,-1 Q-3,-4 0,-4 Q3,-4 3,-1 L3,6 M-3.5,-4.5 L3.5,-4.5 M2,-4.5 L3.5,-7 M-2,1 L2,1 M-2,3.5 L2,3.5";
+              else if (cat === "Pasta") iconPath = "M-1,-7 L-1,3 Q-1,6 0,6 Q1,6 1,3 L1,-7 M-4,-7 L-4,-1 M4,-7 L4,-1 M-3,6 L3,6";
+              else if (tp === "ingredient") iconPath = "M0,1 C-5,-1 -6,-5 -3.5,-7 Q-1,-8 0,-5 Q1,-8 3.5,-7 C6,-5 5,-1 0,1 M0,1 L0,7";
+              else if (tp === "experience") iconPath = "M-5,4 L0,-5 L5,4 Z M-3,4 L-3,7 L3,7 L3,4 M-1,5 L-1,7 L1,7 L1,5";
+              else if (tp === "dish") iconPath = "M-6,3 Q-5,-4 0,-5 Q5,-4 6,3 M-7,3 L7,3 M0,-5 L0,-7";
+              else iconPath = "M0,-4 Q4,-4 4,0 Q4,4 0,4 Q-4,4 -4,0 Q-4,-4 0,-4 M-1,-1 L1,1 M1,-1 L-1,1";
 
               return (
                 <g
                   key={regionId + "-spot-" + si}
-                  style={{ cursor: "pointer", transition: "opacity 0.2s ease" }}
+                  style={{ cursor: "pointer", transition: "opacity 0.15s ease" }}
                   opacity={spotOpacity}
                   onClick={handleSpotClick}
                   onMouseEnter={function(e) {
@@ -376,13 +381,11 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
                   }}
                   onMouseLeave={function() { setHoveredSpot(null); }}
                 >
-                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 2 / s} fill={spotColor} opacity={0.12} />
-                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2} fill={spotColor} />
-                  <foreignObject x={pos[0] - mSz / 2 + brd} y={pos[1] - mSz / 2 + brd} width={mSz - brd * 2} height={mSz - brd * 2} style={{ overflow: "hidden" }}>
-                    <div style={{ width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden" }}>
-                      <img src={iUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                    </div>
-                  </foreignObject>
+                  <circle cx={pos[0]} cy={pos[1]} r={sz / 2 + 2 / s} fill={bg} opacity={0.15} />
+                  <circle cx={pos[0]} cy={pos[1]} r={sz / 2} fill={bg} />
+                  <g transform={tform}>
+                    <path d={iconPath} fill="none" stroke={ic} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />
+                  </g>
                 </g>
               );
             });
