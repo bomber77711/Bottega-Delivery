@@ -4,7 +4,7 @@ import { geoMercator, geoPath } from 'd3-geo';
 import { regionData, regionCentroids } from './regionData';
 import { gastronomySpots, spotTypeColors } from './gastronomySpots';
 
-// Spot label â entity type + id mapping for mini-cards
+// Spot label Ã¢ÂÂ entity type + id mapping for mini-cards
 const SPOT_ENTITY_MAP = {
   'Carbonara': { type: 'recipes', id: 'cacio-e-pepe' },
   'Parmigiano': { type: 'ingredients', id: 'parmigiano-reggiano' },
@@ -38,11 +38,11 @@ const LAYER_TYPE_MAP = {
 function normalizeRegionName(name) {
   if (!name) return '';
   const map = {
-    "Valle d'Aosta/VallÃ©e d'Aoste": 'valle_daosta',
+    "Valle d'Aosta/VallÃÂ©e d'Aoste": 'valle_daosta',
     "Valle d'Aosta": 'valle_daosta',
     'Piemonte': 'piemonte',
     'Lombardia': 'lombardia',
-    'Trentino-Alto Adige/SÃ¼dtirol': 'trentino_alto_adige',
+    'Trentino-Alto Adige/SÃÂ¼dtirol': 'trentino_alto_adige',
     'Trentino-Alto Adige': 'trentino_alto_adige',
     'Veneto': 'veneto',
     'Friuli-Venezia Giulia': 'friuli_venezia_giulia',
@@ -63,8 +63,8 @@ function normalizeRegionName(name) {
   };
   if (map[name]) return map[name];
   return name.toLowerCase()
-    .replace(/[Ã Ã¡Ã¢]/g, 'a').replace(/[Ã¨Ã©Ãª]/g, 'e').replace(/[Ã¬Ã­Ã®]/g, 'i')
-    .replace(/[Ã²Ã³Ã´]/g, 'o').replace(/[Ã¹ÃºÃ»]/g, 'u')
+    .replace(/[ÃÂ ÃÂ¡ÃÂ¢]/g, 'a').replace(/[ÃÂ¨ÃÂ©ÃÂª]/g, 'e').replace(/[ÃÂ¬ÃÂ­ÃÂ®]/g, 'i')
+    .replace(/[ÃÂ²ÃÂ³ÃÂ´]/g, 'o').replace(/[ÃÂ¹ÃÂºÃÂ»]/g, 'u')
     .replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 }
 
@@ -272,7 +272,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
             );
           })}
 
-          {/* Gastronomy spot markers â with layer filtering */}
+          {/* Gastronomy spot markers Ã¢ÂÂ with layer filtering */}
           {Object.entries(gastronomySpots).map(([regionId, spots]) => {
             const bb = regionBBoxes[regionId];
             if (!bb) return null;
@@ -324,7 +324,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               const handleSpotClick = (e) => {
                 e.stopPropagation();
                 if (selectedRegion === regionId) {
-                  // Region already selected â open mini-card
+                  // Region already selected Ã¢ÂÂ open mini-card
                   const rect = containerRef.current?.getBoundingClientRect();
                   if (!rect) return;
                   const entity = SPOT_ENTITY_MAP[spot.label];
@@ -341,34 +341,40 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
 
               const isZoomed = selectedRegion === regionId;
               const s = isZoomed ? zoomTransform.scale : 1;
-              var mSz = (isZoomed ? 14 : 6) / s;
-              var mH = mSz / 2;
-              var mS = (isZoomed ? 1.2 : 0.6) / s;
-              var mD = (isZoomed ? 2.5 : 1.2) / s;
-              var mG = (isZoomed ? 18 : 9) / s;
-              var dk = "rgba(10,16,10,0.78)";
+              var sc = (isZoomed ? 5.5 : 2.4) / s;
+              var gsc = (isZoomed ? 9 : 4) / s;
+              var sw = 0.3;
+              var dk = "rgba(10,16,10,0.82)";
               var tp = spot.type;
+              var tform = "translate(" + pos[0] + " " + pos[1] + ") scale(" + sc + ")";
 
               return (
                 <g
-                  key={`${regionId}-spot-${si}`}
-                  style={{ opacity: spotOpacity, transition: 'opacity 0.25s ease', cursor: 'pointer' }}
+                  key={regionId + "-spot-" + si}
+                  style={{ cursor: "pointer", transition: "opacity 0.2s ease" }}
+                  opacity={spotOpacity}
                   onClick={handleSpotClick}
+                  onMouseEnter={function(e) {
+                    var rect = e.currentTarget.getBoundingClientRect();
+                    setHoveredSpot({ spot: spot, regionId: regionId, x: rect.left + rect.width / 2, y: rect.top });
+                  }}
+                  onMouseLeave={function() { setHoveredSpot(null); }}
                 >
-                  <circle cx={pos[0]} cy={pos[1]} r={mG} fill={spotColor} opacity={0.05} />
-                  {tp === "producer" ? <circle cx={pos[0]} cy={pos[1]} r={mH} fill={dk} stroke={spotColor} strokeWidth={mS} /> : null}
-                  {tp === "ingredient" ? <rect x={pos[0]-mH} y={pos[1]-mH} width={mSz} height={mSz} rx={mH*0.28} fill={dk} stroke={spotColor} strokeWidth={mS} /> : null}
-                  {tp === "experience" ? <rect x={pos[0]-mH*0.7} y={pos[1]-mH*0.7} width={mSz*0.7} height={mSz*0.7} rx={1} fill={dk} stroke={spotColor} strokeWidth={mS} transform={"rotate(45 "+pos[0]+" "+pos[1]+")"} /> : null}
-                  {tp === "wine" ? <ellipse cx={pos[0]} cy={pos[1]} rx={mH*0.55} ry={mH*0.85} fill={dk} stroke={spotColor} strokeWidth={mS} /> : null}
-                  {tp === "dish" ? <circle cx={pos[0]} cy={pos[1]} r={mH*0.78} fill={dk} stroke={spotColor} strokeWidth={mS} strokeDasharray={String(2/s)+" "+String(1.5/s)} /> : null}
-                  {["producer","ingredient","experience","wine","dish"].indexOf(tp) < 0 ? <circle cx={pos[0]} cy={pos[1]} r={mH*0.6} fill={dk} stroke={spotColor} strokeWidth={mS} /> : null}
-                  <circle cx={pos[0]} cy={pos[1]} r={mD} fill={spotColor} opacity={0.85} />
+                  <circle cx={pos[0]} cy={pos[1]} r={gsc} fill={spotColor} opacity={0.06} />
+                  <g transform={tform}>
+                    {tp === "producer" ? <path d="M0,-0.85 L0.6,-0.4 L0.6,0.2 Q0.6,0.85 0,0.95 Q-0.6,0.85 -0.6,0.2 L-0.6,-0.4 Z" fill={dk} stroke={spotColor} strokeWidth={sw} strokeLinejoin="round" /> : null}
+                    {tp === "ingredient" ? <path d="M0,-0.9 Q0.85,0 0,0.9 Q-0.85,0 0,-0.9 Z" fill={dk} stroke={spotColor} strokeWidth={sw} strokeLinejoin="round" /> : null}
+                    {tp === "experience" ? <path d="M0,-1 L0.22,-0.22 L1,0 L0.22,0.22 L0,1 L-0.22,0.22 L-1,0 L-0.22,-0.22 Z" fill={dk} stroke={spotColor} strokeWidth={sw} strokeLinejoin="round" /> : null}
+                    {tp === "wine" ? <path d="M0,-0.95 C0.5,-0.3 0.55,0.35 0,0.95 C-0.55,0.35 -0.5,-0.3 0,-0.95 Z" fill={dk} stroke={spotColor} strokeWidth={sw} strokeLinejoin="round" /> : null}
+                    {tp === "dish" ? <g><circle cx={0} cy={0} r={0.7} fill={dk} stroke={spotColor} strokeWidth={sw} /><path d="M-0.35,0.05 Q0,0.45 0.35,0.05" fill="none" stroke={spotColor} strokeWidth={sw * 0.6} strokeLinecap="round" opacity={0.5} /></g> : null}
+                    {["producer","ingredient","experience","wine","dish"].indexOf(tp) < 0 ? <circle cx={0} cy={0} r={0.55} fill={dk} stroke={spotColor} strokeWidth={sw} /> : null}
+                  </g>
                 </g>
               );
             });
           })}
 
-          {/* Region centroid producer count dots â hidden when non-producer layer active */}
+          {/* Region centroid producer count dots Ã¢ÂÂ hidden when non-producer layer active */}
           {activeLayer === 'all' || activeLayer === 'producers' ? Object.entries(regionCentroids).map(([regionId, centroid]) => {
             const pos = getPos(centroid.lng, centroid.lat);
             if (!pos) return null;
@@ -414,7 +420,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.3)', fontSize: 13, gap: 8 }}>
           <div style={{ width: 16, height: 16, border: '2px solid rgba(76,175,80,0.4)', borderTop: '2px solid #4CAF50', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-          Loading atlasâ¦
+          Loading atlasÃ¢ÂÂ¦
         </div>
       )}
 
@@ -459,7 +465,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               onMouseEnter={e => e.currentTarget.style.background = '#1B5E20'}
               onMouseLeave={e => e.currentTarget.style.background = '#2E7D32'}
             >
-              Explore â
+              Explore Ã¢ÂÂ
             </button>
           )}
 
@@ -467,7 +473,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
           <button
             onClick={() => setMiniCard(null)}
             style={{ position: 'absolute', top: 7, right: 8, background: 'rgba(0,0,0,0.35)', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >â</button>
+          >Ã¢ÂÂ</button>
         </div>
       )}
 
@@ -484,8 +490,8 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
         }}>
           <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, marginBottom: 3, fontFamily: "'Playfair Display',serif" }}>{tooltip.name}</p>
           <p style={{ color: '#4CAF50', fontSize: 11, fontWeight: 700, marginBottom: 6, fontFamily: "'DM Mono',monospace" }}>{tooltip.count} Producers</p>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, lineHeight: 1.5 }}>{tooltip.products.join(' Â· ')}</p>
-          <p style={{ color: 'rgba(76,175,80,0.6)', fontSize: 10, marginTop: 6, fontWeight: 600 }}>Click to explore â</p>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, lineHeight: 1.5 }}>{tooltip.products.join(' ÃÂ· ')}</p>
+          <p style={{ color: 'rgba(76,175,80,0.6)', fontSize: 10, marginTop: 6, fontWeight: 600 }}>Click to explore Ã¢ÂÂ</p>
         </div>
       )}
     </div>
