@@ -21,20 +21,25 @@
         }
         el = el.parentElement;
       }
-      if (!markerG && e.target.tagName === "path") {
-        var gs = document.querySelectorAll("g");
-        var bd = 18;
-        for (var i = 0; i < gs.length; i++) {
-          var s = gs[i].getAttribute("style") || "";
-          if (s.indexOf("cursor") < 0) continue;
-          var r = gs[i].getBoundingClientRect();
-          if (r.width < 5) continue;
-          var cx = r.left + r.width / 2;
-          var cy = r.top + r.height / 2;
-          var dx = e.clientX - cx;
-          var dy = e.clientY - cy;
-          var d = Math.sqrt(dx * dx + dy * dy);
-          if (d < bd) { bd = d; markerG = gs[i]; }
+      if (!markerG) {
+        var tg = e.target;
+        var tgStyle = tg.getAttribute ? (tg.getAttribute("style") || "") : "";
+        var isOverlay = tg.tagName === "path" || (tg.tagName === "DIV" && tgStyle.indexOf("z-index") >= 0) || tg.tagName === "rect";
+        if (isOverlay) {
+          var gs = document.querySelectorAll("g");
+          var bd = 25;
+          for (var i = 0; i < gs.length; i++) {
+            var s = gs[i].getAttribute("style") || "";
+            if (s.indexOf("cursor") < 0) continue;
+            var r = gs[i].getBoundingClientRect();
+            if (r.width < 5) continue;
+            var cx = r.left + r.width / 2;
+            var cy = r.top + r.height / 2;
+            var dx = e.clientX - cx;
+            var dy = e.clientY - cy;
+            var d = Math.sqrt(dx * dx + dy * dy);
+            if (d < bd) { bd = d; markerG = gs[i]; }
+          }
         }
       }
       if (markerG) {
