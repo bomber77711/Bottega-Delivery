@@ -11,7 +11,47 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
+    function isZoomed() {
+      var els = document.querySelectorAll("p,span,div");
+      for (var i = 0; i < els.length; i++) {
+        if (els[i].textContent === "ITALIAN REGION" && els[i].children.length === 0) return true;
+      }
+      return false;
+    }
+    function nearestMarker(x, y, maxDist) {
+      var gs = document.querySelectorAll("g");
+      var best = null;
+      var bd = maxDist;
+      for (var i = 0; i < gs.length; i++) {
+        var s = gs[i].getAttribute("style") || "";
+        if (s.indexOf("cursor") < 0) continue;
+        var r = gs[i].getBoundingClientRect();
+        if (r.width < 5) continue;
+        var cx = r.left + r.width / 2;
+        var cy = r.top + r.height / 2;
+        var dx = x - cx;
+        var dy = y - cy;
+        var d = Math.sqrt(dx * dx + dy * dy);
+        if (d < bd) { bd = d; best = gs[i]; }
+      }
+      return best;
+    }
+    function callMarkerClick(g, e) {
+      var ks = Object.keys(g);
+      for (var i = 0; i < ks.length; i++) {
+        if (ks[i].indexOf("__reactProps") >= 0) {
+          var p = g[ks[i]];
+          if (p && typeof p.onClick === "function") {
+            e.stopPropagation();
+            p.onClick(e);
+            return true;
+          }
+        }
+      }
+      return false;
+    }
     document.addEventListener("click", function(e) {
+      if (!isZoomed()) return;
       var el = e.target;
       var markerG = null;
       while (el && el !== document.body) {
@@ -22,40 +62,20 @@
         el = el.parentElement;
       }
       if (!markerG) {
-        var tg = e.target;
-        var tgStyle = tg.getAttribute ? (tg.getAttribute("style") || "") : "";
-        var isZoomOverlay = (tg.tagName === "DIV" && tgStyle.indexOf("z-index") >= 0) || tg.tagName === "rect";
-        if (isZoomOverlay) {
-          var gs = document.querySelectorAll("g");
-          var bd = 25;
-          for (var i = 0; i < gs.length; i++) {
-            var s = gs[i].getAttribute("style") || "";
-            if (s.indexOf("cursor") < 0) continue;
-            var r = gs[i].getBoundingClientRect();
-            if (r.width < 5) continue;
-            var cx = r.left + r.width / 2;
-            var cy = r.top + r.height / 2;
-            var dx = e.clientX - cx;
-            var dy = e.clientY - cy;
-            var d = Math.sqrt(dx * dx + dy * dy);
-            if (d < bd) { bd = d; markerG = gs[i]; }
-          }
-        }
+        markerG = nearestMarker(e.clientX, e.clientY, 25);
       }
       if (markerG) {
-        var ks = Object.keys(markerG);
-        for (var i = 0; i < ks.length; i++) {
-          if (ks[i].indexOf("__reactProps") >= 0) {
-            var p = markerG[ks[i]];
-            if (p && typeof p.onClick === "function") {
-              e.stopPropagation();
-              p.onClick(e);
-              return;
-            }
-          }
-        }
+        callMarkerClick(markerG, e);
       }
     }, true);
+    document.addEventListener("mousemove", function(e) {
+      var tg = e.target;
+      var tgStyle = tg.getAttribute ? (tg.getAttribute("style") || "") : "";
+      if (tg.tagName === "DIV" && tgStyle.indexOf("z-index") >= 0) {
+        var m = nearestMarker(e.clientX, e.clientY, 25);
+        tg.style.cursor = m ? "pointer" : "";
+      }
+    });
     </script>
   </body>
 </html>
