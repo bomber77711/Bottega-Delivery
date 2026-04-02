@@ -62,6 +62,7 @@
       if (!isZoomed()) {
         if (markerG) {
           e.stopImmediatePropagation();
+          e.preventDefault();
           var stack = document.elementsFromPoint(e.clientX, e.clientY);
           for (var j = 0; j < stack.length; j++) {
             if (stack[j].tagName === "path") {
@@ -76,8 +77,10 @@
         markerG = nearestMarker(e.clientX, e.clientY, 25);
       }
       if (markerG) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
         var fn = getReactOnClick(markerG);
-        if (fn) { e.stopPropagation(); fn(e); }
+        if (fn) { fn(e); }
       }
     }, true);
     document.addEventListener("mousemove", function(e) {
