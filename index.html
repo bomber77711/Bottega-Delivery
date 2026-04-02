@@ -2,14 +2,49 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍅</text></svg>" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#127813;</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Bottega Delivery — The Digital Atlas of Italian Gastronomy" />
-    <link rel="manifest" href="/manifest.json" />
+    <meta name="description" content="Bottega Delivery - The Digital Atlas of Italian Gastronomy" />
     <title>Bottega Delivery</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+    (function(){
+      function wire(){
+        var gs=document.querySelectorAll("g");
+        for(var i=0;i<gs.length;i++){
+          var g=gs[i];
+          var s=g.getAttribute("style")||"";
+          if(s.indexOf("cursor")<0)continue;
+          if(g.getAttribute("data-wired"))continue;
+          g.setAttribute("data-wired","1");
+          for(var j=0;j<g.children.length;j++){
+            bind(g.children[j],g);
+          }
+        }
+      }
+      function bind(child,pg){
+        child.style.pointerEvents="all";
+        child.style.cursor="pointer";
+        child.addEventListener("click",function(e){
+          e.stopPropagation();
+          var ks=Object.keys(pg);
+          for(var k=0;k<ks.length;k++){
+            if(ks[k].indexOf("__reactProps")>=0){
+              var p=pg[ks[k]];
+              if(p&&typeof p.onClick==="function"){
+                p.onClick(e);
+                return;
+              }
+            }
+          }
+        });
+      }
+      setInterval(wire,2000);
+      setTimeout(wire,3000);
+    })();
+    </script>
   </body>
 </html>
