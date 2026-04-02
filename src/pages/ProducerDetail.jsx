@@ -60,25 +60,25 @@ const regionLandscapes = {
 
 const terroir = {
   toscana: 'Rolling hills of olive groves, ancient vineyards, and centuries of artisan craft in the Val d\'Orcia.',
-  lombardia: 'Alpine foothills, glacial lakes, and the fertile Po plain — Italy\'s most productive gastronomic landscape.',
+  lombardia: 'Alpine foothills, glacial lakes, and the fertile Po plain â Italy\'s most productive gastronomic landscape.',
   sicilia: 'Volcanic soils, blazing sun, and millennia of Mediterranean crossroads culture.',
   campania: 'Vesuvian slopes, buffalo plains, and the birthplace of pizza and mozzarella.',
-  veneto: 'From Dolomite peaks to Adriatic lagoons — a region of extraordinary wine and cheese variety.',
+  veneto: 'From Dolomite peaks to Adriatic lagoons â a region of extraordinary wine and cheese variety.',
   piemonte: 'The Langhe hills in autumn fog: truffle country, Barolo, and the aristocracy of Italian food.',
   puglia: 'Ancient olive groves, brilliant sea light, and the hand-shaped pastas of the Italian heel.',
-  emilia_romagna: 'The food valley of Italy — Parmigiano, Prosciutto, balsamic vinegar, and tortellini.',
-  lazio: 'The eternal city\'s hinterland — volcanic lakes, Castelli Romani wines, and Roman pastoral traditions.',
-  sardegna: 'An island of ancient food rituals — bottarga, pane carasau, and centuries-old sheep farming.',
-  liguria: 'Steep terraces above the Ligurian sea — home of pesto, Taggiasca olives, and focaccia.',
-  calabria: 'Italy\'s wild toe — nduja, bergamot, and the fierce flavours of the deep south.',
+  emilia_romagna: 'The food valley of Italy â Parmigiano, Prosciutto, balsamic vinegar, and tortellini.',
+  lazio: 'The eternal city\'s hinterland â volcanic lakes, Castelli Romani wines, and Roman pastoral traditions.',
+  sardegna: 'An island of ancient food rituals â bottarga, pane carasau, and centuries-old sheep farming.',
+  liguria: 'Steep terraces above the Ligurian sea â home of pesto, Taggiasca olives, and focaccia.',
+  calabria: 'Italy\'s wild toe â nduja, bergamot, and the fierce flavours of the deep south.',
   marche: 'Hidden hills, Adriatic coast, and the truffle forests of Acqualagna.',
   abruzzo: 'Gran Sasso highlands, saffron fields, and ancient mountain pastoral traditions.',
-  umbria: 'The green heart of Italy — Sagrantino vineyards, truffle forests, and Norcia cured meats.',
+  umbria: 'The green heart of Italy â Sagrantino vineyards, truffle forests, and Norcia cured meats.',
   trentino_alto_adige: 'Alpine meadows, mountain dairies, and the fusion of Italian and Austrian food culture.',
-  friuli_venezia_giulia: 'Rolling Collio hills and the Adriatic coast — a crossroads of Italian, Slovenian, and Austrian influences.',
+  friuli_venezia_giulia: 'Rolling Collio hills and the Adriatic coast â a crossroads of Italian, Slovenian, and Austrian influences.',
   basilicata: 'Wild volcanic landscapes, ancient grain fields, and the fierce independent spirit of Lucanian cuisine.',
-  molise: 'Italy\'s most unspoiled region — ancient transhumance routes, mountain pastures, and artisan cheese traditions.',
-  valle_daosta: 'Europe\'s highest vineyards and Alpine pastures — home of Fontina and the mountain dairy tradition.',
+  molise: 'Italy\'s most unspoiled region â ancient transhumance routes, mountain pastures, and artisan cheese traditions.',
+  valle_daosta: 'Europe\'s highest vineyards and Alpine pastures â home of Fontina and the mountain dairy tradition.',
 };
 
 const pantryCategories = new Set(['Olive Oil', 'Pasta', 'Coffee', 'Honey']);
@@ -138,7 +138,7 @@ function ProductCard({ product }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
           <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 700, color: '#1A1A1A', lineHeight: 1.3, flex: 1 }}>{product.name}</h3>
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 20, fontWeight: 800, color: '#2E7D32', display: 'block' }}>€{product.price.toFixed(2)}</span>
+            <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 20, fontWeight: 800, color: '#2E7D32', display: 'block' }}>â¬{product.price.toFixed(2)}</span>
             {product.weight && <span style={{ fontSize: 10, color: '#bbb', fontFamily: "'DM Mono',monospace" }}>{product.weight}</span>}
           </div>
         </div>
@@ -154,7 +154,7 @@ function ProductCard({ product }) {
               <button onClick={() => setSubMode(true)} style={{
                 flex: 1, padding: '8px 0', fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
                 background: subMode ? '#2E7D32' : '#fff', color: subMode ? '#fff' : '#bbb', transition: 'all 0.15s'
-              }}>🌿 Subscribe</button>
+              }}>ð¿ Subscribe</button>
             </div>
             {subMode && (
               <div style={{ marginTop: 8 }}>
@@ -168,7 +168,7 @@ function ProductCard({ product }) {
                     }}>{opt}</button>
                   ))}
                 </div>
-                <p style={{ fontSize: 10, color: '#bbb', fontFamily: "'DM Mono',monospace" }}>Cancel anytime · Free first delivery</p>
+                <p style={{ fontSize: 10, color: '#bbb', fontFamily: "'DM Mono',monospace" }}>Cancel anytime Â· Free first delivery</p>
               </div>
             )}
           </div>
@@ -189,18 +189,20 @@ function ProductCard({ product }) {
   );
 }
 
+
+function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/g, "").replace(/^-+/g, ""); }
 export default function ProducerDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('products');
 
-  const producer = allProducers.find(p => p.id === id);
+  const producer = allProducers.find(function(p) { return slugify(p.name) === id; });
 
   if (!producer) {
     return (
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, background: '#FAFAFA' }}>
         <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 28, color: '#1A1A1A' }}>Producer not found</p>
-        <button onClick={() => navigate('/Producers')} style={{ color: '#2E7D32', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: 15 }}>← Back to Producers</button>
+        <button onClick={() => navigate('/Producers')} style={{ color: '#2E7D32', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: 15 }}>â Back to Producers</button>
       </div>
     );
   }
@@ -225,7 +227,7 @@ export default function ProducerDetail() {
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: '#FAFAFA' }}>
 
-      {/* ── HERO ── */}
+      {/* ââ HERO ââ */}
       <div style={{ height: '80vh', position: 'relative', overflow: 'hidden' }}>
         <img src={heroUrl} alt={producer.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.38) saturate(1.1)' }} />
@@ -254,7 +256,7 @@ export default function ProducerDetail() {
           padding: '6px 14px', borderRadius: 100,
           fontFamily: "'DM Mono',monospace", letterSpacing: '0.1em', textTransform: 'uppercase'
         }}>
-          ✓ Verified Artisan
+          â Verified Artisan
         </div>
 
         {/* Producer identity */}
@@ -289,14 +291,14 @@ export default function ProducerDetail() {
               </div>
               <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.2)' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
-                <Award size={13} color="#A5D6A7" /> Est. 1958 · Family-run
+                <Award size={13} color="#A5D6A7" /> Est. 1958 Â· Family-run
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── STATS BAR ── */}
+      {/* ââ STATS BAR ââ */}
       <div style={{ background: '#fff', borderBottom: '1px solid #F0F0F0', boxShadow: '0 2px 16px rgba(0,0,0,0.05)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px', display: 'flex', alignItems: 'stretch' }}>
           {[
@@ -319,7 +321,7 @@ export default function ProducerDetail() {
         </div>
       </div>
 
-      {/* ── DESCRIPTION BAND ── */}
+      {/* ââ DESCRIPTION BAND ââ */}
       <div style={{ background: 'linear-gradient(135deg, #F6F1E7 0%, #FDF8F0 100%)', padding: '60px 48px' }}>
         <div style={{ maxWidth: 820, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
           <span style={{
@@ -344,7 +346,7 @@ export default function ProducerDetail() {
         </div>
       </div>
 
-      {/* ── TABS ── */}
+      {/* ââ TABS ââ */}
       <div style={{ background: '#fff', borderBottom: '1px solid #EFEFEF', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px', display: 'flex', gap: 0 }}>
           {tabs.map(tab => (
@@ -370,7 +372,7 @@ export default function ProducerDetail() {
         </div>
       </div>
 
-      {/* ── TAB CONTENT ── */}
+      {/* ââ TAB CONTENT ââ */}
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 48px 80px' }}>
 
         {/* PRODUCTS TAB */}
@@ -405,7 +407,7 @@ export default function ProducerDetail() {
         {activeTab === 'story' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
             <div>
-              <p style={{ fontSize: 11, fontFamily: "'DM Mono',monospace", color: '#C76A3A', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>✦ The Story</p>
+              <p style={{ fontSize: 11, fontFamily: "'DM Mono',monospace", color: '#C76A3A', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>â¦ The Story</p>
               <p style={{ fontSize: 16, color: '#333', lineHeight: 1.9, marginBottom: 24 }}>
                 <span style={{
                   float: 'left', fontFamily: "'Playfair Display',serif", fontSize: 72, fontWeight: 800,
@@ -413,18 +415,18 @@ export default function ProducerDetail() {
                 }}>T</span>
                 hree generations of the <strong>{producer.name}</strong> family have worked this land,
                 using methods passed down without a written recipe. The terroir of {producer.regionName} gives
-                their products an unmistakable character — shaped by the local climate, soil, and centuries of
+                their products an unmistakable character â shaped by the local climate, soil, and centuries of
                 accumulated knowledge that cannot be replicated anywhere else in the world.
               </p>
               <p style={{ fontSize: 15, color: '#555', lineHeight: 1.85, marginBottom: 24 }}>
                 The {producer.regionName} region has long been celebrated for its exceptional {producer.category.toLowerCase()} tradition.
-                Here, quality is not just a standard — it is a way of life, embedded in every harvest, every
+                Here, quality is not just a standard â it is a way of life, embedded in every harvest, every
                 pressing, every aging process. {producer.name} carries this legacy forward with the same
                 reverence and precision that defines the finest Italian artisanship.
               </p>
               <p style={{ fontSize: 15, color: '#555', lineHeight: 1.85, marginBottom: 32 }}>
                 Every item that leaves this workshop is a testament to the belief that the best food cannot be rushed.
-                The slow processes, the patient hands, the respect for season and terroir — these are not marketing words
+                The slow processes, the patient hands, the respect for season and terroir â these are not marketing words
                 here. They are the daily practice of a craft that predates modern commerce by centuries.
               </p>
 
@@ -539,7 +541,7 @@ export default function ProducerDetail() {
         )}
       </div>
 
-      {/* ── BOTTOM CTA ── */}
+      {/* ââ BOTTOM CTA ââ */}
       <div style={{
         background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 60%, #388E3C 100%)',
         padding: '72px 48px'
@@ -573,7 +575,7 @@ export default function ProducerDetail() {
             }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 10px 36px rgba(0,0,0,0.3)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)'; }}>
-              Explore Region →
+              Explore Region â
             </button>
           </div>
         </div>
