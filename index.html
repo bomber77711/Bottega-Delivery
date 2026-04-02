@@ -11,40 +11,34 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
-    (function(){
-      function wire(){
-        var gs=document.querySelectorAll("g");
-        for(var i=0;i<gs.length;i++){
-          var g=gs[i];
-          var s=g.getAttribute("style")||"";
-          if(s.indexOf("cursor")<0)continue;
-          if(g.getAttribute("data-wired"))continue;
-          g.setAttribute("data-wired","1");
-          for(var j=0;j<g.children.length;j++){
-            bind(g.children[j],g);
+    document.addEventListener("click",function(e){
+      var zd=false;
+      var ps=document.querySelectorAll("p,span");
+      for(var i=0;i<ps.length;i++){if(ps[i].textContent==="ITALIAN REGION"){zd=true;break;}}
+      if(!zd)return;
+      var gs=document.querySelectorAll("g");
+      var best=null,bd=25;
+      for(var i=0;i<gs.length;i++){
+        var s=gs[i].getAttribute("style")||"";
+        if(s.indexOf("cursor")<0)continue;
+        var r=gs[i].getBoundingClientRect();
+        if(r.width<5)continue;
+        var cx=r.left+r.width/2,cy=r.top+r.height/2;
+        var dx=e.clientX-cx,dy=e.clientY-cy;
+        var d=Math.sqrt(dx*dx+dy*dy);
+        if(d<bd){bd=d;best=gs[i];}
+      }
+      if(best){
+        e.stopPropagation();
+        var ks=Object.keys(best);
+        for(var k=0;k<ks.length;k++){
+          if(ks[k].indexOf("__reactProps")>=0){
+            var p=best[ks[k]];
+            if(p&&typeof p.onClick==="function"){p.onClick(e);return;}
           }
         }
       }
-      function bind(child,pg){
-        child.style.pointerEvents="all";
-        child.style.cursor="pointer";
-        child.addEventListener("click",function(e){
-          e.stopPropagation();
-          var ks=Object.keys(pg);
-          for(var k=0;k<ks.length;k++){
-            if(ks[k].indexOf("__reactProps")>=0){
-              var p=pg[ks[k]];
-              if(p&&typeof p.onClick==="function"){
-                p.onClick(e);
-                return;
-              }
-            }
-          }
-        });
-      }
-      setInterval(wire,2000);
-      setTimeout(wire,3000);
-    })();
+    },true);
     </script>
   </body>
 </html>
