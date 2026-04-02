@@ -4,7 +4,7 @@ import { geoMercator, geoPath } from 'd3-geo';
 import { regionData, regionCentroids } from './regionData';
 import { gastronomySpots, spotTypeColors } from './gastronomySpots';
 
-// Spot label ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ entity type + id mapping for mini-cards
+// Spot label ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ entity type + id mapping for mini-cards
 const SPOT_ENTITY_MAP = {
   'Carbonara': { type: 'recipes', id: 'cacio-e-pepe' },
   'Parmigiano': { type: 'ingredients', id: 'parmigiano-reggiano' },
@@ -38,11 +38,11 @@ const LAYER_TYPE_MAP = {
 function normalizeRegionName(name) {
   if (!name) return '';
   const map = {
-    "Valle d'Aosta/VallÃÂÃÂÃÂÃÂ©e d'Aoste": 'valle_daosta',
+    "Valle d'Aosta/VallÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©e d'Aoste": 'valle_daosta',
     "Valle d'Aosta": 'valle_daosta',
     'Piemonte': 'piemonte',
     'Lombardia': 'lombardia',
-    'Trentino-Alto Adige/SÃÂÃÂÃÂÃÂ¼dtirol': 'trentino_alto_adige',
+    'Trentino-Alto Adige/SÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼dtirol': 'trentino_alto_adige',
     'Trentino-Alto Adige': 'trentino_alto_adige',
     'Veneto': 'veneto',
     'Friuli-Venezia Giulia': 'friuli_venezia_giulia',
@@ -63,8 +63,8 @@ function normalizeRegionName(name) {
   };
   if (map[name]) return map[name];
   return name.toLowerCase()
-    .replace(/[ÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ¡ÃÂÃÂÃÂÃÂ¢]/g, 'a').replace(/[ÃÂÃÂÃÂÃÂ¨ÃÂÃÂÃÂÃÂ©ÃÂÃÂÃÂÃÂª]/g, 'e').replace(/[ÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ­ÃÂÃÂÃÂÃÂ®]/g, 'i')
-    .replace(/[ÃÂÃÂÃÂÃÂ²ÃÂÃÂÃÂÃÂ³ÃÂÃÂÃÂÃÂ´]/g, 'o').replace(/[ÃÂÃÂÃÂÃÂ¹ÃÂÃÂÃÂÃÂºÃÂÃÂÃÂÃÂ»]/g, 'u')
+    .replace(/[ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢]/g, 'a').replace(/[ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¨ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª]/g, 'e').replace(/[ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ­ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ®]/g, 'i')
+    .replace(/[ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ²ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ´]/g, 'o').replace(/[ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¹ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂºÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ»]/g, 'u')
     .replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 }
 
@@ -272,7 +272,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
             );
           })}
 
-          {/* Gastronomy spot markers ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ with layer filtering */}
+          {/* Gastronomy spot markers ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ with layer filtering */}
           {Object.entries(gastronomySpots).map(([regionId, spots]) => {
             const bb = regionBBoxes[regionId];
             if (!bb) return null;
@@ -324,7 +324,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               const handleSpotClick = (e) => {
                 e.stopPropagation();
                 if (selectedRegion === regionId) {
-                  // Region already selected ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ open mini-card
+                  // Region already selected ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ open mini-card
                   const rect = containerRef.current?.getBoundingClientRect();
                   if (!rect) return;
                   const entity = SPOT_ENTITY_MAP[spot.label];
@@ -385,7 +385,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
             });
           })}
 
-          {/* Region centroid producer count dots ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ hidden when non-producer layer active */}
+          {/* Region centroid producer count dots ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ hidden when non-producer layer active */}
           {activeLayer === 'all' || activeLayer === 'producers' ? Object.entries(regionCentroids).map(([regionId, centroid]) => {
             const pos = getPos(centroid.lng, centroid.lat);
             if (!pos) return null;
@@ -431,7 +431,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.3)', fontSize: 13, gap: 8 }}>
           <div style={{ width: 16, height: 16, border: '2px solid rgba(76,175,80,0.4)', borderTop: '2px solid #4CAF50', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-          Loading atlasÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¦
+          Loading atlasÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¦
         </div>
       )}
 
@@ -476,7 +476,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               onMouseEnter={e => e.currentTarget.style.background = '#1B5E20'}
               onMouseLeave={e => e.currentTarget.style.background = '#2E7D32'}
             >
-              Explore ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ
+              Explore ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ
             </button>
           )}
 
@@ -484,27 +484,10 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
           <button
             onClick={() => setMiniCard(null)}
             style={{ position: 'absolute', top: 7, right: 8, background: 'rgba(0,0,0,0.35)', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</button>
+          >ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</button>
         </div>
       )}
 
-      {/* Floating tooltip */}
-      {tooltip && !selectedRegion && (
-        <div style={{
-          position: 'absolute',
-          left: Math.min(tooltip.x + 16, dims.width - 210),
-          top: Math.max(tooltip.y - 90, 10),
-          background: 'rgba(6,13,6,0.95)', backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(76,175,80,0.3)', borderRadius: 12, padding: '11px 15px',
-          pointerEvents: 'none', zIndex: 50, minWidth: 170, maxWidth: 220,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5)', animation: 'fadeSlideIn 0.15s ease'
-        }}>
-          <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, marginBottom: 3, fontFamily: "'Playfair Display',serif" }}>{tooltip.name}</p>
-          <p style={{ color: '#4CAF50', fontSize: 11, fontWeight: 700, marginBottom: 6, fontFamily: "'DM Mono',monospace" }}>{tooltip.count} Producers</p>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, lineHeight: 1.5 }}>{tooltip.products.join(' ÃÂÃÂÃÂÃÂ· ')}</p>
-          <p style={{ color: 'rgba(76,175,80,0.6)', fontSize: 10, marginTop: 6, fontWeight: 600 }}>Click to explore ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</p>
-        </div>
-      )}
     </div>
   );
 }
