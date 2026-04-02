@@ -12,9 +12,9 @@
     <script type="module" src="/src/main.jsx"></script>
     <script>
     function isZoomed() {
-      var els = document.querySelectorAll("p,span,div");
+      var els = document.querySelectorAll("span");
       for (var i = 0; i < els.length; i++) {
-        if (els[i].textContent === "ITALIAN REGION" && els[i].children.length === 0) return true;
+        if (els[i].textContent === "Italian Region") return true;
       }
       return false;
     }
