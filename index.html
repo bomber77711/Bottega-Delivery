@@ -36,36 +36,48 @@
       }
       return best;
     }
-    function callMarkerClick(g, e) {
-      var ks = Object.keys(g);
+    function getReactOnClick(el) {
+      var ks = Object.keys(el);
       for (var i = 0; i < ks.length; i++) {
         if (ks[i].indexOf("__reactProps") >= 0) {
-          var p = g[ks[i]];
-          if (p && typeof p.onClick === "function") {
-            e.stopPropagation();
-            p.onClick(e);
-            return true;
-          }
+          var p = el[ks[i]];
+          if (p && typeof p.onClick === "function") return p.onClick;
         }
       }
-      return false;
+      return null;
     }
-    document.addEventListener("click", function(e) {
-      if (!isZoomed()) return;
-      var el = e.target;
-      var markerG = null;
+    function findMarkerParent(target) {
+      var el = target;
       while (el && el !== document.body) {
         if (el.tagName === "g") {
           var st = el.getAttribute("style") || "";
-          if (st.indexOf("cursor") >= 0) { markerG = el; break; }
+          if (st.indexOf("cursor") >= 0) return el;
         }
         el = el.parentElement;
+      }
+      return null;
+    }
+    document.addEventListener("click", function(e) {
+      var markerG = findMarkerParent(e.target);
+      if (!isZoomed()) {
+        if (markerG) {
+          e.stopImmediatePropagation();
+          var stack = document.elementsFromPoint(e.clientX, e.clientY);
+          for (var j = 0; j < stack.length; j++) {
+            if (stack[j].tagName === "path") {
+              var fn = getReactOnClick(stack[j]);
+              if (fn) { fn(e); return; }
+            }
+          }
+        }
+        return;
       }
       if (!markerG) {
         markerG = nearestMarker(e.clientX, e.clientY, 25);
       }
       if (markerG) {
-        callMarkerClick(markerG, e);
+        var fn = getReactOnClick(markerG);
+        if (fn) { e.stopPropagation(); fn(e); }
       }
     }, true);
     document.addEventListener("mousemove", function(e) {
