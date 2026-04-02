@@ -11,34 +11,29 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
-    document.addEventListener("click",function(e){
-      var zd=false;
-      var ps=document.querySelectorAll("p,span");
-      for(var i=0;i<ps.length;i++){if(ps[i].textContent==="ITALIAN REGION"){zd=true;break;}}
-      if(!zd)return;
-      var gs=document.querySelectorAll("g");
-      var best=null,bd=25;
-      for(var i=0;i<gs.length;i++){
-        var s=gs[i].getAttribute("style")||"";
-        if(s.indexOf("cursor")<0)continue;
-        var r=gs[i].getBoundingClientRect();
-        if(r.width<5)continue;
-        var cx=r.left+r.width/2,cy=r.top+r.height/2;
-        var dx=e.clientX-cx,dy=e.clientY-cy;
-        var d=Math.sqrt(dx*dx+dy*dy);
-        if(d<bd){bd=d;best=gs[i];}
-      }
-      if(best){
-        e.stopPropagation();
-        var ks=Object.keys(best);
-        for(var k=0;k<ks.length;k++){
-          if(ks[k].indexOf("__reactProps")>=0){
-            var p=best[ks[k]];
-            if(p&&typeof p.onClick==="function"){p.onClick(e);return;}
+    document.addEventListener("click", function(e) {
+      var el = e.target;
+      while (el && el !== document.body) {
+        if (el.tagName === "g") {
+          var style = el.getAttribute("style") || "";
+          if (style.indexOf("cursor") >= 0) {
+            var keys = Object.keys(el);
+            for (var i = 0; i < keys.length; i++) {
+              if (keys[i].indexOf("__reactProps") >= 0) {
+                var props = el[keys[i]];
+                if (props && typeof props.onClick === "function") {
+                  e.stopPropagation();
+                  props.onClick(e);
+                  return;
+                }
+              }
+            }
+            break;
           }
         }
+        el = el.parentElement;
       }
-    },true);
+    }, true);
     </script>
   </body>
 </html>
