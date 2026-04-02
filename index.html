@@ -24,8 +24,8 @@
       if (!markerG) {
         var tg = e.target;
         var tgStyle = tg.getAttribute ? (tg.getAttribute("style") || "") : "";
-        var isOverlay = tg.tagName === "path" || (tg.tagName === "DIV" && tgStyle.indexOf("z-index") >= 0) || tg.tagName === "rect";
-        if (isOverlay) {
+        var isZoomOverlay = (tg.tagName === "DIV" && tgStyle.indexOf("z-index") >= 0) || tg.tagName === "rect";
+        if (isZoomOverlay) {
           var gs = document.querySelectorAll("g");
           var bd = 25;
           for (var i = 0; i < gs.length; i++) {
