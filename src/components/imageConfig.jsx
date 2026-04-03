@@ -22,19 +22,19 @@ export const REGION_IMAGES = {
 };
 
 export const PRODUCT_IMAGES = {
-  'Olive Oil': 'https://images.unsplash.com/vvPybMs7eX0?w=400&q=80',
-  'Wine': 'https://images.unsplash.com/HIyZWQZvG7I?w=400&q=80',
-  'Cheese': 'https://images.unsplash.com/brZc1i-F2_0?w=400&q=80',
-  'Pasta': 'https://images.unsplash.com/tHOu9Fc2HNA?w=400&q=80',
-  'Coffee': 'https://images.unsplash.com/jXaDEaO0csc?w=400&q=80',
-  'Truffle': 'https://images.unsplash.com/ybSgrT3VNjg?w=400&q=80',
-  'Cured Meats': 'https://images.unsplash.com/-N9hX_F8FlA?w=400&q=80',
-  'Honey': 'https://images.unsplash.com/v4u13Q5mjfQ?w=400&q=80',
-  'Condiments': 'https://images.unsplash.com/WPdFUs9UH9Q?w=400&q=80',
-  'Spirits': 'https://images.unsplash.com/aOAS6uRZFrU?w=400&q=80',
-  'Chocolate': 'https://images.unsplash.com/-qV5PBuHVPc?w=400&q=80',
-  'Nuts': 'https://images.unsplash.com/AEYdJTleZc0?w=400&q=80',
-  'default': 'https://images.unsplash.com/vn_BRX8B2vI?w=400&q=80',
+  'Olive Oil': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&q=80',
+  'Wine': 'https://images.unsplash.com/photo-1698063126115-7ba800c43289?w=400&q=80',
+  'Cheese': 'https://images.unsplash.com/photo-1773919685006-2d329149f44b?w=400&q=80',
+  'Pasta': 'https://images.unsplash.com/photo-1751182471056-ecd29a41f339?w=400&q=80',
+  'Coffee': 'https://images.unsplash.com/photo-1650100458608-824a54559caa?w=400&q=80',
+  'Truffle': 'https://images.unsplash.com/photo-1597771125516-4eddaf867446?w=400&q=80',
+  'Cured Meats': 'https://images.unsplash.com/photo-1615932726364-a8f79917a65a?w=400&q=80',
+  'Honey': 'https://images.unsplash.com/photo-1692797178143-659c48c34135?w=400&q=80',
+  'Condiments': 'https://images.unsplash.com/photo-1733336748576-82854570ef01?w=400&q=80',
+  'Spirits': 'https://images.unsplash.com/photo-1719433436838-3f0c01d6222c?w=400&q=80',
+  'Chocolate': 'https://images.unsplash.com/photo-1522249341405-3871994ac062?w=400&q=80',
+  'Nuts': 'https://images.unsplash.com/photo-1769255484631-d4e5b7d77446?w=400&q=80',
+  'default': 'https://images.unsplash.com/photo-1689001915758-dc1fb9acb3ff?w=400&q=80',
 };
 
 export const RECIPE_IMAGES = {
