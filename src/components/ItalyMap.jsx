@@ -231,8 +231,9 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
           onMouseMove={handleMove}
         >
         <style>{`
-          g[data-zoomed="true"]:hover > .hover-ring-outer { opacity: 0.7 !important; }
-          g[data-zoomed="true"]:hover > .hover-ring { opacity: 0.25 !important; }
+          .hover-ring-outer, .hover-ring { opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
+          g.spot-zoomed:hover > .hover-ring-outer { opacity: 0.7; }
+          g.spot-zoomed:hover > .hover-ring { opacity: 0.25; }
         `}</style>
           <defs>
             <filter id="glowSelected">
@@ -391,23 +392,21 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               return (
                 <g
                   key={spotKey}
-                  data-zoomed={isZoomed ? "true" : undefined} style={{ cursor: "pointer", transition: "opacity 0.2s ease" }}
+                  className={isZoomed ? "spot-zoomed" : undefined} style={{ cursor: "pointer", transition: "opacity 0.2s ease" }}
                   opacity={spotOpacity}
                   onClick={function() { handleSpotClick(spot); }}
                   onMouseEnter={function(e) {
                     var rect = e.currentTarget.getBoundingClientRect();
                     setHoveredSpot({ spotKey: spotKey, spot: spot, regionId: regionId, x: rect.left + rect.width / 2, y: rect.top });
-                    if (isZoomed) { var ring = e.currentTarget.querySelector('.hover-ring'); if (ring) ring.setAttribute('opacity', '0.25'); var ring2 = e.currentTarget.querySelector('.hover-ring-outer'); if (ring2) ring2.setAttribute('opacity', '0.7'); }
                   }}
-                  onMouseLeave={function(e) {
+                  onMouseLeave={function() {
                     setHoveredSpot(null);
-                    var ring = e.currentTarget.querySelector('.hover-ring'); if (ring) ring.setAttribute('opacity', '0'); var ring2 = e.currentTarget.querySelector('.hover-ring-outer'); if (ring2) ring2.setAttribute('opacity', '0');
                   }}
                 >
                   {/* Green hover ring - outer stroke */}
-                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 8 / s} className="hover-ring-outer" fill="none" stroke="#4CAF50" strokeWidth={1.5 / s} opacity={0} style={{ transition: 'opacity 0.2s ease' }} />
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 8 / s} className="hover-ring-outer" fill="none" stroke="#4CAF50" strokeWidth={1.5 / s} />
                   {/* Green hover ring - inner glow */}
-                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 4 / s} className="hover-ring" fill="#4CAF50" opacity={0} style={{ transition: 'opacity 0.2s ease' }} />
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 4 / s} className="hover-ring" fill="#4CAF50" />
                   <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 2 / s} fill={cfg.bg} opacity={0.15} />
                   <circle cx={pos[0]} cy={pos[1]} r={mSz / 2} fill={cfg.bg} />
                   <text x={pos[0]} y={pos[1]} textAnchor="middle" dominantBaseline="central" fontSize={eSz} style={{ userSelect: "none" }}>{cfg.em}</text>
