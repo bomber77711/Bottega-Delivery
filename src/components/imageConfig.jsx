@@ -27,7 +27,7 @@ export const PRODUCT_IMAGES = {
   'Cheese': 'https://images.unsplash.com/photo-1773919685006-2d329149f44b?w=400&q=80',
   'Pasta': 'https://images.unsplash.com/photo-1751182471056-ecd29a41f339?w=400&q=80',
   'Coffee': 'https://images.unsplash.com/photo-1650100458608-824a54559caa?w=400&q=80',
-  'Truffle': 'https://images.unsplash.com/photo-1650475972369-4579ce5e8b71?w=400&q=80',
+  'Truffle': 'https://images.unsplash.com/photo-1758580815433-5e35651c1243?w=400&q=80',
   'Cured Meats': 'https://images.unsplash.com/photo-1615932726364-a8f79917a65a?w=400&q=80',
   'Honey': 'https://images.unsplash.com/photo-1692797178143-659c48c34135?w=400&q=80',
   'Condiments': 'https://images.unsplash.com/photo-1733336748576-82854570ef01?w=400&q=80',
