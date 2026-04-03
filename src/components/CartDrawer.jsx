@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from './cartStore';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 
 export default function CartDrawer() {
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, total } = useCart();
+  const navigate = useNavigate();
   const overlayRef = useRef();
 
   useEffect(() => {
@@ -102,7 +104,7 @@ export default function CartDrawer() {
                 €{total.toFixed(2)}
               </span>
             </div>
-            <button style={{
+            <button onClick={() => { setIsOpen(false); navigate('/checkout'); }} style={{
               width: '100%', padding: '15px', background: '#2E7D32', color: '#fff',
               border: 'none', borderRadius: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer',
               transition: 'background 0.2s, transform 0.15s',
