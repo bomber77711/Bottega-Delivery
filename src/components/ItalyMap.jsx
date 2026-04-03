@@ -102,6 +102,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
   const [hoveredRegion, setHoveredRegion] = useState(null);
   const [tooltip, setTooltip] = useState(null);
   const [miniCard, setMiniCard] = useState(null); // { x, y, label, emoji, type, id }
+  const [hoveredSpot, setHoveredSpot] = useState(null); // { spot, regionId, x, y }
 
   useEffect(() => {
     if (geojsonCache.data) { setGeojson(geojsonCache.data); return; }
@@ -380,9 +381,12 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               };
               var cfg = catCfg[cat] || tpCfg[tp] || tpCfg.producer;
 
+              var spotKey = regionId + "-spot-" + si;
+              var isSpotHovered = hoveredSpot && hoveredSpot.spot === spot && hoveredSpot.regionId === regionId;
+
               return (
                 <g
-                  key={regionId + "-spot-" + si}
+                  key={spotKey}
                   style={{ cursor: "pointer", transition: "opacity 0.2s ease" }}
                   opacity={spotOpacity}
                   onClick={function() { handleSpotClick(spot); }}
@@ -402,8 +406,10 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
                     if (ring2) ring2.setAttribute('opacity', '0');
                   }}
                 >
-                  <circle className="hover-ring-outer" cx={pos[0]} cy={pos[1]} r={mSz / 2 + 8 / s} fill="none" stroke="#4CAF50" strokeWidth={1.5 / s} opacity={0} style={{ transition: 'opacity 0.25s ease' }} />
-                  <circle className="hover-ring" cx={pos[0]} cy={pos[1]} r={mSz / 2 + 4 / s} fill="#4CAF50" opacity={0} style={{ transition: 'opacity 0.25s ease' }} />
+                  {/* Green hover ring - outer stroke */}
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 8 / s} fill="none" stroke="#4CAF50" strokeWidth={1.5 / s} opacity={isSpotHovered ? 0.7 : 0} style={{ transition: 'opacity 0.2s ease' }} />
+                  {/* Green hover ring - inner glow */}
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 4 / s} fill="#4CAF50" opacity={isSpotHovered ? 0.25 : 0} style={{ transition: 'opacity 0.2s ease' }} />
                   <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 2 / s} fill={cfg.bg} opacity={0.15} />
                   <circle cx={pos[0]} cy={pos[1]} r={mSz / 2} fill={cfg.bg} />
                   <text x={pos[0]} y={pos[1]} textAnchor="middle" dominantBaseline="central" fontSize={eSz} style={{ userSelect: "none" }}>{cfg.em}</text>
