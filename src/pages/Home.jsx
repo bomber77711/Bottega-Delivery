@@ -181,8 +181,8 @@ function RegionPanel({ regionId, onClose }) {
 
   return (
     <>
-      {/* Backdrop — click to close */}
-      {data && <div onClick={onClose} style={{ position: 'absolute', inset: 0, zIndex: 49 }} />}
+      {/* Backdrop — pointer-events:none so SVG spots get :hover; click-to-close handled by SVG background click */}
+      {data && <div style={{ position: 'absolute', inset: 0, zIndex: 49, pointerEvents: 'none' }} />}
 
       <div style={{
         position: 'absolute', top: 0, right: 0, bottom: 0, width: 380,
