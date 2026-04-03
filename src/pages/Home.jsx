@@ -28,69 +28,69 @@ const WIKI = {
 };
 
 const foodJourneys = [
-  { id: 'olive-oil-route', title: 'The Olive Oil Route', emoji: '🫒', description: 'Follow the ancient olive oil tradition from the Ligurian coast to the heel of Italy.', regions: ['liguria', 'toscana', 'puglia', 'sicilia'], color: '#D4A017' },
-  { id: 'wine-journey', title: 'The Wine Journey', emoji: '🍷', description: "Italy's greatest wine regions — from Barolo in Piedmont to Brunello in Tuscany and Amarone in Veneto.", regions: ['piemonte', 'toscana', 'veneto'], color: '#7B1FA2' },
-  { id: 'pasta-trail', title: 'The Pasta Trail', emoji: '🍝', description: "From Bolognese tagliatelle to Neapolitan spaghetti to Puglian orecchiette — Italy's pasta culture in three regions.", regions: ['emilia_romagna', 'campania', 'puglia'], color: '#E65100' },
+  { id: 'olive-oil-route', title: 'The Olive Oil Route', emoji: 'ð«', description: 'Follow the ancient olive oil tradition from the Ligurian coast to the heel of Italy.', regions: ['liguria', 'toscana', 'puglia', 'sicilia'], color: '#D4A017' },
+  { id: 'wine-journey', title: 'The Wine Journey', emoji: 'ð·', description: "Italy's greatest wine regions â from Barolo in Piedmont to Brunello in Tuscany and Amarone in Veneto.", regions: ['piemonte', 'toscana', 'veneto'], color: '#7B1FA2' },
+  { id: 'pasta-trail', title: 'The Pasta Trail', emoji: 'ð', description: "From Bolognese tagliatelle to Neapolitan spaghetti to Puglian orecchiette â Italy's pasta culture in three regions.", regions: ['emilia_romagna', 'campania', 'puglia'], color: '#E65100' },
 ];
 
 const MAP_LAYERS = [
   { id: 'all', label: 'All' },
-  { id: 'producers', label: '👨‍🌾 Producers' },
-  { id: 'ingredients', label: '🫒 Ingredients' },
-  { id: 'dishes', label: '🍝 Dishes' },
-  { id: 'wines', label: '🍷 Wines' },
-  { id: 'experiences', label: '🗺️ Experiences' },
+  { id: 'producers', label: 'ð¨âð¾ Producers' },
+  { id: 'ingredients', label: 'ð« Ingredients' },
+  { id: 'dishes', label: 'ð Dishes' },
+  { id: 'wines', label: 'ð· Wines' },
+  { id: 'experiences', label: 'ðºï¸ Experiences' },
 ];
 
 const extendedDiscovery = [
-  { type: 'wine',       emoji: '🍷', label: 'Wine Discovery',       name: 'Barolo DOCG',              region: 'piemonte',       subtitle: 'Piedmont' },
-  { type: 'cheese',     emoji: '🧀', label: 'Artisan Cheese',       name: 'Parmigiano Reggiano DOP',  region: 'emilia_romagna', subtitle: 'Emilia-Romagna' },
-  { type: 'ingredient', emoji: '🌿', label: 'Ingredient Spotlight', name: 'Pistacchio di Bronte DOP', region: 'sicilia',        subtitle: 'Sicily' },
-  { type: 'experience', emoji: '🗺️', label: 'Food Experience',      name: 'Truffle Hunt — Alba',      region: 'piemonte',       subtitle: 'Piedmont' },
-  { type: 'dish',       emoji: '🍝', label: 'Iconic Dish',          name: 'Trofie al Pesto',          region: 'liguria',        subtitle: 'Liguria' },
-  { type: 'producer',   emoji: '👨‍🌾', label: 'Producer Spotlight',  name: 'Acetaia Malpighi',         region: 'emilia_romagna', subtitle: 'Modena' },
-  { type: 'ingredient', emoji: '🫒', label: 'Ingredient Spotlight', name: 'Olio Extra Vergine DOP',   region: 'toscana',        subtitle: 'Tuscany' },
-  { type: 'wine',       emoji: '🍷', label: 'Wine Discovery',       name: 'Brunello di Montalcino',   region: 'toscana',        subtitle: 'Tuscany' },
-  { type: 'dish',       emoji: '🍕', label: 'Iconic Dish',          name: 'Pizza Napoletana',         region: 'campania',       subtitle: 'Campania' },
-  { type: 'cheese',     emoji: '🧀', label: 'Artisan Cheese',       name: 'Mozzarella di Bufala DOP', region: 'campania',       subtitle: 'Campania' },
+  { type: 'wine',       emoji: 'ð·', label: 'Wine Discovery',       name: 'Barolo DOCG',              region: 'piemonte',       subtitle: 'Piedmont' },
+  { type: 'cheese',     emoji: 'ð§', label: 'Artisan Cheese',       name: 'Parmigiano Reggiano DOP',  region: 'emilia_romagna', subtitle: 'Emilia-Romagna' },
+  { type: 'ingredient', emoji: 'ð¿', label: 'Ingredient Spotlight', name: 'Pistacchio di Bronte DOP', region: 'sicilia',        subtitle: 'Sicily' },
+  { type: 'experience', emoji: 'ðºï¸', label: 'Food Experience',      name: 'Truffle Hunt â Alba',      region: 'piemonte',       subtitle: 'Piedmont' },
+  { type: 'dish',       emoji: 'ð', label: 'Iconic Dish',          name: 'Trofie al Pesto',          region: 'liguria',        subtitle: 'Liguria' },
+  { type: 'producer',   emoji: 'ð¨âð¾', label: 'Producer Spotlight',  name: 'Acetaia Malpighi',         region: 'emilia_romagna', subtitle: 'Modena' },
+  { type: 'ingredient', emoji: 'ð«', label: 'Ingredient Spotlight', name: 'Olio Extra Vergine DOP',   region: 'toscana',        subtitle: 'Tuscany' },
+  { type: 'wine',       emoji: 'ð·', label: 'Wine Discovery',       name: 'Brunello di Montalcino',   region: 'toscana',        subtitle: 'Tuscany' },
+  { type: 'dish',       emoji: 'ð', label: 'Iconic Dish',          name: 'Pizza Napoletana',         region: 'campania',       subtitle: 'Campania' },
+  { type: 'cheese',     emoji: 'ð§', label: 'Artisan Cheese',       name: 'Mozzarella di Bufala DOP', region: 'campania',       subtitle: 'Campania' },
 ];
 
 
 
-// ── Supplementary region data ──────────────────
+// ââ Supplementary region data ââââââââââââââââââ
 const regionExtra = {
-  toscana: { ingredients: ['Lardo di Colonnata', 'Chianina', 'Pecorino Toscano', 'Finocchiona'], tradition: 'Bistecca alla Fiorentina has anchored Florentine tables for centuries — always T-bone, always rare, always enormous.', wine: { name: 'Brunello di Montalcino', doc: 'DOCG', note: 'One of Italy\'s most celebrated reds, aged a minimum of 5 years' } },
-  lombardia: { ingredients: ['Grana Padano', 'Bresaola', 'Casoncelli', 'Luganega'], tradition: 'Milan\'s risotto alla Milanese — stained golden with saffron — has been stirred continuously since the 16th century.', wine: { name: 'Franciacorta', doc: 'DOCG', note: 'Italy\'s finest metodo classico sparkling wine from glacial moraines south of Lake Iseo' } },
-  sicilia: { ingredients: ['Pistacchio di Bronte', 'Capers di Pantelleria', 'Arancia Rossa', 'Tuna di Sicilia'], tradition: 'The mattanza — an ancient bluefin tuna hunt in the Egadi Islands — is one of the oldest fishing traditions still practiced in Italy.', wine: { name: 'Nero d\'Avola', doc: 'DOC', note: 'Bold, sun-baked red with notes of black cherry and dark chocolate' } },
-  campania: { ingredients: ['San Marzano DOP', 'Mozzarella di Bufala', 'Limone di Sorrento', 'Colatura di Alici'], tradition: 'Pizza Napoletana is UNESCO-protected intangible heritage — dough hand-stretched only, baked in oak-fired stone ovens at 485°C.', wine: { name: 'Taurasi', doc: 'DOCG', note: 'The Barolo of the south — Aglianico aged minimum 3 years in the Campanian hills' } },
-  veneto: { ingredients: ['Radicchio di Treviso', 'Asiago', 'Baccalà', 'Risi e Bisi'], tradition: 'Cicchetti — Venice\'s bar snacks — have been passed across canalside counters since the republic\'s golden age, unchanged.', wine: { name: 'Amarone della Valpolicella', doc: 'DOCG', note: 'Dried-grape Corvina aged 2+ years — one of Italy\'s most powerful reds' } },
-  piemonte: { ingredients: ['Tartufo Bianco d\'Alba', 'Bra Tenero', 'Bagna Cauda', 'Agnolotti dal Plin'], tradition: 'Each November, the Alba Truffle Fair draws hunters and Michelin-starred chefs who pay thousands of euros per kilogram for the white gold.', wine: { name: 'Barolo', doc: 'DOCG', note: 'King of Italian wine — Nebbiolo aged minimum 38 months from the Langhe hills' } },
+  toscana: { ingredients: ['Lardo di Colonnata', 'Chianina', 'Pecorino Toscano', 'Finocchiona'], tradition: 'Bistecca alla Fiorentina has anchored Florentine tables for centuries â always T-bone, always rare, always enormous.', wine: { name: 'Brunello di Montalcino', doc: 'DOCG', note: 'One of Italy\'s most celebrated reds, aged a minimum of 5 years' } },
+  lombardia: { ingredients: ['Grana Padano', 'Bresaola', 'Casoncelli', 'Luganega'], tradition: 'Milan\'s risotto alla Milanese â stained golden with saffron â has been stirred continuously since the 16th century.', wine: { name: 'Franciacorta', doc: 'DOCG', note: 'Italy\'s finest metodo classico sparkling wine from glacial moraines south of Lake Iseo' } },
+  sicilia: { ingredients: ['Pistacchio di Bronte', 'Capers di Pantelleria', 'Arancia Rossa', 'Tuna di Sicilia'], tradition: 'The mattanza â an ancient bluefin tuna hunt in the Egadi Islands â is one of the oldest fishing traditions still practiced in Italy.', wine: { name: 'Nero d\'Avola', doc: 'DOC', note: 'Bold, sun-baked red with notes of black cherry and dark chocolate' } },
+  campania: { ingredients: ['San Marzano DOP', 'Mozzarella di Bufala', 'Limone di Sorrento', 'Colatura di Alici'], tradition: 'Pizza Napoletana is UNESCO-protected intangible heritage â dough hand-stretched only, baked in oak-fired stone ovens at 485Â°C.', wine: { name: 'Taurasi', doc: 'DOCG', note: 'The Barolo of the south â Aglianico aged minimum 3 years in the Campanian hills' } },
+  veneto: { ingredients: ['Radicchio di Treviso', 'Asiago', 'BaccalÃ ', 'Risi e Bisi'], tradition: 'Cicchetti â Venice\'s bar snacks â have been passed across canalside counters since the republic\'s golden age, unchanged.', wine: { name: 'Amarone della Valpolicella', doc: 'DOCG', note: 'Dried-grape Corvina aged 2+ years â one of Italy\'s most powerful reds' } },
+  piemonte: { ingredients: ['Tartufo Bianco d\'Alba', 'Bra Tenero', 'Bagna Cauda', 'Agnolotti dal Plin'], tradition: 'Each November, the Alba Truffle Fair draws hunters and Michelin-starred chefs who pay thousands of euros per kilogram for the white gold.', wine: { name: 'Barolo', doc: 'DOCG', note: 'King of Italian wine â Nebbiolo aged minimum 38 months from the Langhe hills' } },
   puglia: { ingredients: ['Burrata', 'Orecchiette', 'Olive Oil DOP', 'Primitivo', 'Fave e Cicoria'], tradition: 'Orecchiette are still hand-shaped daily by the women of Bari Vecchia, a tradition passed down for generations without a single written recipe.', wine: { name: 'Primitivo di Manduria', doc: 'DOC', note: 'Deep, sun-baked reds from centuries-old ungrafted Salento vines' } },
-  emilia_romagna: { ingredients: ['Parmigiano Reggiano', 'Prosciutto di Parma', 'Aceto Balsamico', 'Mortadella'], tradition: 'The Bolognese sauce (ragù) has a 1982 official notarized recipe deposited at the Bologna Chamber of Commerce.', wine: { name: 'Lambrusco di Sorbara', doc: 'DOC', note: 'Lively, violet-hued sparkling red that cuts through the region\'s richest cured meats' } },
-  lazio: { ingredients: ['Pecorino Romano', 'Guanciale', 'Artichoke Romanesco', 'Ricotta di Bufala'], tradition: 'The four classical pasta sauces — Cacio e Pepe, Amatriciana, Carbonara, Gricia — form an unbreakable canon of Roman identity.', wine: { name: 'Frascati Superiore', doc: 'DOCG', note: 'Crisp golden whites from volcanic Castelli Romani hills southeast of Rome' } },
-  sardegna: { ingredients: ['Pecorino Sardo', 'Bottarga', 'Pane Carasau', 'Mirto'], tradition: 'Pane Carasau — paper-thin crisp flatbread — was baked by shepherds who needed bread that lasted months during transhumance.', wine: { name: 'Cannonau di Sardegna', doc: 'DOC', note: 'Ancient Grenache linked to Sardinia\'s longevity zones; deep, spiced, and mineral' } },
-  liguria: { ingredients: ['Basilico Genovese DOP', 'Olive Oil Riviera', 'Farinata', 'Acciughe di Monterosso'], tradition: 'Pesto Genovese must be made in a marble mortar — blenders are tolerated but considered a betrayal of the seven-leaf tradition.', wine: { name: 'Cinque Terre DOC', doc: 'DOC', note: 'Rare, steep-terraced whites from vertiginous Ligurian coast vineyards' } },
-  calabria: { ingredients: ['\'Nduja di Spilinga', 'Bergamotto', 'Cipolla di Tropea', 'Pecorino Crotonese'], tradition: '\'Nduja — fiery, spreadable salami — was created in Spilinga as peasant food from leftover pork scraps mixed with local Calabrian chilli.', wine: { name: 'Cirò Rosso', doc: 'DOC', note: 'One of Italy\'s oldest wine zones; Gaglioppo grapes on ancient Greek-colonized soils' } },
-  marche: { ingredients: ['Vincisgrassi', 'Brodetto di Pesce', 'Tartufo Nero', 'Verdicchio'], tradition: 'Vincisgrassi — Marchigian lasagne with chicken livers, sweetbreads, and béchamel — dates to a 1779 recipe named after an Austrian general.', wine: { name: 'Verdicchio dei Castelli di Jesi', doc: 'DOC', note: 'Crisp, almond-finish whites in distinctive amphora-shaped bottles' } },
-  abruzzo: { ingredients: ['Zafferano DOP', 'Arrosticini', 'Pasta alla Chitarra', 'Pecorino di Farindola'], tradition: 'Arrosticini — tiny mutton skewers — are grilled on custom iron channels called fornacelle and eaten by the dozens at roadside sagre.', wine: { name: 'Montepulciano d\'Abruzzo', doc: 'DOC', note: 'Dark, velvety red from one of Italy\'s most versatile native grapes' } },
-  umbria: { ingredients: ['Tartufo Nero di Norcia', 'Prosciutto di Norcia', 'Lenticchie di Castelluccio', 'Sagrantino'], tradition: 'Norcia has been synonymous with cured meats since medieval times — the Italian word for butcher, norcino, derives directly from this city.', wine: { name: 'Sagrantino di Montefalco', doc: 'DOCG', note: 'The world\'s most tannic grape — bold, inky reds aged minimum 37 months' } },
-  trentino_alto_adige: { ingredients: ['Speck Alto Adige', 'Strudel di Mele', 'Schlutzkrapfen', 'Canederli'], tradition: 'Speck is cured outdoors in mountain air for a minimum of 22 weeks — a Germanic technique layered onto Italian salt and herb traditions.', wine: { name: 'Alto Adige Pinot Grigio', doc: 'DOC', note: 'Among Italy\'s finest: mineral, precise, with Alpine freshness' } },
-  friuli_venezia_giulia: { ingredients: ['San Daniele DOP', 'Montasio', 'Frico', 'Ribolla Gialla'], tradition: 'Frico — crispy fried Montasio cheese with potato — is Friuli\'s most emblematic dish, a peasant staple elevated to cultural icon.', wine: { name: 'Collio Friulano', doc: 'DOC', note: 'Peachy, textured whites from rolling hills on the Slovenian border' } },
-  basilicata: { ingredients: ['Peperone Crusco', 'Soppressata Lucana', 'Caciocavallo Podolico', 'Matera Bread'], tradition: 'Matera\'s Pane di Matera — a 2kg sourdough loaf baked in wood-fired ovens — has sustained the cave-dwelling population for over a millennium.', wine: { name: 'Aglianico del Vulture', doc: 'DOC', note: 'Volcanic Aglianico from Monte Vulture — austere, age-worthy, profound' } },
-  molise: { ingredients: ['Caciocavallo Molisano', 'Taccozzelle', 'Trota di Molise', 'Wild Boar Salami'], tradition: 'Molise\'s transhumance routes — ancient pastoral roads called tratturi — are the longest in Europe and still occasionally walked by shepherds.', wine: { name: 'Tintilia del Molise', doc: 'DOC', note: 'A nearly extinct native grape rescued by local producers; earthy and distinctive' } },
-  valle_daosta: { ingredients: ['Fontina DOP', 'Lard d\'Arnad', 'Boudin', 'Mocetta'], tradition: 'Fonduta — melted Fontina with egg yolks and white truffle — is the region\'s warming answer to the Alpine cold, stirred slowly over bain-marie.', wine: { name: 'Donnas', doc: 'DOC', note: 'Nebbiolo-based reds from Europe\'s most extreme high-altitude vineyards' } },
+  emilia_romagna: { ingredients: ['Parmigiano Reggiano', 'Prosciutto di Parma', 'Aceto Balsamico', 'Mortadella'], tradition: 'The Bolognese sauce (ragÃ¹) has a 1982 official notarized recipe deposited at the Bologna Chamber of Commerce.', wine: { name: 'Lambrusco di Sorbara', doc: 'DOC', note: 'Lively, violet-hued sparkling red that cuts through the region\'s richest cured meats' } },
+  lazio: { ingredients: ['Pecorino Romano', 'Guanciale', 'Artichoke Romanesco', 'Ricotta di Bufala'], tradition: 'The four classical pasta sauces â Cacio e Pepe, Amatriciana, Carbonara, Gricia â form an unbreakable canon of Roman identity.', wine: { name: 'Frascati Superiore', doc: 'DOCG', note: 'Crisp golden whites from volcanic Castelli Romani hills southeast of Rome' } },
+  sardegna: { ingredients: ['Pecorino Sardo', 'Bottarga', 'Pane Carasau', 'Mirto'], tradition: 'Pane Carasau â paper-thin crisp flatbread â was baked by shepherds who needed bread that lasted months during transhumance.', wine: { name: 'Cannonau di Sardegna', doc: 'DOC', note: 'Ancient Grenache linked to Sardinia\'s longevity zones; deep, spiced, and mineral' } },
+  liguria: { ingredients: ['Basilico Genovese DOP', 'Olive Oil Riviera', 'Farinata', 'Acciughe di Monterosso'], tradition: 'Pesto Genovese must be made in a marble mortar â blenders are tolerated but considered a betrayal of the seven-leaf tradition.', wine: { name: 'Cinque Terre DOC', doc: 'DOC', note: 'Rare, steep-terraced whites from vertiginous Ligurian coast vineyards' } },
+  calabria: { ingredients: ['\'Nduja di Spilinga', 'Bergamotto', 'Cipolla di Tropea', 'Pecorino Crotonese'], tradition: '\'Nduja â fiery, spreadable salami â was created in Spilinga as peasant food from leftover pork scraps mixed with local Calabrian chilli.', wine: { name: 'CirÃ² Rosso', doc: 'DOC', note: 'One of Italy\'s oldest wine zones; Gaglioppo grapes on ancient Greek-colonized soils' } },
+  marche: { ingredients: ['Vincisgrassi', 'Brodetto di Pesce', 'Tartufo Nero', 'Verdicchio'], tradition: 'Vincisgrassi â Marchigian lasagne with chicken livers, sweetbreads, and bÃ©chamel â dates to a 1779 recipe named after an Austrian general.', wine: { name: 'Verdicchio dei Castelli di Jesi', doc: 'DOC', note: 'Crisp, almond-finish whites in distinctive amphora-shaped bottles' } },
+  abruzzo: { ingredients: ['Zafferano DOP', 'Arrosticini', 'Pasta alla Chitarra', 'Pecorino di Farindola'], tradition: 'Arrosticini â tiny mutton skewers â are grilled on custom iron channels called fornacelle and eaten by the dozens at roadside sagre.', wine: { name: 'Montepulciano d\'Abruzzo', doc: 'DOC', note: 'Dark, velvety red from one of Italy\'s most versatile native grapes' } },
+  umbria: { ingredients: ['Tartufo Nero di Norcia', 'Prosciutto di Norcia', 'Lenticchie di Castelluccio', 'Sagrantino'], tradition: 'Norcia has been synonymous with cured meats since medieval times â the Italian word for butcher, norcino, derives directly from this city.', wine: { name: 'Sagrantino di Montefalco', doc: 'DOCG', note: 'The world\'s most tannic grape â bold, inky reds aged minimum 37 months' } },
+  trentino_alto_adige: { ingredients: ['Speck Alto Adige', 'Strudel di Mele', 'Schlutzkrapfen', 'Canederli'], tradition: 'Speck is cured outdoors in mountain air for a minimum of 22 weeks â a Germanic technique layered onto Italian salt and herb traditions.', wine: { name: 'Alto Adige Pinot Grigio', doc: 'DOC', note: 'Among Italy\'s finest: mineral, precise, with Alpine freshness' } },
+  friuli_venezia_giulia: { ingredients: ['San Daniele DOP', 'Montasio', 'Frico', 'Ribolla Gialla'], tradition: 'Frico â crispy fried Montasio cheese with potato â is Friuli\'s most emblematic dish, a peasant staple elevated to cultural icon.', wine: { name: 'Collio Friulano', doc: 'DOC', note: 'Peachy, textured whites from rolling hills on the Slovenian border' } },
+  basilicata: { ingredients: ['Peperone Crusco', 'Soppressata Lucana', 'Caciocavallo Podolico', 'Matera Bread'], tradition: 'Matera\'s Pane di Matera â a 2kg sourdough loaf baked in wood-fired ovens â has sustained the cave-dwelling population for over a millennium.', wine: { name: 'Aglianico del Vulture', doc: 'DOC', note: 'Volcanic Aglianico from Monte Vulture â austere, age-worthy, profound' } },
+  molise: { ingredients: ['Caciocavallo Molisano', 'Taccozzelle', 'Trota di Molise', 'Wild Boar Salami'], tradition: 'Molise\'s transhumance routes â ancient pastoral roads called tratturi â are the longest in Europe and still occasionally walked by shepherds.', wine: { name: 'Tintilia del Molise', doc: 'DOC', note: 'A nearly extinct native grape rescued by local producers; earthy and distinctive' } },
+  valle_daosta: { ingredients: ['Fontina DOP', 'Lard d\'Arnad', 'Boudin', 'Mocetta'], tradition: 'Fonduta â melted Fontina with egg yolks and white truffle â is the region\'s warming answer to the Alpine cold, stirred slowly over bain-marie.', wine: { name: 'Donnas', doc: 'DOC', note: 'Nebbiolo-based reds from Europe\'s most extreme high-altitude vineyards' } },
 };
 
-// ── Discovery cards ────────────────────────────
+// ââ Discovery cards ââââââââââââââââââââââââââââ
 const discoveryCards = [
-  { icon: '🍝', title: 'Dish of the Day', name: 'Cacio e Pepe', region: 'lazio' },
-  { icon: '🧀', title: 'Regional Ingredient', name: 'Parmigiano Reggiano', region: 'emilia_romagna' },
-  { icon: '👨‍🌾', title: 'Producer Spotlight', name: 'Acetaia Malpighi', region: 'emilia_romagna' },
-  { icon: '🍷', title: 'Wine Discovery', name: 'Barolo DOCG', region: 'piemonte' },
-  { icon: '🫒', title: 'Artisan Product', name: 'Riviera Ligure DOP', region: 'liguria' },
+  { icon: 'ð', title: 'Dish of the Day', name: 'Cacio e Pepe', region: 'lazio' },
+  { icon: 'ð§', title: 'Regional Ingredient', name: 'Parmigiano Reggiano', region: 'emilia_romagna' },
+  { icon: 'ð¨âð¾', title: 'Producer Spotlight', name: 'Acetaia Malpighi', region: 'emilia_romagna' },
+  { icon: 'ð·', title: 'Wine Discovery', name: 'Barolo DOCG', region: 'piemonte' },
+  { icon: 'ð«', title: 'Artisan Product', name: 'Riviera Ligure DOP', region: 'liguria' },
 ];
 
-// ── AI Search bar ──────────────────────────────
+// ââ AI Search bar ââââââââââââââââââââââââââââââ
 function AISearchBar({ onSelect, compact = false }) {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
@@ -104,14 +104,14 @@ function AISearchBar({ onSelect, compact = false }) {
     const q = val.toLowerCase();
     const regionMatches = Object.entries(regionData)
       .filter(([, r]) => r.name.toLowerCase().includes(q) || r.featuredProducts.some(p => p.toLowerCase().includes(q)))
-      .slice(0, 3).map(([id, r]) => ({ type: 'Region', icon: '🗺️', label: r.name, sub: r.featuredProducts.slice(0, 2).join(' · '), id }));
+      .slice(0, 3).map(([id, r]) => ({ type: 'Region', icon: 'ðºï¸', label: r.name, sub: r.featuredProducts.slice(0, 2).join(' Â· '), id }));
     const recipeMatches = (recipesData || [])
       .filter(r => r.name?.toLowerCase().includes(q) || r.description?.toLowerCase().includes(q))
-      .slice(0, 2).map(r => ({ type: 'Recipe', icon: '🍝', label: r.name, sub: r.regionName || '', id: r.id }));
+      .slice(0, 2).map(r => ({ type: 'Recipe', icon: 'ð', label: r.name, sub: r.regionName || '', id: r.id }));
     const producerMatches = Object.values(regionData)
       .flatMap(r => r.producers || [])
       .filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
-      .slice(0, 2).map(p => ({ type: 'Producer', icon: '👨‍🌾', label: p.name, sub: `${p.city} · ${p.category}` }));
+      .slice(0, 2).map(p => ({ type: 'Producer', icon: 'ð¨âð¾', label: p.name, sub: `${p.city} Â· ${p.category}` }));
     setResults([...regionMatches, ...recipeMatches, ...producerMatches]);
   };
 
@@ -129,7 +129,7 @@ function AISearchBar({ onSelect, compact = false }) {
         <Search size={13} color="#999" />
         <input ref={inputRef} value={query} onChange={e => handleInput(e.target.value)}
           onFocus={() => setFocused(true)} onBlur={() => setTimeout(() => setFocused(false), 150)}
-          placeholder="Ask Bottega about Italian food…"
+          placeholder="Ask Bottega about Italian foodâ¦"
           style={{ border: 'none', outline: 'none', fontSize: 13, color: '#1A1A1A', flex: 1, fontFamily: "'DM Sans',sans-serif", background: 'transparent' }} />
         <Sparkles size={13} color="#4CAF50" />
       </div>
@@ -167,7 +167,7 @@ function AISearchBar({ onSelect, compact = false }) {
   );
 }
 
-// ── Floating Region Panel ──────────────────────
+// ââ Floating Region Panel ââââââââââââââââââââââ
 function RegionPanel({ regionId, onClose }) {
   const navigate = useNavigate();
   
@@ -181,7 +181,7 @@ function RegionPanel({ regionId, onClose }) {
 
   return (
     <>
-      {/* Backdrop — click to close */}
+      {/* Backdrop â click to close */}
       {data && <div onClick={onClose} style={{ position: 'absolute', inset: 0, zIndex: 49 }} />}
 
       <div style={{
@@ -215,7 +215,7 @@ function RegionPanel({ regionId, onClose }) {
                 <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 800, color: '#fff', lineHeight: 1.1 }}>{data.name}</h2>
                 <div style={{ display: 'flex', gap: 10, marginTop: 5 }}>
                   <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 11, color: '#4CAF50', fontWeight: 700 }}>{data.producerCount} Producers</span>
-                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>·</span>
+                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>Â·</span>
                   <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>{data.experienceCount} Experiences</span>
                 </div>
               </div>
@@ -250,7 +250,7 @@ function RegionPanel({ regionId, onClose }) {
                     onMouseLeave={e => e.currentTarget.style.background = '#F8FAF8'}>
                     <div>
                       <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', marginBottom: 2 }}>{p.name}</p>
-                      <p style={{ fontSize: 10, color: '#888', fontFamily: "'DM Mono',monospace" }}>{p.city} · {p.category}</p>
+                      <p style={{ fontSize: 10, color: '#888', fontFamily: "'DM Mono',monospace" }}>{p.city} Â· {p.category}</p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: '#2E7D32', fontWeight: 600 }}>
                       {p.rating} <Star size={9} fill="#2E7D32" color="#2E7D32" />
@@ -288,7 +288,7 @@ function RegionPanel({ regionId, onClose }) {
                 <div>
                   <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '0 0 14px' }} />
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-                    <span style={{ fontSize: 11 }}>🫙</span>
+                    <span style={{ fontSize: 11 }}>ð«</span>
                     <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: '#888', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace" }}>Iconic Ingredients</span>
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -302,7 +302,7 @@ function RegionPanel({ regionId, onClose }) {
               {/* Food Tradition */}
               {regionExtra[regionId]?.tradition && (
                 <div style={{ background: '#F8FAF8', borderRadius: 10, padding: '13px 14px', borderLeft: '3px solid #4CAF50' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: '#4CAF50', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace", marginBottom: 7 }}>✦ Food Tradition</div>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: '#4CAF50', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace", marginBottom: 7 }}>â¦ Food Tradition</div>
                   <p style={{ fontSize: 12, color: '#444', lineHeight: 1.7, fontStyle: 'italic' }}>"{regionExtra[regionId].tradition}"</p>
                 </div>
               )}
@@ -310,7 +310,7 @@ function RegionPanel({ regionId, onClose }) {
               {/* Wine Specialty */}
               {regionExtra[regionId]?.wine && (
                 <div style={{ background: 'rgba(90,20,60,0.04)', borderRadius: 10, padding: '13px 14px', border: '1px solid rgba(90,20,60,0.1)' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: '#7B1FA2', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace", marginBottom: 7 }}>🍷 Wine Specialty</div>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: '#7B1FA2', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace", marginBottom: 7 }}>ð· Wine Specialty</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                     <div>
                       <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', marginBottom: 3 }}>{regionExtra[regionId].wine.name}</p>
@@ -326,7 +326,7 @@ function RegionPanel({ regionId, onClose }) {
                 <button onClick={() => navigate(`/regions/${regionId}`)} style={{ flex: 1, padding: '11px', background: '#2E7D32', color: '#fff', border: 'none', borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#1B5E20'}
                   onMouseLeave={e => e.currentTarget.style.background = '#2E7D32'}>
-                  Explore Region →
+                  Explore Region â
                 </button>
                 <button style={{ padding: '11px 14px', background: '#F0F7EE', border: '1.5px solid #E8F5E9', borderRadius: 9, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                   <Heart size={15} color="#E53935" />
@@ -340,7 +340,7 @@ function RegionPanel({ regionId, onClose }) {
   );
 }
 
-// ── Animated stat ──────────────────────────────
+// ââ Animated stat ââââââââââââââââââââââââââââââ
 function AnimatedStat({ target, label, suffix = '' }) {
   const [v, setV] = useState(0);
   const started = useRef(false);
@@ -360,13 +360,14 @@ function AnimatedStat({ target, label, suffix = '' }) {
   );
 }
 
-// ══════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââ
 // HOME PAGE
-// ══════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââ
 export default function Home() {
   const navigate = useNavigate();
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [hoveredRegion, setHoveredRegion] = useState(null);
+  const [mousePos, setMousePos] = useState({x: 0, y: 0});
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [cardIdx, setCardIdx] = useState(0);
   const [activeLayer, setActiveLayer] = useState('all');
@@ -404,7 +405,7 @@ export default function Home() {
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: '#F0F7EE' }}>
 
-      {/* ══ MAP: EDGE-TO-EDGE ══ */}
+      {/* ââ MAP: EDGE-TO-EDGE ââ */}
       <div style={{ position: 'relative', width: '100%' }}>
         <div
           ref={mapContainerRef}
@@ -423,7 +424,7 @@ export default function Home() {
             zIndex: isFullscreen ? 9999 : 1,
             boxShadow: 'none',
             transition: 'all 0.3s ease'
-          }}>
+    }} onMouseMove={(e) => { var r = e.currentTarget.getBoundingClientRect(); setMousePos({x: e.clientX - r.left, y: e.clientY - r.top}); }}>
 
           {/* Grid overlay */}
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1, backgroundImage: 'linear-gradient(rgba(76,175,80,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(76,175,80,0.03) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
@@ -439,12 +440,12 @@ export default function Home() {
             activeJourney={activeJourney}
           />
 
-          {/* ── Floating search bar ── */}
+          {/* ââ Floating search bar ââ */}
           <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 200, width: 320, maxWidth: 'calc(100% - 48px)' }}>
             <AISearchBar onSelect={handleSearchSelect} />
           </div>
 
-          {/* ── Food Layers ── */}
+          {/* ââ Food Layers ââ */}
           <div style={{ position: 'absolute', top: 52, left: 16, zIndex: 200, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(6,13,6,0.75)', backdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 11px', border: '1px solid rgba(76,175,80,0.2)' }}>
             <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 3 }}>Explore by</span>
             {MAP_LAYERS.map(layer => (
@@ -457,11 +458,11 @@ export default function Home() {
             ))}
           </div>
 
-          {/* ── Map top controls ── */}
+          {/* ââ Map top controls ââ */}
           <div style={{ position: 'absolute', top: 14, left: 16, zIndex: 20, display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4CAF50', display: 'inline-block', boxShadow: '0 0 8px rgba(76,175,80,0.9)' }} />
             <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(76,175,80,0.65)', textTransform: 'uppercase' }}>
-              Bottega · 20 Regions Live
+              Bottega Â· 20 Regions Live
             </span>
           </div>
 
@@ -473,7 +474,7 @@ export default function Home() {
             {isFullscreen ? 'Exit' : 'Full Map'}
           </button>
 
-          {/* Active journey card — top-center below search */}
+          {/* Active journey card â top-center below search */}
           {activeJourney && (
             <div style={{ position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 250, background: 'rgba(6,13,6,0.88)', backdropFilter: 'blur(16px)', border: `1px solid ${activeJourney.color}40`, borderRadius: 12, padding: '10px 16px', maxWidth: 420, display: 'flex', alignItems: 'center', gap: 12, animation: 'fadeSlideIn 0.25s ease' }}>
               <span style={{ fontSize: 20 }}>{activeJourney.emoji}</span>
@@ -481,7 +482,7 @@ export default function Home() {
                 <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 2 }}>{activeJourney.title}</p>
                 <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>{activeJourney.description}</p>
               </div>
-              <button onClick={() => setActiveJourney(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 16, padding: 0, flexShrink: 0 }}>✕</button>
+              <button onClick={() => setActiveJourney(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 16, padding: 0, flexShrink: 0 }}>â</button>
             </div>
           )}
 
@@ -496,25 +497,25 @@ export default function Home() {
 
           {/* Hover tooltip */}
           {activeHover && !selectedRegion && (
-            <div style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 20, background: 'rgba(6,13,6,0.93)', backdropFilter: 'blur(16px)', border: '1px solid rgba(76,175,80,0.3)', borderRadius: 13, padding: '12px 18px', minWidth: 240, pointerEvents: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', animation: 'fadeSlideIn 0.15s ease' }}>
+            <div style={{ position: 'absolute', left: mousePos.x, top: mousePos.y - 130, transform: 'translateX(-50%)', zIndex: 20, background: 'rgba(6,13,6,0.93)', backdropFilter: 'blur(16px)', border: '1px solid rgba(76,175,80,0.3)', borderRadius: 13, padding: '12px 18px', minWidth: 240, pointerEvents: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', animation: 'fadeSlideIn 0.15s ease' }}>
               <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{activeHover.name}</p>
-              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 11, color: '#4CAF50', marginBottom: 5 }}>{activeHover.producerCount} Producers · {activeHover.experienceCount} Experiences</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>{activeHover.featuredProducts.slice(0, 3).join(' · ')}</p>
-              <p style={{ fontSize: 10, color: 'rgba(76,175,80,0.65)', marginTop: 6, fontWeight: 600 }}>Click to explore →</p>
+              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 11, color: '#4CAF50', marginBottom: 5 }}>{activeHover.producerCount} Producers Â· {activeHover.experienceCount} Experiences</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>{activeHover.featuredProducts.slice(0, 3).join(' Â· ')}</p>
+              <p style={{ fontSize: 10, color: 'rgba(76,175,80,0.65)', marginTop: 6, fontWeight: 600 }}>Click to explore â</p>
             </div>
           )}
 
           {!activeHover && !selectedRegion && (
             <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 10, pointerEvents: 'none' }}>
-              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Hover a region · Click to explore</p>
+              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Hover a region Â· Click to explore</p>
             </div>
           )}
 
-          {/* Food Journeys widget — bottom-left */}
+          {/* Food Journeys widget â bottom-left */}
           <div style={{ position: 'absolute', bottom: 200, left: 18, zIndex: 20, minWidth: 220 }}>
             <div style={{ background: 'rgba(6,13,6,0.82)', backdropFilter: 'blur(12px)', border: '1px solid rgba(76,175,80,0.2)', borderRadius: 12, padding: '10px 14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showJourneys ? 8 : 0 }}>
-                <span style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>🇮🇹 Food Journeys</span>
+                <span style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>ð®ð¹ Food Journeys</span>
                 <div style={{ display: 'flex', gap: 6 }}>
                   {activeJourney && <button onClick={() => setActiveJourney(null)} style={{ fontSize: 10, color: '#E57373', background: 'none', border: '1px solid rgba(229,115,115,0.4)', borderRadius: 100, padding: '2px 8px', cursor: 'pointer' }}>Clear</button>}
                   <button onClick={() => setShowJourneys(j => !j)} style={{ fontSize: 10, color: '#4CAF50', background: 'none', border: '1px solid rgba(76,175,80,0.4)', borderRadius: 100, padding: '2px 9px', cursor: 'pointer' }}>{showJourneys ? 'Close' : 'Explore'}</button>
@@ -531,14 +532,14 @@ export default function Home() {
                   <span style={{ fontSize: 18 }}>{j.emoji}</span>
                   <div>
                     <p style={{ fontSize: 12, color: '#fff', fontWeight: 500, marginBottom: 2 }}>{j.title}</p>
-                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Mono',monospace" }}>{j.regions.map(r => regionData[r]?.name).join(' → ')}</p>
+                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Mono',monospace" }}>{j.regions.map(r => regionData[r]?.name).join(' â ')}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Discovery card — bottom-left (below journeys) */}
+          {/* Discovery card â bottom-left (below journeys) */}
           {(() => {
             const card = extendedDiscovery[cardIdx % extendedDiscovery.length];
             return (
@@ -547,7 +548,7 @@ export default function Home() {
                   onClick={() => setSelectedRegion(card.region)}
                   onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(76,175,80,0.45)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(76,175,80,0.2)'}>
-                  <p style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", fontWeight: 700, color: 'rgba(76,175,80,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 7 }}>✦ {card.label}</p>
+                  <p style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", fontWeight: 700, color: 'rgba(76,175,80,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 7 }}>â¦ {card.label}</p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <span style={{ fontSize: 20 }}>{card.emoji}</span>
                     <div>
@@ -571,7 +572,7 @@ export default function Home() {
                 {l && <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontFamily: "'DM Mono',monospace", textTransform: 'uppercase' }}>{l}</span>}
               </span>
             ))}
-            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', marginLeft: 4 }}>450 Producers · 80+ Experiences</span>
+            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', marginLeft: 4 }}>450 Producers Â· 80+ Experiences</span>
           </div>
 
           {/* Floating Region Panel */}
@@ -579,17 +580,17 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ══ SECTION 3: DISCOVERY CARDS ══ */}
+      {/* ââ SECTION 3: DISCOVERY CARDS ââ */}
       <div style={{ padding: '32px 20px', maxWidth: 1400, margin: '0 auto' }}>
         <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>Today's Discoveries</h2>
         <p style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>Curated gastronomy moments from across Italy</p>
         <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 8 }}>
           {[
-            { emoji: '🍝', cat: 'Dish of the Day', name: 'Cacio e Pepe', region: 'Lazio', path: '/Recipes', color: '#FFF3E0', accent: '#E65100' },
-            { emoji: '👨‍🌾', cat: 'Producer Spotlight', name: 'Acetaia Malpighi', region: 'Modena', path: '/Producers', color: '#E8F5E9', accent: '#2E7D32' },
-            { emoji: '🧀', cat: 'Regional Ingredient', name: 'Parmigiano Reggiano', region: 'Emilia-Romagna', path: '/Producers', color: '#FBE9E7', accent: '#C76A3A' },
-            { emoji: '🗺️', cat: 'Experience of the Day', name: 'Alba Truffle Hunt', region: 'Piedmont · €120', path: '/Experiences', color: '#FBE9E7', accent: '#C76A3A' },
-            { emoji: '📖', cat: 'Story Highlight', name: 'The Last Rice Farmers of Monferrato', region: 'Piedmont', path: '/Stories', color: '#F3E5F5', accent: '#6A1B9A' },
+            { emoji: 'ð', cat: 'Dish of the Day', name: 'Cacio e Pepe', region: 'Lazio', path: '/Recipes', color: '#FFF3E0', accent: '#E65100' },
+            { emoji: 'ð¨âð¾', cat: 'Producer Spotlight', name: 'Acetaia Malpighi', region: 'Modena', path: '/Producers', color: '#E8F5E9', accent: '#2E7D32' },
+            { emoji: 'ð§', cat: 'Regional Ingredient', name: 'Parmigiano Reggiano', region: 'Emilia-Romagna', path: '/Producers', color: '#FBE9E7', accent: '#C76A3A' },
+            { emoji: 'ðºï¸', cat: 'Experience of the Day', name: 'Alba Truffle Hunt', region: 'Piedmont Â· â¬120', path: '/Experiences', color: '#FBE9E7', accent: '#C76A3A' },
+            { emoji: 'ð', cat: 'Story Highlight', name: 'The Last Rice Farmers of Monferrato', region: 'Piedmont', path: '/Stories', color: '#F3E5F5', accent: '#6A1B9A' },
           ].map((item, i) => (
             <div key={i} onClick={() => navigate(item.path)} style={{ minWidth: 200, padding: '16px', background: item.color, borderRadius: 14, cursor: 'pointer', flexShrink: 0, border: `1px solid ${item.accent}22`, transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)'; }}
@@ -604,7 +605,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ══ SECTION 4: METRICS ══ */}
+      {/* ââ SECTION 4: METRICS ââ */}
       <div style={{ background: '#1B5E20', padding: '40px 24px' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 24, textAlign: 'center' }}>
           {[{ target: 20, label: 'Regions', suffix: '' }, { target: 450, label: 'Producers', suffix: '+' }, { target: 1200, label: 'Products', suffix: '+' }, { target: 80, label: 'Experiences', suffix: '+' }, { target: 120, label: 'Recipes', suffix: '+' }].map((s, i) => (
@@ -613,10 +614,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ══ SECTION 5: EXPLORE BY REGION ══ */}
+      {/* ââ SECTION 5: EXPLORE BY REGION ââ */}
       <div style={{ padding: '48px 20px', maxWidth: 1400, margin: '0 auto' }}>
         <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, color: '#1A1A1A', marginBottom: 6 }}>Explore by Region</h2>
-        <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>Each Italian region is a world unto itself — click to open on the map above</p>
+        <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>Each Italian region is a world unto itself â click to open on the map above</p>
         <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 8 }}>
           {Object.entries(regionData).slice(0, 8).map(([id, r]) => (
             <div key={id} onClick={() => { setSelectedRegion(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ minWidth: 200, borderRadius: 14, overflow: 'hidden', cursor: 'pointer', flexShrink: 0, position: 'relative', aspectRatio: '4/3', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
@@ -633,11 +634,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ══ FOOTER ══ */}
+      {/* ââ FOOTER ââ */}
       <div style={{ background: '#1A1A1A', padding: '32px 24px', textAlign: 'center' }}>
         <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, fontWeight: 700, color: '#4CAF50', marginBottom: 8 }}>BOTTEGA</p>
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <span>© 2026 Bottega Delivery · The Digital Atlas of Italian Gastronomy</span>
+          <span>Â© 2026 Bottega Delivery Â· The Digital Atlas of Italian Gastronomy</span>
           <a href="/About" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontWeight: 600 }}
             onMouseEnter={e => e.currentTarget.style.color = '#4CAF50'}
             onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}>About</a>
