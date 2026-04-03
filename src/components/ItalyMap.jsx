@@ -407,9 +407,9 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
                   }}
                 >
                   {/* Green hover ring - outer stroke */}
-                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 8 / s} fill="none" stroke="#4CAF50" strokeWidth={1.5 / s} opacity={isSpotHovered ? 0.7 : 0} style={{ transition: 'opacity 0.2s ease' }} />
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + (isZoomed ? 8 : 14) / s} fill="none" stroke="#4CAF50" strokeWidth={(isZoomed ? 1.5 : 2.5) / s} opacity={isSpotHovered ? (isZoomed ? 0.7 : 0.9) : 0} style={{ transition: 'opacity 0.2s ease' }} />
                   {/* Green hover ring - inner glow */}
-                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 4 / s} fill="#4CAF50" opacity={isSpotHovered ? 0.25 : 0} style={{ transition: 'opacity 0.2s ease' }} />
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + (isZoomed ? 4 : 10) / s} fill="#4CAF50" opacity={isSpotHovered ? (isZoomed ? 0.25 : 0.35) : 0} style={{ transition: 'opacity 0.2s ease' }} />
                   <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 2 / s} fill={cfg.bg} opacity={0.15} />
                   <circle cx={pos[0]} cy={pos[1]} r={mSz / 2} fill={cfg.bg} />
                   <text x={pos[0]} y={pos[1]} textAnchor="middle" dominantBaseline="central" fontSize={eSz} style={{ userSelect: "none" }}>{cfg.em}</text>
