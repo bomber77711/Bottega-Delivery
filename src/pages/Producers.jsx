@@ -4,6 +4,8 @@ import { regionData } from '../components/regionData';
 import { Search, MapPin, Star, ChevronDown } from 'lucide-react';
 import { getProductImage } from '../components/imageConfig';
 
+function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/g, "").replace(/^-+/g, ""); }
+
 const allProducers = Object.entries(regionData).flatMap(([regionId, region]) =>
   region.producers.map((p, i) => ({
     ...p, regionId, regionName: region.name, id: `${regionId}-${i}`,
@@ -17,7 +19,6 @@ const categoryOptions = [...new Set(allProducers.map(p => p.category))].sort();
 function ProducerCard({ producer }) {
   const navigate = useNavigate();
   const img = getProductImage(producer.category);
-  const initials = producer.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
   return (
     <div style={{
@@ -34,16 +35,9 @@ function ProducerCard({ producer }) {
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)' }} />
         {/* Avatar */}
-        <div style={{
-          position: 'absolute', bottom: -24, left: 20,
-          width: 52, height: 52, borderRadius: '50%',
-          background: '#2E7D32', border: '3px solid #fff',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 16, fontWeight: 800, color: '#fff', fontFamily: "'DM Sans',sans-serif"
-        }}>{initials}</div>
       </div>
 
-      <div style={{ padding: '30px 20px 20px' }}>
+      <div style={{ padding: '20px 20px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
           <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 700, color: '#1A1A1A', lineHeight: 1.3, flex: 1, marginRight: 8 }}>
             {producer.name}
@@ -79,7 +73,7 @@ function ProducerCard({ producer }) {
             borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 600,
             cursor: 'pointer', transition: 'all 0.15s'
           }}
-            onClick={() => navigate(`/producers/${producer.id}`)}
+            onClick={() => navigate(`/producers/${slugify(producer.name)}`)}
             onMouseEnter={e => { e.currentTarget.style.background = '#2E7D32'; e.currentTarget.style.color = '#fff'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#2E7D32'; }}>
              Visit Store →
