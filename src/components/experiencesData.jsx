@@ -4,7 +4,7 @@ export const experiencesData = [
     region: 'Piedmont', regionId: 'piemonte', producer: 'Tartufi Morra',
     price: 120, priceLabel: '€120/person',
     description: 'Join expert truffle hunters and their trained dogs in the legendary forests around Alba. Learn the secrets of white truffle foraging followed by a tasting with local wines.',
-    image: 'https://images.unsplash.com/d-JENg6nV2s?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1653185245072-8eaccca8d0f1?w=800&q=80',
     rating: 4.9, duration: '4 hours', includes: ['Guide', 'Truffle tasting', 'Local wine pairing'],
   },
   {
@@ -12,7 +12,7 @@ export const experiencesData = [
     region: 'Emilia-Romagna', regionId: 'emilia_romagna', producer: 'Caseificio Gennari',
     price: 45, priceLabel: '€45/person',
     description: 'Watch the ancient art of Parmigiano Reggiano production at dawn. See the massive wheels formed by hand, then taste aged 12, 24, and 36 month varieties directly from the cellar.',
-    image: 'https://images.unsplash.com/e7--mQAp--Y?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1663841366331-71c93047c6de?w=800&q=80',
     rating: 4.8, duration: '3 hours', includes: ['Guided tour', 'Cheese tasting', 'Take-home portion'],
   },
   {
@@ -20,7 +20,7 @@ export const experiencesData = [
     region: 'Campania', regionId: 'campania', producer: 'Caseificio Vannulo',
     price: 45, priceLabel: '€45/person',
     description: "Meet Paestum's famous water buffalo herds and witness organic mozzarella being hand-stretched fresh. The freshest mozzarella di bufala DOP you'll ever taste.",
-    image: 'https://images.unsplash.com/OsDI0d-Mp6c?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1666646747142-2146efb604fe?w=800&q=80',
     rating: 4.9, duration: '2.5 hours', includes: ['Farm tour', 'Mozzarella making demo', 'Tasting platter'],
   },
   {
@@ -28,7 +28,7 @@ export const experiencesData = [
     region: 'Veneto', regionId: 'veneto', producer: 'Cantina Bisol',
     price: 50, priceLabel: '€50/person',
     description: "Explore the UNESCO-listed Valdobbiadene hills and taste Prosecco Superiore DOCG at the source. Three different cuvées from the Bisol family's historic estate.",
-    image: 'https://images.unsplash.com/Lj4nVnmv04U?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1623501613313-960fcf943784?w=800&q=80',
     rating: 4.7, duration: '2 hours', includes: ['3 Prosecco tastings', 'Vineyard walk', 'Cheese accompaniment'],
   },
   {
@@ -36,7 +36,7 @@ export const experiencesData = [
     region: 'Liguria', regionId: 'liguria', producer: 'Pesto Rossi',
     price: 55, priceLabel: '€55/person',
     description: 'Learn the traditional marble mortar technique for authentic Genovese pesto from a third-generation Ligurian producer. Use fresh DOP basil, pine nuts, and aged Parmigiano.',
-    image: 'https://images.unsplash.com/V1ML8ozvsHw?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1668253824450-f18895227dd6?w=800&q=80',
     rating: 4.8, duration: '2.5 hours', includes: ['Mortar & pestle lesson', 'All ingredients', 'Recipe card', 'Jar to take home'],
   },
   {
@@ -44,7 +44,7 @@ export const experiencesData = [
     region: 'Umbria', regionId: 'umbria', producer: 'Tartufi Bianconi',
     price: 95, priceLabel: '€95/person',
     description: "Venture into the Umbrian forests around Norcia with experienced tartufai and their Lagotto Romagnolo dogs. Discover Norcia's famous black truffle followed by a traditional lunch.",
-    image: 'https://images.unsplash.com/mjFhZFxk_Y8?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1564136426574-a7596ca66832?w=800&q=80',
     rating: 4.9, duration: '5 hours', includes: ['Forest hunt', 'Traditional lunch', 'Black truffle products'],
   },
   {
@@ -52,7 +52,7 @@ export const experiencesData = [
     region: 'Emilia-Romagna', regionId: 'emilia_romagna', producer: 'Acetaia Malpighi',
     price: 55, priceLabel: '€55/person',
     description: 'Explore centuries-old acetaia attics in Modena where traditional balsamic vinegar ages in a succession of barrels. Taste aged 12, 18, and 25-year varieties.',
-    image: 'https://images.unsplash.com/dnapDBNPuJo?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1571323185405-d4c20ffd832d?w=800&q=80',
     rating: 5.0, duration: '2 hours', includes: ['Acetaia tour', 'Guided tasting', 'Exclusive aged balsamic'],
   },
   {
@@ -60,7 +60,7 @@ export const experiencesData = [
     region: 'Piedmont', regionId: 'piemonte', producer: 'Giacomo Conterno',
     price: 80, priceLabel: '€80/person',
     description: "Enter the legendary cellars of Giacomo Conterno in Serralunga d'Alba. Taste legendary Barolo DOCG from different vintages directly from the barrel and bottle.",
-    image: 'https://images.unsplash.com/Mj1CDQJdNOk?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1640031306007-f22ed0cec1a3?w=800&q=80',
     rating: 5.0, duration: '2.5 hours', includes: ['Cellar tour', 'Vintage tasting', 'Food pairing'],
   },
   {
@@ -68,7 +68,7 @@ export const experiencesData = [
     region: 'Apulia', regionId: 'puglia', producer: 'Caseificio Montrone',
     price: 65, priceLabel: '€65/person',
     description: 'Learn to hand-pull mozzarella and fill it with stracciatella cream to make authentic burrata at an Andria dairy. A deeply hands-on experience with the masters.',
-    image: 'https://images.unsplash.com/nZFjKeA27zg?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1686998424100-bdfb15c0079c?w=800&q=80',
     rating: 4.8, duration: '3 hours', includes: ['Hands-on making', 'Traditional lunch', 'Burrata to take home'],
   },
   {
@@ -76,7 +76,7 @@ export const experiencesData = [
     region: 'Sicily', regionId: 'sicilia', producer: 'Pistacchi Bronte',
     price: 50, priceLabel: '€50/person',
     description: "Harvest DOP pistachios from the volcanic slopes of Mount Etna at Bronte. Understand why Etna's mineral-rich lava soil produces the world's most intensely flavoured pistachios.",
-    image: 'https://images.unsplash.com/qnI1zi_R7LE?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1525351159099-81893194469e?w=800&q=80',
     rating: 4.8, duration: '3.5 hours', includes: ['Harvest participation', 'Processing tour', 'Pistachio products tasting'],
   },
   {
@@ -84,7 +84,7 @@ export const experiencesData = [
     region: 'Tuscany', regionId: 'toscana', producer: 'Frantoio Franci',
     price: 45, priceLabel: '€45/person',
     description: 'Walk through ancient Tuscan olive groves with the Franci family and discover the cold-press process that produces their award-winning extra virgin oil.',
-    image: 'https://images.unsplash.com/S0AEWqvdycw?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1760681555052-ee2331a39905?w=800&q=80',
     rating: 4.7, duration: '2.5 hours', includes: ['Grove walk', 'Press demonstration', 'Oil tasting with bread'],
   },
   {
@@ -92,7 +92,7 @@ export const experiencesData = [
     region: 'Lombardy', regionId: 'lombardia', producer: 'Cantina Berlucchi',
     price: 55, priceLabel: '€55/person',
     description: 'Visit the historic Berlucchi estate that pioneered Italian sparkling wine. Tour the underground cellars and taste three cuvées of Franciacorta DOCG.',
-    image: 'https://images.unsplash.com/AdZJkPK6_hg?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1562663729-4971d6802f4a?w=800&q=80',
     rating: 4.8, duration: '2 hours', includes: ['Cellar tour', '3 Franciacorta tastings', 'Appetizer pairing'],
   },
 ];
