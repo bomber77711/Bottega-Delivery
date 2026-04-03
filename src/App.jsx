@@ -16,6 +16,7 @@ import RegionDetail from './pages/RegionDetail';
 import CreatorProfile from './pages/CreatorProfile';
 import TasteMaps from './pages/TasteMaps';
 import ProducerDetail from './pages/ProducerDetail';
+import Checkout from './pages/Checkout';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -79,6 +80,7 @@ const AuthenticatedApp = () => {
       <Route path="/creators/:id" element={<LayoutWrapper currentPageName="Discover"><CreatorProfile /></LayoutWrapper>} />
       <Route path="/taste-maps" element={<LayoutWrapper currentPageName="TasteMaps"><TasteMaps /></LayoutWrapper>} />
       <Route path="/producers/:id" element={<LayoutWrapper currentPageName="Producers"><ProducerDetail /></LayoutWrapper>} />
+      <Route path="/checkout" element={<LayoutWrapper currentPageName="Checkout"><Checkout /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
