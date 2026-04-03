@@ -246,6 +246,7 @@ function RegionPanel({ regionId, onClose }) {
                 </div>
                 {(data.producers || []).slice(0, 3).map((p, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#F8FAF8', borderRadius: 10, marginBottom: 6, cursor: 'pointer', transition: 'all 0.15s' }}
+                    onClick={() => navigate('/producers/' + p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/g, '').replace(/^-+/g, ''))}
                     onMouseEnter={e => e.currentTarget.style.background = '#E8F5E9'}
                     onMouseLeave={e => e.currentTarget.style.background = '#F8FAF8'}>
                     <div>
