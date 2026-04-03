@@ -393,23 +393,17 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
                   onMouseEnter={function(e) {
                     var rect = e.currentTarget.getBoundingClientRect();
                     setHoveredSpot({ spotKey: spotKey, spot: spot, regionId: regionId, x: rect.left + rect.width / 2, y: rect.top });
-                    var ring = e.currentTarget.querySelector('.hover-ring');
-                    if (ring) { ring.setAttribute('opacity', '0.3'); }
-                    var ring2 = e.currentTarget.querySelector('.hover-ring-outer');
-                    if (ring2) { ring2.setAttribute('opacity', '1'); }
+                    if (isZoomed) { var ring = e.currentTarget.querySelector('.hover-ring'); if (ring) ring.setAttribute('opacity', '0.25'); var ring2 = e.currentTarget.querySelector('.hover-ring-outer'); if (ring2) ring2.setAttribute('opacity', '0.7'); }
                   }}
                   onMouseLeave={function(e) {
                     setHoveredSpot(null);
-                    var ring = e.currentTarget.querySelector('.hover-ring');
-                    if (ring) ring.setAttribute('opacity', '0');
-                    var ring2 = e.currentTarget.querySelector('.hover-ring-outer');
-                    if (ring2) ring2.setAttribute('opacity', '0');
+                    var ring = e.currentTarget.querySelector('.hover-ring'); if (ring) ring.setAttribute('opacity', '0'); var ring2 = e.currentTarget.querySelector('.hover-ring-outer'); if (ring2) ring2.setAttribute('opacity', '0');
                   }}
                 >
                   {/* Green hover ring - outer stroke */}
-                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 8 / s} fill="none" stroke="#4CAF50" strokeWidth={1.5 / s} opacity={isSpotHovered && isZoomed ? 0.7 : 0} style={{ transition: 'opacity 0.2s ease' }} />
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 8 / s} className="hover-ring-outer" fill="none" stroke="#4CAF50" strokeWidth={1.5 / s} opacity={0} style={{ transition: 'opacity 0.2s ease' }} />
                   {/* Green hover ring - inner glow */}
-                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 4 / s} fill="#4CAF50" opacity={isSpotHovered && isZoomed ? 0.25 : 0} style={{ transition: 'opacity 0.2s ease' }} />
+                  <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 4 / s} className="hover-ring" fill="#4CAF50" opacity={0} style={{ transition: 'opacity 0.2s ease' }} />
                   <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 2 / s} fill={cfg.bg} opacity={0.15} />
                   <circle cx={pos[0]} cy={pos[1]} r={mSz / 2} fill={cfg.bg} />
                   <text x={pos[0]} y={pos[1]} textAnchor="middle" dominantBaseline="central" fontSize={eSz} style={{ userSelect: "none" }}>{cfg.em}</text>
