@@ -230,6 +230,10 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
           style={{ display: 'block' }}
           onMouseMove={handleMove}
         >
+        <style>{`
+          g[data-zoomed="true"]:hover > .hover-ring-outer { opacity: 0.7 !important; }
+          g[data-zoomed="true"]:hover > .hover-ring { opacity: 0.25 !important; }
+        `}</style>
           <defs>
             <filter id="glowSelected">
               <feGaussianBlur stdDeviation="5" result="b" />
@@ -387,7 +391,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               return (
                 <g
                   key={spotKey}
-                  style={{ cursor: "pointer", transition: "opacity 0.2s ease" }}
+                  data-zoomed={isZoomed ? "true" : undefined} style={{ cursor: "pointer", transition: "opacity 0.2s ease" }}
                   opacity={spotOpacity}
                   onClick={function() { handleSpotClick(spot); }}
                   onMouseEnter={function(e) {
