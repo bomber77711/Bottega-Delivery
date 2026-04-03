@@ -4,6 +4,7 @@ import ItalyMap from '../components/ItalyMap';
 import { regionData } from '../components/regionData';
 import { recipesData } from '../components/recipesData';
 import { Sparkles, Search, MapPin, Maximize2, Minimize2, X, Star, ChevronRight, ArrowRight, Heart, Compass, Utensils, Users } from 'lucide-react';
+import AskBottega from '../components/AskBottega';
 const WIKI = {
   toscana: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/7e69b3d03_generated_image.png',
   lombardia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/5caaf3d0f_generated_image.png',
@@ -442,12 +443,10 @@ export default function Home() {
           />
 
           {/* ── Floating search bar ── */}
-          <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 200, width: 320, maxWidth: 'calc(100% - 48px)' }}>
-            <AISearchBar onSelect={handleSearchSelect} />
-          </div>
-
-          {/* ── Food Layers ── */}
-          <div style={{ position: 'absolute', top: 52, left: 16, zIndex: 200, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(6,13,6,0.75)', backdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 11px', border: '1px solid rgba(76,175,80,0.2)' }}>
+          <div st{/* ── Floating search bar / Ask Bottega AI ── */}
+          <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 200, width: 420, maxWidth: 'calc(100% - 48px)' }}>
+            <AskBottega onSelect={handleSearchSelect} />
+          </div>v style={{ position: 'absolute', top: 52, left: 16, zIndex: 200, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(6,13,6,0.75)', backdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 11px', border: '1px solid rgba(76,175,80,0.2)' }}>
             <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 3 }}>Explore by</span>
             {MAP_LAYERS.map(layer => (
               <button key={layer.id} onClick={() => setActiveLayer(layer.id)} style={{
