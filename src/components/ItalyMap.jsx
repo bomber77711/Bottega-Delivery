@@ -382,7 +382,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
               var cfg = catCfg[cat] || tpCfg[tp] || tpCfg.producer;
 
               var spotKey = regionId + "-spot-" + si;
-              var isSpotHovered = hoveredSpot && hoveredSpot.spot === spot && hoveredSpot.regionId === regionId;
+              var isSpotHovered = hoveredSpot && hoveredSpot.spotKey === spotKey;
 
               return (
                 <g
@@ -392,7 +392,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
                   onClick={function() { handleSpotClick(spot); }}
                   onMouseEnter={function(e) {
                     var rect = e.currentTarget.getBoundingClientRect();
-                    setHoveredSpot({ spot: spot, regionId: regionId, x: rect.left + rect.width / 2, y: rect.top });
+                    setHoveredSpot({ spotKey: spotKey, spot: spot, regionId: regionId, x: rect.left + rect.width / 2, y: rect.top });
                     var ring = e.currentTarget.querySelector('.hover-ring');
                     if (ring) { ring.setAttribute('opacity', '0.3'); }
                     var ring2 = e.currentTarget.querySelector('.hover-ring-outer');
