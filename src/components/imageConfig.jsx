@@ -22,19 +22,19 @@ export const REGION_IMAGES = {
 };
 
 export const PRODUCT_IMAGES = {
-  'Olive Oil': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/75a704805_generated_image.png',
-  'Wine': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/359d011f0_generated_image.png',
-  'Cheese': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/2c2d89ddf_generated_image.png',
-  'Pasta': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/c114c2d7e_generated_image.png',
-  'Coffee': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/23e5dd626_generated_image.png',
-  'Truffle': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/6caf84c41_generated_image.png',
-  'Cured Meats': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/fff5f7b36_generated_image.png',
-  'Honey': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/491cc0200_generated_image.png',
-  'Condiments': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/ce9eb7bc7_generated_image.png',
-  'Spirits': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/5a811eb85_generated_image.png',
-  'Chocolate': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/8dd32f907_generated_image.png',
-  'Nuts': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/6caf84c41_generated_image.png',
-  'default': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/75a704805_generated_image.png',
+  'Olive Oil': 'https://images.unsplash.com/vvPybMs7eX0?w=400&q=80',
+  'Wine': 'https://images.unsplash.com/HIyZWQZvG7I?w=400&q=80',
+  'Cheese': 'https://images.unsplash.com/brZc1i-F2_0?w=400&q=80',
+  'Pasta': 'https://images.unsplash.com/tHOu9Fc2HNA?w=400&q=80',
+  'Coffee': 'https://images.unsplash.com/jXaDEaO0csc?w=400&q=80',
+  'Truffle': 'https://images.unsplash.com/ybSgrT3VNjg?w=400&q=80',
+  'Cured Meats': 'https://images.unsplash.com/-N9hX_F8FlA?w=400&q=80',
+  'Honey': 'https://images.unsplash.com/v4u13Q5mjfQ?w=400&q=80',
+  'Condiments': 'https://images.unsplash.com/WPdFUs9UH9Q?w=400&q=80',
+  'Spirits': 'https://images.unsplash.com/aOAS6uRZFrU?w=400&q=80',
+  'Chocolate': 'https://images.unsplash.com/-qV5PBuHVPc?w=400&q=80',
+  'Nuts': 'https://images.unsplash.com/AEYdJTleZc0?w=400&q=80',
+  'default': 'https://images.unsplash.com/vn_BRX8B2vI?w=400&q=80',
 };
 
 export const RECIPE_IMAGES = {
