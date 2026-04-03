@@ -229,6 +229,7 @@ export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover
           width="100%" height="100%"
           style={{ display: 'block' }}
           onMouseMove={handleMove}
+          onClick={function(e) { if (selectedRegion && (e.target.tagName === 'svg' || e.target.tagName === 'rect')) onRegionSelect(null); }}
         >
         <style>{`
           .hover-ring-outer, .hover-ring { opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
