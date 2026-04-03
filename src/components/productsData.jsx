@@ -56,19 +56,19 @@ export const productsData = [
 ];
 
 export const categories = [
-  { name: "All", emoji: "\u{1F37D}\uFE0F" },
-  { name: "Olive Oil", emoji: "\u{1FAD2}" },
-  { name: "Wine", emoji: "\u{1F377}" },
-  { name: "Cheese", emoji: "\u{1F9C0}" },
-  { name: "Pasta", emoji: "\u{1F35D}" },
-  { name: "Cured Meats", emoji: "\u{1F969}" },
-  { name: "Condiments", emoji: "\u{1F33F}" },
-  { name: "Truffle", emoji: "\u{1F344}" },
-  { name: "Honey", emoji: "\u{1F36F}" },
-  { name: "Coffee", emoji: "\u2615" },
-  { name: "Seafood", emoji: "\u{1F41F}" },
-  { name: "Nuts", emoji: "\u{1F95C}" },
-  { name: "Dolci", emoji: "\u{1F370}" },
-  { name: "Rice", emoji: "\u{1F33E}" },
-  { name: "Liqueur", emoji: "\u{1F378}" },
-];
+  { name: "All", emoji: "🍽️", image: "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?w=300&h=200&fit=crop" },
+  { name: "Olive Oil", emoji: "🫒", image: "https://images.unsplash.com/photo-1474979266404-7eadf1f34f09?w=300&h=200&fit=crop" },
+  { name: "Wine", emoji: "🍷", image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=300&h=200&fit=crop" },
+  { name: "Cheese", emoji: "🧀", image: "https://images.unsplash.com/photo-1452195100486-9cc805987862?w=300&h=200&fit=crop" },
+  { name: "Pasta", emoji: "🍝", image: "https://images.unsplash.com/photo-1551462147-ff29053bfc14?w=300&h=200&fit=crop" },
+  { name: "Cured Meats", emoji: "🥩", image: "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?w=300&h=200&fit=crop" },
+  { name: "Condiments", emoji: "🌿", image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=300&h=200&fit=crop" },
+  { name: "Truffle", emoji: "🍄", image: "https://images.unsplash.com/photo-1504544750208-dc0358e63f7f?w=300&h=200&fit=crop" },
+  { name: "Honey", emoji: "🍯", image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=300&h=200&fit=crop" },
+  { name: "Coffee", emoji: "☕", image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=300&h=200&fit=crop" },
+  { name: "Seafood", emoji: "🐟", image: "https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?w=300&h=200&fit=crop" },
+  { name: "Nuts", emoji: "🥜", image: "https://images.unsplash.com/photo-1536591375323-c45872950e78?w=300&h=200&fit=crop" },
+  { name: "Dolci", emoji: "🍰", image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=300&h=200&fit=crop" },
+  { name: "Rice", emoji: "🌾", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300&h=200&fit=crop" },
+  { name: "Liqueur", emoji: "🍸", image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=300&h=200&fit=crop" }
+]
