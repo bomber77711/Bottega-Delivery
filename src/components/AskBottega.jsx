@@ -38,15 +38,15 @@ export default function AskBottega({ onSelect }) {
         return r.name.toLowerCase().includes(q) || r.featuredProducts.some(function(p) { return p.toLowerCase().includes(q); });
       })
       .slice(0, 3).map(function(entry) {
-        return { type: 'Region', icon: 'ðºï¸', label: entry[1].name, sub: entry[1].featuredProducts.slice(0, 2).join(' Â· '), id: entry[0] };
+        return { type: 'Region', icon: '🗺️', label: entry[1].name, sub: entry[1].featuredProducts.slice(0, 2).join(' · '), id: entry[0] };
       });
     var recipeMatches = (recipesData || [])
       .filter(function(r) { return r.name?.toLowerCase().includes(q) || r.description?.toLowerCase().includes(q); })
-      .slice(0, 2).map(function(r) { return { type: 'Recipe', icon: 'ð', label: r.name, sub: r.regionName || '', id: r.id }; });
+      .slice(0, 2).map(function(r) { return { type: 'Recipe', icon: '🍝', label: r.name, sub: r.regionName || '', id: r.id }; });
     var producerMatches = Object.values(regionData)
       .flatMap(function(r) { return r.producers || []; })
       .filter(function(p) { return p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q); })
-      .slice(0, 2).map(function(p) { return { type: 'Producer', icon: 'ð¨âð¾', label: p.name, sub: p.city + ' Â· ' + p.category }; });
+      .slice(0, 2).map(function(p) { return { type: 'Producer', icon: '👨‍🌾', label: p.name, sub: p.city + ' · ' + p.category }; });
     setResults([].concat(regionMatches, recipeMatches, producerMatches));
   };
 
@@ -73,7 +73,7 @@ export default function AskBottega({ onSelect }) {
         setChatMessages(function(prev) { return prev.concat([{ role: 'assistant', content: 'Mi dispiace, something went wrong. Try again?' }]); });
       }
     } catch (err) {
-      setChatMessages(function(prev) { return prev.concat([{ role: 'assistant', content: 'Connection error â please try again.' }]); });
+      setChatMessages(function(prev) { return prev.concat([{ role: 'assistant', content: 'Connection error — please try again.' }]); });
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +98,7 @@ export default function AskBottega({ onSelect }) {
   return (
     <div style={{ position: 'relative', width: '100%', maxWidth: 480 }}>
 
-      {/* ââ Search Input ââ */}
+      {/* ── Search Input ── */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 10,
         padding: '10px 16px',
@@ -125,7 +125,7 @@ export default function AskBottega({ onSelect }) {
           onFocus={function() { setFocused(true); }}
           onBlur={function() { if (!showChat) setTimeout(function() { setFocused(false); }, 150); }}
           onKeyDown={handleKeyDown}
-          placeholder={showChat ? "Ask a follow-upâ¦" : "Ask Bottega about Italian foodâ¦"}
+          placeholder={showChat ? "Ask a follow-up…" : "Ask Bottega about Italian food…"}
           style={{
             border: 'none', outline: 'none', fontSize: 13, flex: 1,
             fontFamily: "'DM Sans',sans-serif", background: 'transparent',
@@ -146,7 +146,7 @@ export default function AskBottega({ onSelect }) {
         )}
       </div>
 
-      {/* ââ Local Search Results (when NOT in chat mode) ââ */}
+      {/* ── Local Search Results (when NOT in chat mode) ── */}
       {!showChat && focused && (results.length > 0 || !query) && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 8, zIndex: 300,
@@ -162,13 +162,13 @@ export default function AskBottega({ onSelect }) {
                     style={{ width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#555', transition: 'all 0.1s' }}
                     onMouseEnter={function(e) { e.currentTarget.style.background = '#F0F7EE'; e.currentTarget.style.color = '#2E7D32'; }}
                     onMouseLeave={function(e) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#555'; }}>
-                    â¦ {s}
+                    ✦ {s}
                   </button>
                 );
               })}
               <div style={{ borderTop: '1px solid #f0f0f0', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Sparkles size={10} color="#4CAF50" />
-                <span style={{ fontSize: 10, color: '#aaa' }}>Powered by Claude AI Â· Press Enter to ask</span>
+                <span style={{ fontSize: 10, color: '#aaa' }}>Powered by Claude AI · Press Enter to ask</span>
               </div>
             </>
           )}
@@ -190,7 +190,7 @@ export default function AskBottega({ onSelect }) {
         </div>
       )}
 
-      {/* ââ AI Chat Panel ââ */}
+      {/* ── AI Chat Panel ── */}
       {showChat && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 300,
@@ -273,7 +273,7 @@ export default function AskBottega({ onSelect }) {
                     );
                   })}
                 </span>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono',monospace" }}>thinkingâ¦</span>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono',monospace" }}>thinking…</span>
               </div>
             )}
           </div>

@@ -8,16 +8,16 @@ const buildDiscoveries = () => {
   const discoveries = [];
   // Regions
   Object.entries(regionData).forEach(([id, r]) => {
-    discoveries.push({ type: 'Region', icon: '🗺️', title: r.name, sub: `${r.producerCount} producers · ${r.featuredProducts[0]}`, href: '/ExploreMap', badge: '📍 Region Discovery', badgeColor: '#2E7D32' });
+    discoveries.push({ type: 'Region', icon: '=', title: r.name, sub: `${r.producerCount} producers � ${r.featuredProducts[0]}`, href: '/ExploreMap', badge: '= Region Discovery', badgeColor: '#2E7D32' });
   });
   // Recipes
   recipesData.forEach(r => {
-    discoveries.push({ type: 'Recipe', icon: '🍝', title: r.name, sub: `${r.regionName} · ${r.cookTime}`, href: `/recipes/${r.id}`, badge: '🍝 Recipe of the Moment', badgeColor: '#E65100' });
+    discoveries.push({ type: 'Recipe', icon: '<', title: r.name, sub: `${r.regionName} � ${r.cookTime}`, href: `/recipes/${r.id}`, badge: '< Recipe of the Moment', badgeColor: '#E65100' });
   });
   // Producers
   Object.values(regionData).forEach(r => {
     r.producers?.forEach(p => {
-      discoveries.push({ type: 'Producer', icon: '👨‍🌾', title: p.name, sub: `${p.city} · ${p.category} · ★${p.rating}`, href: '/Producers', badge: '👨‍🌾 Producer Spotlight', badgeColor: '#2E7D32' });
+      discoveries.push({ type: 'Producer', icon: '=<', title: p.name, sub: `${p.city} � ${p.category} � ${p.rating}`, href: '/Producers', badge: '=< Producer Spotlight', badgeColor: '#2E7D32' });
     });
   });
   return discoveries;
@@ -66,7 +66,7 @@ export default function DiscoveryFloat() {
           onMouseEnter={e => { e.currentTarget.style.background = '#2E7D32'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(46,125,50,0.4)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = '#1A1A1A'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4)'; }}>
           <Sparkles size={14} color="#4CAF50" />
-          ✦ Discover
+          & Discover
         </button>
       )}
 
@@ -119,7 +119,7 @@ export default function DiscoveryFloat() {
               }}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}>
-                Next →
+                Next �
               </button>
             </div>
           </div>
