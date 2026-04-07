@@ -8,22 +8,22 @@ import { creatorsData } from './creatorsData';
 const allResults = [
   // Regions
   ...Object.entries(regionData).map(([id, r]) => ({
-    type: 'Region', icon: '=', label: r.name, sub: `${r.producerCount} producers � ${r.experienceCount} experiences`,
+    type: 'Region', icon: '🗺️', label: r.name, sub: `${r.producerCount} producers · ${r.experienceCount} experiences`,
     href: `/ExploreMap`, color: '#2E7D32'
   })),
   // Recipes
   ...recipesData.map(r => ({
-    type: 'Recipe', icon: '<', label: r.name, sub: `${r.regionName} � ${r.cookTime}`,
+    type: 'Recipe', icon: '🍝', label: r.name, sub: `${r.regionName} · ${r.cookTime}`,
     href: `/recipes/${r.id}`, color: '#E65100'
   })),
   // Producers (sample)
   ...Object.values(regionData).flatMap(r => r.producers.map(p => ({
-    type: 'Producer', icon: '=<', label: p.name, sub: `${p.city} � ${p.category}`,
+    type: 'Producer', icon: '👨‍🌾', label: p.name, sub: `${p.city} · ${p.category}`,
     href: `/Producers`, color: '#2E7D32'
   }))),
   // Creators
   ...creatorsData.map(c => ({
-    type: 'Chef', icon: '=<', label: c.name, sub: c.title,
+    type: 'Chef', icon: '👨‍🍳', label: c.name, sub: c.title,
     href: `/Discover`, color: '#1565C0'
   })),
 ];
@@ -83,7 +83,7 @@ export default function CommandBar({ isOpen, onClose }) {
             ref={inputRef}
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search regions, recipes, producers, chefs&"
+            placeholder="Search regions, recipes, producers, chefs…"
             style={{
               flex: 1, border: 'none', background: 'none', outline: 'none',
               fontSize: 16, color: '#fff', fontFamily: "'DM Sans',sans-serif"
@@ -137,7 +137,7 @@ export default function CommandBar({ isOpen, onClose }) {
 
         {/* Footer */}
         <div style={{ padding: '10px 20px', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 16 }}>
-          {['= Regions', '< Recipes', '=< Producers'].map(label => (
+          {['🗺️ Regions', '🍝 Recipes', '👨‍🌾 Producers'].map(label => (
             <span key={label} style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', gap: 4 }}>{label}</span>
           ))}
         </div>

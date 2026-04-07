@@ -36,10 +36,10 @@ export default function FoodConnections({ nodes = [], edges = [], title = 'Food 
     <div style={{ background: '#F0F7EE', borderRadius: 12, padding: '20px 24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: collapsed ? 0 : 16 }}>
         <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, fontWeight: 700, color: '#1A1A1A' }}>
-          = {title}
+          🔗 {title}
         </h3>
         <button onClick={() => setCollapsed(c => !c)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#888', fontWeight: 600 }}>
-          {collapsed ? 'Show �' : 'Hide �'}
+          {collapsed ? 'Show ▾' : 'Hide ▴'}
         </button>
       </div>
       {!collapsed && (
@@ -57,7 +57,7 @@ export default function FoodConnections({ nodes = [], edges = [], title = 'Food 
               const isHov = hovered === n.id;
               const label = n.label || n.id;
               const maxLen = 18;
-              const displayLabel = label.length > maxLen ? label.slice(0, maxLen - 1) + '&' : label;
+              const displayLabel = label.length > maxLen ? label.slice(0, maxLen - 1) + '…' : label;
               const pillW = Math.max(displayLabel.length * 6.5 + 20, 70);
               const pillH = 26;
               return (
