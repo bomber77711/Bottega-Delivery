@@ -71,7 +71,7 @@ export default function Checkout() {
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <div style={{ fontSize: 64, marginBottom: 24, opacity: 0.3 }}>ð</div>
+        <div style={{ fontSize: 64, marginBottom: 24, opacity: 0.3 }}>🛒</div>
         <h1 style={{
           fontFamily: "'Playfair Display',serif",
           fontSize: 32,
@@ -296,7 +296,7 @@ export default function Checkout() {
                           fontWeight: 700,
                           color: '#1A1A1A'
                         }}>
-                          â¬{(item.price * item.quantity).toFixed(2)}
+                          €{(item.price * item.quantity).toFixed(2)}
                         </span>
                         <button onClick={() => removeItem(item.id)} style={{
                           background: 'none',
@@ -333,7 +333,7 @@ export default function Checkout() {
                     fontSize: 15,
                     fontWeight: 600,
                     color: '#1A1A1A'
-                  }}>â¬{total.toFixed(2)}</span>
+                  }}>€{total.toFixed(2)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#666', fontSize: 14 }}>
@@ -345,7 +345,7 @@ export default function Checkout() {
                     fontWeight: 600,
                     color: shippingCost === 0 ? '#2E7D32' : '#1A1A1A'
                   }}>
-                    {shippingCost === 0 ? 'FREE' : `â¬${shippingCost.toFixed(2)}`}
+                    {shippingCost === 0 ? 'FREE' : `€${shippingCost.toFixed(2)}`}
                   </span>
                 </div>
               </div>
@@ -362,7 +362,7 @@ export default function Checkout() {
                   fontSize: 24,
                   fontWeight: 700,
                   color: '#2E7D32'
-                }}>â¬{finalTotal.toFixed(2)}</span>
+                }}>€{finalTotal.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -544,7 +544,7 @@ export default function Checkout() {
                     fontWeight: 600,
                     color: total >= 75 ? '#2E7D32' : '#1A1A1A'
                   }}>
-                    {total >= 75 ? 'FREE' : 'â¬9.90'}
+                    {total >= 75 ? 'FREE' : '€9.90'}
                   </span>
                 </label>
 
@@ -575,7 +575,7 @@ export default function Checkout() {
                     fontWeight: 600,
                     color: '#1A1A1A'
                   }}>
-                    â¬14.90
+                    €14.90
                   </span>
                 </label>
               </div>
