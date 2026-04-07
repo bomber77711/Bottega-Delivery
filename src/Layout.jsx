@@ -174,9 +174,16 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
       <NavContent currentPageName={currentPageName} />
-      <div style={{ paddingTop: 60, height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {children}
-      </div>
+      {(() => {
+        // Fixed-viewport pages (interactive maps) need height:100vh + overflow:hidden.
+        // Content pages (Checkout, About, lists, details) must scroll.
+        const fixedViewportPages = new Set(['Home', 'ExploreMap', 'TasteMap']);
+        const isFixed = fixedViewportPages.has(currentPageName);
+        const wrapperStyle = isFixed
+          ? { paddingTop: 60, height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }
+          : { paddingTop: 60, minHeight: '100vh', display: 'flex', flexDirection: 'column' };
+        return <div style={wrapperStyle}>{children}</div>;
+      })()}
       <DiscoveryFloat />
     </CartProvider>
   );
