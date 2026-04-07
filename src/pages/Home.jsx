@@ -442,11 +442,13 @@ export default function Home() {
             activeJourney={activeJourney}
           />
 
-          {/* ── Floating search bar ── */}
-          <div st{/* ── Floating search bar / Ask Bottega AI ── */}
+          {/* ── Floating search bar / Ask Bottega AI ── */}
           <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 200, width: 420, maxWidth: 'calc(100% - 48px)' }}>
             <AskBottega onSelect={handleSearchSelect} />
-          </div>v style={{ position: 'absolute', top: 52, left: 16, zIndex: 200, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(6,13,6,0.75)', backdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 11px', border: '1px solid rgba(76,175,80,0.2)' }}>
+          </div>
+
+          {/* ── Food Layers ── */}
+          <div style={{ position: 'absolute', top: 52, left: 16, zIndex: 200, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(6,13,6,0.75)', backdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 11px', border: '1px solid rgba(76,175,80,0.2)' }}>
             <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 3 }}>Explore by</span>
             {MAP_LAYERS.map(layer => (
               <button key={layer.id} onClick={() => setActiveLayer(layer.id)} style={{
