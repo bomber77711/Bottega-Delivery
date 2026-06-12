@@ -4,9 +4,9 @@
 export const gastronomySpots = {
   // Toscana: ~3.5° wide, ~2.5° tall
   toscana: [
-    { emoji: '🫒', label: 'Olio EVO',           type: 'ingredient', offset: [-1.4,  0.8] },
+    { emoji: '🫒', label: 'Olio EVO',           to: '/ingredients/olio-extra-vergine', type: 'ingredient', offset: [-1.4,  0.8] },
     { emoji: '🍷', label: 'Chianti',             type: 'wine',       offset: [ 0.3, -0.9] },
-    { emoji: '🧀', label: 'Pecorino',            type: 'ingredient', offset: [ 1.2,  0.5] },
+    { emoji: '🧀', label: 'Pecorino',            to: '/ingredients/pecorino-toscano', type: 'ingredient', offset: [ 1.2,  0.5] },
     { emoji: '🌿', label: 'Truffle',             type: 'ingredient', offset: [-0.6, -0.7] },
     { emoji: '👨‍🌾', label: 'Frantoio Franci',   type: 'producer',   offset: [-1.2,  0.2] },
     { emoji: '👨‍🌾', label: 'Cantina Rossi',     type: 'producer',   offset: [ 0.8,  0.9] },
@@ -15,10 +15,10 @@ export const gastronomySpots = {
   ],
   // Emilia-Romagna: ~4° wide, ~1.5° tall
   emilia_romagna: [
-    { emoji: '🧀', label: 'Parmigiano',          type: 'ingredient', offset: [-1.5,  0.4] },
-    { emoji: '🥩', label: 'Prosciutto',          type: 'ingredient', offset: [ 1.6, -0.2] },
+    { emoji: '🧀', label: 'Parmigiano',          type: 'ingredient', to: '/ingredients/parmigiano-reggiano', offset: [-1.5,  0.4] },
+    { emoji: '🥩', label: 'Prosciutto',          to: '/ingredients/prosciutto-di-parma', type: 'ingredient', offset: [ 1.6, -0.2] },
     { emoji: '🍝', label: 'Tortellini',          type: 'dish',       offset: [ 0.4, -0.6] },
-    { emoji: '🫙', label: 'Balsamic',            type: 'ingredient', offset: [-0.3,  0.6] },
+    { emoji: '🫙', label: 'Balsamic',            to: '/ingredients/aceto-balsamico', type: 'ingredient', offset: [-0.3,  0.6] },
     { emoji: '👨‍🌾', label: 'Acetaia Malpighi',  type: 'producer',   offset: [ 0.7,  0.3] },
     { emoji: '👨‍🌾', label: 'Caseificio Gennari', type: 'producer',  offset: [-1.8,  0.1] },
     { emoji: '🍾', label: 'Lambrusco',           type: 'wine',       offset: [-0.8, -0.5] },
@@ -26,10 +26,10 @@ export const gastronomySpots = {
   ],
   // Lombardia: ~3.5° wide, ~2° tall
   lombardia: [
-    { emoji: '🧀', label: 'Grana Padano',        type: 'ingredient', offset: [-1.2,  0.5] },
-    { emoji: '🥩', label: 'Bresaola',            type: 'ingredient', offset: [ 1.0, -0.8] },
+    { emoji: '🧀', label: 'Grana Padano',        to: '/ingredients/grana-padano', type: 'ingredient', offset: [-1.2,  0.5] },
+    { emoji: '🥩', label: 'Bresaola',            to: '/ingredients/bresaola', type: 'ingredient', offset: [ 1.0, -0.8] },
     { emoji: '🍾', label: 'Franciacorta',        type: 'wine',       offset: [-0.3, -0.5] },
-    { emoji: '🍚', label: 'Risotto',             type: 'dish',       offset: [ 0.6,  0.7] },
+    { emoji: '🍚', label: 'Risotto',             type: 'dish',       to: '/recipes/risotto-milanese', offset: [ 0.6,  0.7] },
     { emoji: '👨‍🌾', label: 'Salumificio Valtellina', type: 'producer', offset: [ 1.4,  0.3] },
     { emoji: '👨‍🌾', label: 'Cantina Berlucchi', type: 'producer',   offset: [-0.8,  0.8] },
     { emoji: '🍫', label: 'Torrone Cremona',     type: 'ingredient', offset: [ 0.2, -0.2] },
@@ -39,19 +39,19 @@ export const gastronomySpots = {
   sicilia: [
     { emoji: '🍋', label: 'Citrus',              type: 'ingredient', offset: [-1.6,  0.5] },
     { emoji: '🍷', label: 'Marsala',             type: 'wine',       offset: [-1.8, -0.3] },
-    { emoji: '🌿', label: 'Pistachio',           type: 'ingredient', offset: [ 1.5,  0.4] },
+    { emoji: '🌿', label: 'Pistachio',           to: '/ingredients/pistacchio-di-bronte', type: 'ingredient', offset: [ 1.5,  0.4] },
     { emoji: '🐟', label: 'Pesce Spada',         type: 'ingredient', offset: [ 0.2, -0.7] },
     { emoji: '👨‍🌾', label: 'Pistacchi Bronte',  type: 'producer',   offset: [ 1.2, -0.2] },
-    { emoji: '👨‍🌾', label: 'Cioccolato Bonajuto', type: 'producer', offset: [ 0.8,  0.6] },
-    { emoji: '🍝', label: 'Pasta alla Norma',    type: 'dish',       offset: [-0.3,  0.7] },
+    { emoji: '👨‍🌾', label: 'Cioccolato Bonajuto', name: 'Cioccolato Modica Bonajuto', type: 'producer', offset: [ 0.8,  0.6] },
+    { emoji: '🍝', label: 'Pasta alla Norma',    type: 'dish',       to: '/recipes/pasta-alla-norma', offset: [-0.3,  0.7] },
     { emoji: '🗺️', label: 'Etna Harvest',        type: 'experience', offset: [-0.8, -0.6] },
   ],
   // Campania: ~2.5° wide, ~2° tall
   campania: [
-    { emoji: '🍕', label: 'Pizza',               type: 'dish',       offset: [-0.5,  0.7] },
-    { emoji: '🧀', label: 'Mozzarella',          type: 'ingredient', offset: [ 0.8, -0.5] },
-    { emoji: '🍅', label: 'San Marzano',         type: 'ingredient', offset: [-0.9, -0.6] },
-    { emoji: '🍋', label: 'Limoncello',          type: 'ingredient', offset: [ 0.9,  0.5] },
+    { emoji: '🍕', label: 'Pizza',               to: '/recipes/pizza-margherita', type: 'dish',       offset: [-0.5,  0.7] },
+    { emoji: '🧀', label: 'Mozzarella',          to: '/ingredients/mozzarella-di-bufala', type: 'ingredient', offset: [ 0.8, -0.5] },
+    { emoji: '🍅', label: 'San Marzano',         type: 'ingredient', to: '/ingredients/san-marzano', offset: [-0.9, -0.6] },
+    { emoji: '🍋', label: 'Limoncello',          to: '/ingredients/limoncello', type: 'ingredient', offset: [ 0.9,  0.5] },
     { emoji: '👨‍🌾', label: 'Caseificio Vannulo', type: 'producer',  offset: [-0.2,  0.9] },
     { emoji: '👨‍🌾', label: 'Gustarosso',        type: 'producer',   offset: [ 0.6,  0.1] },
     { emoji: '🫙', label: 'Colatura Alici',      type: 'ingredient', offset: [ 1.0, -0.8] },
@@ -60,7 +60,7 @@ export const gastronomySpots = {
   // Veneto: ~3° wide, ~1.5° tall
   veneto: [
     { emoji: '🍾', label: 'Prosecco',            type: 'wine',       offset: [ 1.0,  0.4] },
-    { emoji: '🧀', label: 'Asiago',              type: 'ingredient', offset: [-0.5, -0.6] },
+    { emoji: '🧀', label: 'Asiago',              to: '/ingredients/asiago', type: 'ingredient', offset: [-0.5, -0.6] },
     { emoji: '🍷', label: 'Amarone',             type: 'wine',       offset: [-0.8,  0.3] },
     { emoji: '🍚', label: 'Risotto Veneto',      type: 'dish',       offset: [ 0.3, -0.5] },
     { emoji: '👨‍🌾', label: 'Cantina Bisol',     type: 'producer',   offset: [ 1.2,  0.6] },
@@ -71,8 +71,8 @@ export const gastronomySpots = {
   // Piemonte: ~3° wide, ~2.5° tall
   piemonte: [
     { emoji: '🍷', label: 'Barolo',              type: 'wine',       offset: [-0.8,  0.8] },
-    { emoji: '🌿', label: 'Truffle',             type: 'ingredient', offset: [ 0.9, -0.6] },
-    { emoji: '🍫', label: 'Gianduiotto',         type: 'ingredient', offset: [-0.3, -0.9] },
+    { emoji: '🌿', label: 'Truffle',             type: 'ingredient', to: '/ingredients/tartufo-bianco', offset: [ 0.9, -0.6] },
+    { emoji: '🍫', label: 'Gianduiotto',         to: '/ingredients/gianduiotto', type: 'ingredient', offset: [-0.3, -0.9] },
     { emoji: '🍷', label: 'Barbaresco',          type: 'wine',       offset: [ 1.1,  0.5] },
     { emoji: '👨‍🌾', label: 'Giacomo Conterno',  type: 'producer',   offset: [-1.2, -0.2] },
     { emoji: '👨‍🌾', label: 'Tartufi Morra',     type: 'producer',   offset: [ 0.2,  1.0] },
@@ -82,7 +82,7 @@ export const gastronomySpots = {
   // Puglia: ~1.5° wide, ~4° tall
   puglia: [
     { emoji: '🫒', label: 'Olive Oil',           type: 'ingredient', offset: [-0.5,  1.5] },
-    { emoji: '🧀', label: 'Burrata',             type: 'ingredient', offset: [ 0.5,  0.8] },
+    { emoji: '🧀', label: 'Burrata',             to: '/ingredients/burrata', type: 'ingredient', offset: [ 0.5,  0.8] },
     { emoji: '🍝', label: 'Orecchiette',         type: 'dish',       offset: [ 0.3, -0.5] },
     { emoji: '🍷', label: 'Primitivo',           type: 'wine',       offset: [-0.4, -1.5] },
     { emoji: '👨‍🌾', label: 'Frantoio Muraglia', type: 'producer',   offset: [-0.6,  0.3] },
@@ -92,8 +92,8 @@ export const gastronomySpots = {
   ],
   // Lazio: ~2° wide, ~2° tall
   lazio: [
-    { emoji: '🍝', label: 'Carbonara',           type: 'dish',       offset: [-0.7,  0.6] },
-    { emoji: '🧀', label: 'Pecorino Romano',     type: 'ingredient', offset: [ 0.7, -0.5] },
+    { emoji: '🍝', label: 'Carbonara',           to: '/recipes/carbonara', type: 'dish',       offset: [-0.7,  0.6] },
+    { emoji: '🧀', label: 'Pecorino Romano',     type: 'ingredient', to: '/ingredients/pecorino-romano', offset: [ 0.7, -0.5] },
     { emoji: '🍷', label: 'Frascati',            type: 'wine',       offset: [ 0.5,  0.7] },
     { emoji: '🌿', label: 'Artichoke',           type: 'ingredient', offset: [-0.8, -0.7] },
     { emoji: '👨‍🌾', label: 'Caseificio Salvo',  type: 'producer',   offset: [-0.3,  0.8] },
@@ -105,7 +105,7 @@ export const gastronomySpots = {
   sardegna: [
     { emoji: '🧀', label: 'Pecorino Sardo',      type: 'ingredient', offset: [-0.6,  1.5] },
     { emoji: '🍷', label: 'Cannonau',            type: 'wine',       offset: [ 0.5,  0.5] },
-    { emoji: '🐟', label: 'Bottarga',            type: 'ingredient', offset: [-0.7, -0.8] },
+    { emoji: '🐟', label: 'Bottarga',            to: '/ingredients/bottarga', type: 'ingredient', offset: [-0.7, -0.8] },
     { emoji: '🥃', label: 'Mirto',               type: 'ingredient', offset: [ 0.6, -1.5] },
     { emoji: '👨‍🌾', label: 'Cantina Argiolas',  type: 'producer',   offset: [ 0.4,  1.2] },
     { emoji: '👨‍🌾', label: 'Formaggi Argiolas', type: 'producer',   offset: [-0.5, -0.2] },
@@ -114,7 +114,7 @@ export const gastronomySpots = {
   ],
   // Liguria: ~2.5° wide, ~0.6° tall — very horizontal
   liguria: [
-    { emoji: '🌿', label: 'Pesto',               type: 'ingredient', offset: [-0.5,  0.2] },
+    { emoji: '🌿', label: 'Pesto',               type: 'ingredient', to: '/ingredients/pesto-genovese', offset: [-0.5,  0.2] },
     { emoji: '🫒', label: 'Taggiasca',           type: 'ingredient', offset: [ 0.9, -0.1] },
     { emoji: '🍞', label: 'Focaccia',            type: 'dish',       offset: [-1.0, -0.2] },
     { emoji: '🐟', label: 'Acciughe',            type: 'ingredient', offset: [ 0.2,  0.2] },
@@ -125,7 +125,7 @@ export const gastronomySpots = {
   ],
   // Calabria: ~1.5° wide, ~3.5° tall
   calabria: [
-    { emoji: '🌶️', label: 'Nduja',              type: 'ingredient', offset: [-0.5,  1.2] },
+    { emoji: '🌶️', label: 'Nduja',              to: '/ingredients/nduja', type: 'ingredient', offset: [-0.5,  1.2] },
     { emoji: '🍋', label: 'Bergamot',            type: 'ingredient', offset: [ 0.4, -1.0] },
     { emoji: '🐟', label: 'Tonno Callipo',       type: 'ingredient', offset: [-0.6, -0.3] },
     { emoji: '🧅', label: 'Cipolla Tropea',      type: 'ingredient', offset: [ 0.5,  0.6] },
@@ -147,7 +147,7 @@ export const gastronomySpots = {
   ],
   // Abruzzo: ~2° wide, ~1.5° tall
   abruzzo: [
-    { emoji: '🌿', label: 'Saffron',             type: 'ingredient', offset: [-0.6,  0.5] },
+    { emoji: '🌿', label: 'Saffron',             to: '/ingredients/zafferano', type: 'ingredient', offset: [-0.6,  0.5] },
     { emoji: '🍷', label: 'Montepulciano',       type: 'wine',       offset: [ 0.7, -0.4] },
     { emoji: '🥩', label: 'Arrosticini',         type: 'dish',       offset: [-0.7, -0.5] },
     { emoji: '🍝', label: 'Pasta Chitarra',      type: 'dish',       offset: [ 0.6,  0.5] },
@@ -169,7 +169,7 @@ export const gastronomySpots = {
   ],
   // Trentino-Alto Adige: ~1.5° wide, ~1.5° tall
   trentino_alto_adige: [
-    { emoji: '🥩', label: 'Speck',               type: 'ingredient', offset: [-0.4,  0.5] },
+    { emoji: '🥩', label: 'Speck',               to: '/ingredients/speck-alto-adige', type: 'ingredient', offset: [-0.4,  0.5] },
     { emoji: '🍎', label: 'Mela DOP',            type: 'ingredient', offset: [ 0.5, -0.4] },
     { emoji: '🍷', label: 'Pinot Grigio',        type: 'wine',       offset: [-0.5, -0.4] },
     { emoji: '🧀', label: 'Stelvio DOP',         type: 'ingredient', offset: [ 0.4,  0.5] },
@@ -213,11 +213,11 @@ export const gastronomySpots = {
   ],
   // Valle d'Aosta: ~1° wide, ~0.8° tall — tiny region
   valle_daosta: [
-    { emoji: '🧀', label: 'Fontina',             type: 'ingredient', offset: [-0.3,  0.3] },
+    { emoji: '🧀', label: 'Fontina',             to: '/ingredients/fontina', type: 'ingredient', offset: [-0.3,  0.3] },
     { emoji: '🥃', label: 'Genepì',              type: 'ingredient', offset: [ 0.3, -0.2] },
     { emoji: '🥩', label: "Lard d'Arnad",        type: 'ingredient', offset: [-0.3, -0.2] },
     { emoji: '🍷', label: 'Donnas DOC',          type: 'wine',       offset: [ 0.3,  0.2] },
-    { emoji: '👨‍🌾', label: 'Coop Fontina',       type: 'producer',  offset: [-0.2,  0.1] },
+    { emoji: '👨‍🌾', label: 'Coop Fontina',       name: 'Cooperativa Produttori Fontina', type: 'producer',  offset: [-0.2,  0.1] },
     { emoji: '👨‍🌾', label: 'Maison Bertolin',    type: 'producer',  offset: [ 0.2,  0.3] },
     { emoji: '🫙', label: 'Fonduta',             type: 'dish',       offset: [ 0.1, -0.3] },
     { emoji: '🗺️', label: 'Alpine Dairy Tour',   type: 'experience', offset: [-0.1,  0.2] },
