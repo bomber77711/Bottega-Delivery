@@ -288,7 +288,6 @@ export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlRegion = searchParams.get('region');
   const selectedRegion = urlRegion && regionData[urlRegion] ? urlRegion : null;
-  const [selectedSpot, setSelectedSpot] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [cardIdx, setCardIdx] = useState(0);
   const [activeLayer, setActiveLayer] = useState('all');
@@ -310,28 +309,22 @@ export default function Home() {
     }, { replace: hadRegion });
   }, [setSearchParams]);
 
-  // A selected spot always belongs to the selected region.
-  useEffect(() => {
-    if (selectedSpot && selectedSpot.regionId !== selectedRegion) setSelectedSpot(null);
-  }, [selectedRegion, selectedSpot]);
-
   useEffect(() => {
     const t = setInterval(() => setCardIdx(i => (i + 1) % extendedDiscovery.length), 8000);
     return () => clearInterval(t);
   }, []);
 
-  // Escape peels back one layer at a time: spot card → region → journey → fullscreen
+  // Escape peels back one layer at a time: region → journey → fullscreen
   useEffect(() => {
     const handler = (e) => {
       if (e.key !== 'Escape') return;
-      if (selectedSpot) setSelectedSpot(null);
-      else if (selectedRegion) selectRegion(null);
+      if (selectedRegion) selectRegion(null);
       else if (activeJourney) setActiveJourney(null);
       else if (isFullscreen) setIsFullscreen(false);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [isFullscreen, selectedRegion, selectedSpot, activeJourney, selectRegion]);
+  }, [isFullscreen, selectedRegion, activeJourney, selectRegion]);
 
   const handleSearchSelect = useCallback((r) => {
     if (r.type === 'Region' && r.id) selectRegion(r.id);
@@ -383,8 +376,6 @@ export default function Home() {
               onRegionSelect={selectRegion}
               activeLayer={activeLayer}
               activeJourney={activeJourney}
-              selectedSpot={selectedSpot}
-              onSpotSelect={setSelectedSpot}
               insets={mapInsets}
             />
           </div>
@@ -444,7 +435,7 @@ export default function Home() {
           )}
 
           {/* Selected region chip + back control */}
-          {selectedRegion && !(compact && selectedSpot) && (
+          {selectedRegion && (
             <button onClick={() => selectRegion(null)} style={{ position: 'absolute', top: compact ? 112 : 116, left: compact ? 12 : 16, zIndex: 210, display: 'flex', alignItems: 'center', gap: 7, padding: '6px 14px', borderRadius: 100, background: 'rgba(6,13,6,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(76,175,80,0.45)', cursor: 'pointer', color: '#fff', animation: 'fadeSlideIn 0.2s ease' }}>
               <span style={{ fontSize: 12 }}>←</span>
               <span style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12, fontWeight: 600 }}>All of Italy</span>
@@ -454,7 +445,7 @@ export default function Home() {
           {/* Hint */}
           {!selectedRegion && !compact && (
             <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 10, pointerEvents: 'none' }}>
-              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', margin: 0 }}>Hover a region · Click to zoom · Click a marker for details</p>
+              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', margin: 0 }}>Click a region to zoom in · then click any icon</p>
             </div>
           )}
           {!selectedRegion && compact && (

@@ -2,7 +2,6 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import { useNavigate } from 'react-router-dom';
 import { geoMercator, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
-import { X, ArrowRight } from 'lucide-react';
 import topology from './map/italy-regions.topo.json';
 import { regionData, regionCentroids } from './regionData';
 import { gastronomySpots } from './gastronomySpots';
@@ -61,6 +60,11 @@ const LAYER_TYPE_MAP = {
   wines: ['wine'],
   experiences: ['experience'],
 };
+
+// Each marker's single click-through destination, resolved once against the catalogue.
+const SPOT_DESTINATIONS = Object.fromEntries(
+  Object.entries(gastronomySpots).map(([regionId, spots]) => [regionId, spots.map((s) => resolveSpot(s, regionId).primary)]),
+);
 
 const MARKER = { national: 17, zoomed: 34, zoomedCompact: 28 };
 const ZOOM_MS = 650;
@@ -134,8 +138,6 @@ export default function ItalyMap({
   onRegionHover,
   activeLayer = 'all',
   activeJourney = null,
-  selectedSpot = null,          // { regionId, index }
-  onSpotSelect,                 // (spotRef | null) => void
   insets = { top: 110, right: 24, bottom: 24, left: 24 }, // screen area hidden by overlays
 }) {
   const containerRef = useRef(null);
@@ -251,9 +253,8 @@ export default function ItalyMap({
   // ── Interaction handlers (stable identities so RegionPath memo holds) ──
   const selectRegion = useCallback((regionId) => {
     if (!regionData[regionId]) return;
-    onSpotSelect?.(null);
     onRegionSelect?.(regionId === selectedRegion ? null : regionId);
-  }, [onRegionSelect, onSpotSelect, selectedRegion]);
+  }, [onRegionSelect, selectedRegion]);
   const selectRef = useRef(selectRegion);
   selectRef.current = selectRegion;
   const stableSelect = useCallback((id) => selectRef.current(id), []);
@@ -267,10 +268,13 @@ export default function ItalyMap({
     onRegionHover?.(null);
   }, [onRegionHover]);
 
+  // One click per step: a marker outside the open region zooms into it; a marker inside the
+  // open region goes straight to its best destination (product, producer, recipe, guide…).
   const activateSpot = useCallback((regionId, index) => {
-    if (regionId !== selectedRegion) onRegionSelect?.(regionId);
-    onSpotSelect?.({ regionId, index });
-  }, [selectedRegion, onRegionSelect, onSpotSelect]);
+    if (regionId !== selectedRegion) { onRegionSelect?.(regionId); return; }
+    const dest = SPOT_DESTINATIONS[regionId]?.[index];
+    if (dest) navigate(dest.to);
+  }, [selectedRegion, onRegionSelect, navigate]);
 
   // Tooltip follows the cursor via direct style writes (no re-render per mousemove)
   const onMouseMove = useCallback((e) => {
@@ -310,18 +314,6 @@ export default function ItalyMap({
     });
   }
 
-  const selectedSpotData = selectedSpot && gastronomySpots[selectedSpot.regionId]?.[selectedSpot.index];
-  const selectedSpotPos = (() => {
-    if (!selectedSpotData) return null;
-    const raw = toScreen(spotReal[selectedSpot.regionId]?.[selectedSpot.index]);
-    const off = zoomOffsets[`${selectedSpot.regionId}-${selectedSpot.index}`] || [0, 0];
-    return raw ? [raw[0] + off[0], raw[1] + off[1]] : null;
-  })();
-  const resolved = useMemo(
-    () => (selectedSpotData ? resolveSpot(selectedSpotData, selectedSpot.regionId) : null),
-    [selectedSpotData, selectedSpot?.regionId],
-  );
-
   const hoverRegion = hover?.kind === 'region' ? regionData[hover.regionId] : null;
   const hoverSpot = hover?.kind === 'spot' ? gastronomySpots[hover.regionId]?.[hover.index] : null;
   const showTooltip = !coarse && ((hoverRegion && !zoomed) || hoverSpot);
@@ -340,7 +332,7 @@ export default function ItalyMap({
         .it-spot:focus { outline: none; }
         .it-spot:focus-visible .it-ring { opacity: 1 !important; }
         .it-spot .it-ring { opacity: 0; transition: opacity .15s ease; pointer-events: none; }
-        .it-spot:hover .it-ring, .it-spot.is-active .it-ring { opacity: 1; }
+        .it-spot:hover .it-ring { opacity: 1; }
         @keyframes itPulse { 0%,100% { opacity: .9 } 50% { opacity: .35 } }
         @keyframes itCardIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
       `}</style>
@@ -354,7 +346,7 @@ export default function ItalyMap({
           style={{ display: 'block' }}
           role="application"
           aria-label="Interactive map of Italian food regions"
-          onClick={() => { if (selectedSpot) onSpotSelect?.(null); else if (selectedRegion) onRegionSelect?.(null); }}
+          onClick={() => { if (selectedRegion) onRegionSelect?.(null); }}
         >
           <defs>
             <pattern id="mapgrid" width="36" height="36" patternUnits="userSpaceOnUse">
@@ -420,12 +412,12 @@ export default function ItalyMap({
           {markers.map(({ regionId, index, spot, pos, isSel, journeyDim, t }) => {
             const size = lerp(MARKER.national, compact ? MARKER.zoomedCompact : MARKER.zoomed, t);
             const cfg = TYPE_CONFIG[spot.type] || TYPE_CONFIG.producer;
-            const active = selectedSpot?.regionId === regionId && selectedSpot?.index === index;
-            const label = `${spot.label} — ${cfg.label}`;
+            const dest = SPOT_DESTINATIONS[regionId]?.[index];
+            const label = isSel && dest ? `${spot.label} — ${dest.label}` : `${spot.label} — ${cfg.label}`;
             return (
               <g
                 key={`${regionId}-${index}`}
-                className={`it-spot${active ? ' is-active' : ''}`}
+                className="it-spot"
                 transform={`translate(${pos[0]} ${pos[1]})`}
                 opacity={journeyDim ? 0.15 : lerp(0.75, 1, t)}
                 style={{ cursor: 'pointer', pointerEvents: markerInteractive ? 'auto' : 'none', transition: 'opacity .2s' }}
@@ -474,7 +466,9 @@ export default function ItalyMap({
                 {TYPE_CONFIG[hoverSpot.type]?.label || 'Gastronomy'} · {regionData[hover.regionId]?.name}
               </span>
               <span style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{hoverSpot.label}</span>
-              <span style={{ fontSize: 10, color: '#888' }}>Click for details</span>
+              <span style={{ fontSize: 11, color: '#2E7D32', fontWeight: 600 }}>
+                {hover.regionId === selectedRegion ? `${SPOT_DESTINATIONS[hover.regionId]?.[hover.index]?.label || 'Open'} →` : `Click to explore ${regionData[hover.regionId]?.name}`}
+              </span>
             </div>
           </div>
         ) : hoverRegion ? (
@@ -487,78 +481,6 @@ export default function ItalyMap({
         ) : null}
       </div>
 
-      {/* Spot detail card */}
-      {selectedSpotData && resolved && (
-        <SpotCard
-          spot={selectedSpotData}
-          regionName={regionData[selectedSpot.regionId]?.name}
-          resolved={resolved}
-          anchor={selectedSpotPos}
-          container={dims}
-          compact={compact}
-          insets={insets}
-          onClose={() => onSpotSelect?.(null)}
-          onNavigate={(to) => navigate(to)}
-        />
-      )}
-    </div>
-  );
-}
-
-// ── Spot card ─────────────────────────────────────────────────────────
-function SpotCard({ spot, regionName, resolved, anchor, container, compact, insets, onClose, onNavigate }) {
-  const cfg = TYPE_CONFIG[spot.type] || TYPE_CONFIG.producer;
-  const W = compact ? Math.min(container.width - 24, 360) : 290;
-
-  let style;
-  if (compact || !anchor) {
-    style = { left: '50%', top: Math.max(insets.top - 4, 12), transform: 'translateX(-50%)', width: W };
-  } else {
-    // to the right of the marker, flipped left if it would collide with the side panel
-    const rightLimit = container.width - insets.right - 12;
-    let x = anchor[0] + 28;
-    if (x + W > rightLimit) x = anchor[0] - 28 - W;
-    x = Math.max(12, x);
-    let y = anchor[1] - 40;
-    y = Math.max(insets.top - 10, Math.min(y, container.height - 260));
-    style = { left: x, top: y, width: W };
-  }
-
-  const [primary, ...rest] = resolved.links;
-
-  return (
-    <div
-      role="dialog"
-      aria-label={`${spot.label} details`}
-      onClick={(e) => e.stopPropagation()}
-      style={{
-        position: 'absolute', zIndex: 420, ...style,
-        background: '#fff', borderRadius: 14, boxShadow: '0 18px 50px rgba(0,0,0,0.38)',
-        overflow: 'hidden', animation: 'itCardIn .18s ease', fontFamily: "'DM Sans',sans-serif",
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '13px 14px 11px', borderBottom: '1px solid #EEF3EE' }}>
-        <span style={{ width: 38, height: 38, borderRadius: '50%', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19, flexShrink: 0 }}>{spot.emoji || cfg.em}</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ margin: 0, fontFamily: "'DM Mono',monospace", fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', color: '#2E7D32' }}>{cfg.label} · {regionName}</p>
-          <p style={{ margin: '2px 0 0', fontFamily: "'Playfair Display',serif", fontSize: 17, fontWeight: 700, color: '#1A1A1A', lineHeight: 1.2 }}>{spot.label}</p>
-        </div>
-        <button onClick={onClose} aria-label="Close" style={{ width: 28, height: 28, borderRadius: '50%', border: 'none', background: '#F2F5F2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <X size={13} color="#555" />
-        </button>
-      </div>
-      <div style={{ padding: '11px 14px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {primary && (
-          <button onClick={() => onNavigate(primary.to)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, width: '100%', padding: '10px 13px', borderRadius: 9, border: 'none', background: '#2E7D32', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
-            <span>{primary.label}</span><ArrowRight size={14} />
-          </button>
-        )}
-        {rest.map((l) => (
-          <button key={l.to} onClick={() => onNavigate(l.to)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, width: '100%', padding: '8px 12px', borderRadius: 9, border: '1px solid #E3EEE3', background: '#F7FAF7', color: '#2E7D32', fontSize: 12, fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}>
-            <span>{l.label}</span><ArrowRight size={12} />
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
