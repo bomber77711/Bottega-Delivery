@@ -1,6 +1,8 @@
-import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { recipesData, recipeCategories } from '../components/recipesData';
+import { useState, useMemo, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { searchRecipes } from '@/lib/catalog';
+import { regionData } from '../components/regionData';
+import { recipeCategories } from '../components/recipesData';
 import { creatorsData } from '../components/creatorsData';
 import { isSaved, toggleSave } from '../components/tasteMapStore';
 import { Search, Clock, Heart, ChefHat } from 'lucide-react';
@@ -74,17 +76,16 @@ function RecipeCard({ recipe }) {
 }
 
 export default function Recipes() {
-  const [search, setSearch] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('q') || '');
+  const regionFilter = searchParams.get('region') || '';
+  // Deep links from the map (/Recipes?q=tortellini) pre-fill the search
+  useEffect(() => { setSearch(searchParams.get('q') || ''); }, [searchParams]);
   const [category, setCategory] = useState('All');
 
   const filtered = useMemo(() =>
-    recipesData.filter(r => {
-      const matchSearch = !search || [r.name, r.regionName, r.description]
-        .some(s => s.toLowerCase().includes(search.toLowerCase()));
-      const matchCat = category === 'All' || r.category === category;
-      return matchSearch && matchCat;
-    }),
-    [search, category]
+    searchRecipes(search, { regionId: regionFilter || undefined }).filter(r => category === 'All' || r.category === category),
+    [search, category, regionFilter]
   );
 
   return (
@@ -127,6 +128,12 @@ export default function Recipes() {
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '36px 32px 64px' }}>
         <p style={{ fontSize: 14, color: '#888', marginBottom: 28 }}>
           <strong style={{ color: '#1A1A1A' }}>{filtered.length}</strong> recipes
+          {regionFilter && (
+            <button onClick={() => { const n = new URLSearchParams(searchParams); n.delete('region'); setSearchParams(n, { replace: true }); }}
+              style={{ marginLeft: 10, padding: '3px 10px', borderRadius: 100, border: '1px solid #FFCCBC', background: '#fff', color: '#E65100', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+              {regionData[regionFilter]?.name || regionFilter} ✕
+            </button>
+          )}
         </p>
         {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0', color: '#bbb' }}>

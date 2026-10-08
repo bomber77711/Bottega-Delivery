@@ -1,67 +1,57 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { geoMercator, geoPath } from 'd3-geo';
+import { feature } from 'topojson-client';
+import topology from './map/italy-regions.topo.json';
 import { regionData, regionCentroids } from './regionData';
 import { gastronomySpots } from './gastronomySpots';
+import { resolveSpot } from '@/lib/catalog';
 
-const GEOJSON_URL = 'https://raw.githubusercontent.com/openpolis/geojson-italy/master/geojson/limits_IT_regions.geojson';
+/*
+ * Interactive Italy map.
+ *
+ * Performance design
+ *  - Region boundaries are a bundled, simplified TopoJSON (~57 KB, ~6k vertices) instead of a
+ *    2.75 MB GeoJSON fetched from GitHub at runtime (71k vertices).
+ *  - SVG path strings are computed once per container size, never on hover.
+ *  - Mouse-follow tooltips are positioned through a ref (no React state per mousemove).
+ *  - Zoom is a single animated transform on the region layer; markers live in an unscaled
+ *    overlay so they keep a constant on-screen size at every zoom level.
+ */
 
-// ISTAT region code (reg_istat_code_num) -> internal region id.
-// Deterministic matching: immune to name spelling, bilingual names and encoding.
+// ── Geography ─────────────────────────────────────────────────────────
 const ISTAT_TO_REGION = {
-  1: 'piemonte',
-  2: 'valle_daosta',
-  3: 'lombardia',
-  4: 'trentino_alto_adige',
-  5: 'veneto',
-  6: 'friuli_venezia_giulia',
-  7: 'liguria',
-  8: 'emilia_romagna',
-  9: 'toscana',
-  10: 'umbria',
-  11: 'marche',
-  12: 'lazio',
-  13: 'abruzzo',
-  14: 'molise',
-  15: 'campania',
-  16: 'puglia',
-  17: 'basilicata',
-  18: 'calabria',
-  19: 'sicilia',
-  20: 'sardegna',
+  1: 'piemonte', 2: 'valle_daosta', 3: 'lombardia', 4: 'trentino_alto_adige', 5: 'veneto',
+  6: 'friuli_venezia_giulia', 7: 'liguria', 8: 'emilia_romagna', 9: 'toscana', 10: 'umbria',
+  11: 'marche', 12: 'lazio', 13: 'abruzzo', 14: 'molise', 15: 'campania', 16: 'puglia',
+  17: 'basilicata', 18: 'calabria', 19: 'sicilia', 20: 'sardegna',
 };
 
-// Name-based fallback in case the GeoJSON source ever drops ISTAT codes.
-const NAME_TO_REGION = {
-  'piemonte': 'piemonte',
-  'lombardia': 'lombardia',
-  'veneto': 'veneto',
-  'liguria': 'liguria',
-  'toscana': 'toscana',
-  'umbria': 'umbria',
-  'marche': 'marche',
-  'lazio': 'lazio',
-  'abruzzo': 'abruzzo',
-  'molise': 'molise',
-  'campania': 'campania',
-  'puglia': 'puglia',
-  'basilicata': 'basilicata',
-  'calabria': 'calabria',
-  'sicilia': 'sicilia',
-  'sardegna': 'sardegna',
-};
+const ITALY = (() => {
+  const fc = feature(topology, topology.objects.regions);
+  fc.features.forEach((f) => { f.properties.regionId = ISTAT_TO_REGION[f.properties.reg_istat_code_num] || ''; });
+  return fc;
+})();
 
-function resolveRegionId(properties) {
-  const code = properties.reg_istat_code_num ?? Number(properties.reg_istat_code);
-  if (code && ISTAT_TO_REGION[code]) return ISTAT_TO_REGION[code];
-  const rawName = (properties.reg_name || properties.NOME_REG || properties.name || '').toLowerCase();
-  if (NAME_TO_REGION[rawName]) return NAME_TO_REGION[rawName];
-  if (rawName.startsWith('valle d')) return 'valle_daosta';
-  if (rawName.startsWith('trentino')) return 'trentino_alto_adige';
-  if (rawName.startsWith('friuli')) return 'friuli_venezia_giulia';
-  if (rawName.startsWith('emilia')) return 'emilia_romagna';
-  return '';
-}
+// ── Visual config (exported so the legend uses the exact same scale) ──
+// The original Bottega palette: subtle dark greens, deliberately low-contrast.
+export const DENSITY_SCALE = [
+  { min: 40, color: '#2D5A2D', label: '40+' },
+  { min: 20, color: '#1E3E1E', label: '20–39' },
+  { min: 10, color: '#183218', label: '10–19' },
+  { min: 0, color: '#132513', label: '<10' },
+];
+const HOVER_FILL = '#2D6A4F';
+const SELECTED_FILL = '#2D6A4F';
+const regionFill = (count) => DENSITY_SCALE.find((b) => count >= b.min).color;
+
+export const TYPE_CONFIG = {
+  producer: { bg: '#5A7A2A', em: '\u{1F33E}', label: 'Producer' },
+  ingredient: { bg: '#2E7D32', em: '\u{1F33F}', label: 'Ingredient' },
+  experience: { bg: '#B8860B', em: '\u{1F3E1}', label: 'Experience' },
+  wine: { bg: '#7B2040', em: '\u{1F377}', label: 'Wine' },
+  dish: { bg: '#C84040', em: '\u{1F37D}\u{FE0F}', label: 'Dish' },
+};
 
 const LAYER_TYPE_MAP = {
   producers: ['producer'],
@@ -71,377 +61,426 @@ const LAYER_TYPE_MAP = {
   experiences: ['experience'],
 };
 
-function getRegionColor(regionId, producerCount, isHovered) {
-  if (isHovered) return '#2D6A4F';
-  if (producerCount >= 40) return '#2D5A2D';
-  if (producerCount >= 20) return '#1E3E1E';
-  if (producerCount >= 10) return '#183218';
-  return '#132513';
-}
+// Each marker's single click-through destination, resolved once against the catalogue.
+const SPOT_DESTINATIONS = Object.fromEntries(
+  Object.entries(gastronomySpots).map(([regionId, spots]) => [regionId, spots.map((s) => resolveSpot(s, regionId).primary)]),
+);
 
-const geojsonCache = { data: null };
+const MARKER = { national: 17, zoomed: 34, zoomedCompact: 28 };
+const ZOOM_MS = 650;
+const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-function toSlug(str) {
-  return (str || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-const CATEGORY_CONFIG = {
-  'Olive Oil': { bg: '#6B8E23', em: '\u{1FAD2}' },
-  'Wine': { bg: '#7B2040', em: '\u{1F377}' },
-  'Cheese': { bg: '#C8960A', em: '\u{1F9C0}' },
-  'Coffee': { bg: '#5C3A1E', em: '☕' },
-  'Cured Meats': { bg: '#A8404A', em: '\u{1F969}' },
-  'Honey': { bg: '#C07820', em: '\u{1F36F}' },
-  'Pasta': { bg: '#C06830', em: '\u{1F35D}' },
-  'Truffle': { bg: '#5A4A3A', em: '\u{1F344}' },
-};
-
-const TYPE_CONFIG = {
-  producer: { bg: '#5A7A2A', em: '\u{1F33E}', label: 'Producer' },
-  ingredient: { bg: '#2E7D32', em: '\u{1F33F}', label: 'Ingredient' },
-  experience: { bg: '#B8860B', em: '\u{1F3E1}', label: 'Experience' },
-  wine: { bg: '#7B2040', em: '\u{1F377}', label: 'Wine' },
-  dish: { bg: '#C84040', em: '\u{1F37D}️', label: 'Dish' },
-};
-
-export default function ItalyMap({ selectedRegion, onRegionSelect, onRegionHover, activeLayer = 'all', activeJourney = null }) {
-  const containerRef = useRef(null);
-  const navigate = useNavigate();
-  const [geojson, setGeojson] = useState(null);
-  const [dims, setDims] = useState({ width: 600, height: 800 });
-  const [hoveredRegion, setHoveredRegion] = useState(null);
-  const [hoveredSpot, setHoveredSpot] = useState(null); // { spotKey, spot, regionId, x, y } (x/y container-relative)
-
-  useEffect(() => {
-    if (geojsonCache.data) { setGeojson(geojsonCache.data); return; }
-    fetch(GEOJSON_URL).then(r => r.json()).then(data => {
-      data.features = data.features.map(f => ({
-        ...f,
-        properties: { ...f.properties, regionId: resolveRegionId(f.properties) },
-      }));
-      geojsonCache.data = data;
-      setGeojson(data);
-    }).catch(() => console.warn('GeoJSON load failed'));
-  }, []);
-
-  useEffect(() => {
-    const obs = new ResizeObserver(entries => {
-      for (const e of entries) setDims({ width: e.contentRect.width, height: e.contentRect.height });
-    });
-    if (containerRef.current) obs.observe(containerRef.current);
-    return () => obs.disconnect();
-  }, []);
-
-  const proj = useMemo(() => {
-    if (!dims.width || !dims.height || !geojson) return null;
-    const projection = geoMercator();
-    projection.fitExtent([[0, 95], [dims.width, dims.height + 60]], geojson);
-    return projection;
-  }, [dims, geojson]);
-
-  const pathGen = useMemo(() => proj ? geoPath().projection(proj) : null, [proj]);
-
-  const getPos = useCallback((lng, lat) => {
-    if (!proj) return null;
-    return proj([lng, lat]);
-  }, [proj]);
-
-  const regionPathRefs = useRef({});
-  const [zoomTransform, setZoomTransform] = useState({ tx: 0, ty: 0, scale: 1 });
-
-  useEffect(() => {
-    if (!selectedRegion || !dims.width || !dims.height) {
-      setZoomTransform({ tx: 0, ty: 0, scale: 1 });
-      return;
+// Screen-space de-overlap: nudges markers apart (pairwise repulsion) so none hide another.
+function relax(points, minDist, iterations = 30) {
+  const p = points.map(([x, y]) => [x, y]);
+  for (let it = 0; it < iterations; it++) {
+    let moved = false;
+    for (let i = 0; i < p.length; i++) {
+      for (let j = i + 1; j < p.length; j++) {
+        let dx = p[j][0] - p[i][0], dy = p[j][1] - p[i][1];
+        let d = Math.hypot(dx, dy);
+        if (d >= minDist) continue;
+        if (d < 0.01) { dx = Math.cos(j * 2.4); dy = Math.sin(j * 2.4); d = 1; }
+        const push = (minDist - d) / 2, ux = dx / d, uy = dy / d;
+        p[i][0] -= ux * push; p[i][1] -= uy * push;
+        p[j][0] += ux * push; p[j][1] += uy * push;
+        moved = true;
+      }
     }
-    const el = regionPathRefs.current[selectedRegion];
-    if (!el) return;
-    const bbox = el.getBBox();
-    if (!bbox.width || !bbox.height) return;
-    const scale = Math.min(dims.width, dims.height) * 0.75 / Math.max(bbox.width, bbox.height);
-    const tx = (dims.width * 0.68) / 2 - scale * (bbox.x + bbox.width / 2);
-    const ty = dims.height / 2 - scale * (bbox.y + bbox.height / 2);
-    setZoomTransform({ tx, ty, scale });
-  }, [selectedRegion, dims]);
+    if (!moved) break;
+  }
+  return p;
+}
 
-  // Geographic spot positions: region centroid + authored [deltaLng, deltaLat] offset.
-  // Memoized so they are NOT recomputed on every hover re-render.
-  const spotPositions = useMemo(() => {
-    if (!proj) return {};
-    const out = {};
-    Object.entries(gastronomySpots).forEach(([regionId, spots]) => {
+function useCoarsePointer() {
+  const [coarse, setCoarse] = useState(() => typeof window !== 'undefined' && window.matchMedia?.('(hover: none)').matches);
+  useEffect(() => {
+    const mq = window.matchMedia?.('(hover: none)');
+    if (!mq) return;
+    const on = () => setCoarse(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return coarse;
+}
+
+// ── Region path (memoised: only re-renders when its own visual state changes) ──
+const RegionPath = memo(function RegionPath({ regionId, d, name, fill, stroke, strokeWidth, opacity, glow, journeyColor, interactive, onEnter, onLeave, onSelect }) {
+  return (
+    <path
+      d={d}
+      fill={fill}
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+      vectorEffect="non-scaling-stroke"
+      opacity={opacity}
+      className={interactive ? 'it-region' : undefined}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : -1}
+      aria-label={interactive ? `${name} — open region` : undefined}
+      style={{
+        cursor: interactive ? 'pointer' : 'default',
+        transition: 'fill 0.18s ease, opacity 0.25s ease',
+        filter: glow ? 'drop-shadow(0 0 6px rgba(76,175,80,0.55))' : journeyColor ? `drop-shadow(0 0 8px ${journeyColor}AA)` : undefined,
+      }}
+      onMouseEnter={interactive ? () => onEnter(regionId) : undefined}
+      onMouseLeave={interactive ? onLeave : undefined}
+      onClick={interactive ? (e) => { e.stopPropagation(); onSelect(regionId); } : undefined}
+      onKeyDown={interactive ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(regionId); } } : undefined}
+    />
+  );
+});
+
+// ── Main component ────────────────────────────────────────────────────
+export default function ItalyMap({
+  selectedRegion,
+  onRegionSelect,
+  onRegionHover,
+  activeLayer = 'all',
+  activeJourney = null,
+  insets = { top: 110, right: 24, bottom: 24, left: 24 }, // screen area hidden by overlays
+}) {
+  const containerRef = useRef(null);
+  const tooltipRef = useRef(null);
+  const navigate = useNavigate();
+  const coarse = useCoarsePointer();
+  const [dims, setDims] = useState({ width: 0, height: 0 });
+  const [hover, setHover] = useState(null); // { kind: 'region', regionId } | { kind: 'spot', regionId, index }
+
+  // Container size
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const measure = () => setDims({ width: el.clientWidth, height: el.clientHeight });
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const compact = dims.width > 0 && dims.width < 768;
+
+  // Base projection: whole of Italy fitted inside the area not covered by overlays.
+  const proj = useMemo(() => {
+    if (!dims.width || !dims.height) return null;
+    // Italy fills the screen (like the original): it may tuck under the floating controls.
+    return geoMercator().fitExtent(
+      compact ? [[8, 112], [dims.width - 8, dims.height - 56]] : [[0, 72], [dims.width, dims.height + 30]],
+      ITALY,
+    );
+  }, [dims.width, dims.height, compact]);
+
+  // Path strings + bounds — computed once per projection, never on hover.
+  const shapes = useMemo(() => {
+    if (!proj) return [];
+    const pg = geoPath(proj);
+    return ITALY.features.map((f) => ({ regionId: f.properties.regionId, name: regionData[f.properties.regionId]?.name || f.properties.reg_name, d: pg(f), bounds: pg.bounds(f) }));
+  }, [proj]);
+  const boundsById = useMemo(() => Object.fromEntries(shapes.map((s) => [s.regionId, s.bounds])), [shapes]);
+
+  // Two marker layouts, projected once:
+  //  - spotNat:  the original evenly-spread "constellation" (authored offsets) for the national view
+  //  - spotReal: the real town each spot represents, used once you zoom into a region
+  const { spotNat, spotReal } = useMemo(() => {
+    if (!proj) return { spotNat: {}, spotReal: {} };
+    const nat = {}, real = {};
+    for (const [regionId, spots] of Object.entries(gastronomySpots)) {
       const c = regionCentroids[regionId];
-      if (!c) return;
-      out[regionId] = spots.map(spot => {
-        const off = spot.offset || [0, 0];
-        return proj([c.lng + off[0], c.lat + off[1]]);
-      });
-    });
-    return out;
+      if (!c) continue;
+      nat[regionId] = spots.map((s) => proj([c.lng + (s.offset?.[0] || 0), c.lat + (s.offset?.[1] || 0)]));
+      real[regionId] = spots.map((s, i) => (s.coords ? proj(s.coords) : nat[regionId][i]));
+    }
+    return { spotNat: nat, spotReal: real };
   }, [proj]);
 
-  // Journey route polyline points
-  const journeyRoutePoints = useMemo(() => {
-    if (!activeJourney || !proj) return null;
-    const pts = activeJourney.regions
-      .map(id => {
-        const c = regionCentroids[id];
-        if (!c) return null;
-        const pos = proj([c.lng, c.lat]);
-        return pos ? `${pos[0]},${pos[1]}` : null;
-      })
-      .filter(Boolean);
-    return pts.length > 1 ? pts.join(' ') : null;
-  }, [activeJourney, proj]);
+  const centroidBase = useMemo(() => {
+    if (!proj) return {};
+    return Object.fromEntries(Object.entries(regionCentroids).map(([id, c]) => [id, proj([c.lng, c.lat])]));
+  }, [proj]);
 
-  const handleEnter = useCallback((regionId) => {
+  // ── Zoom (animated with rAF so markers can track the transform every frame) ──
+  const target = useMemo(() => {
+    const b = selectedRegion && boundsById[selectedRegion];
+    if (!b || !dims.width) return { tx: 0, ty: 0, s: 1 };
+    const [[x0, y0], [x1, y1]] = b;
+    const box = {
+      x0: insets.left, y0: insets.top,
+      x1: dims.width - insets.right, y1: dims.height - insets.bottom,
+    };
+    const bw = Math.max(1, box.x1 - box.x0), bh = Math.max(1, box.y1 - box.y0);
+    const s = Math.max(1, Math.min(10, 0.86 * Math.min(bw / (x1 - x0), bh / (y1 - y0))));
+    return { s, tx: (box.x0 + box.x1) / 2 - s * (x0 + x1) / 2, ty: (box.y0 + box.y1) / 2 - s * (y0 + y1) / 2 };
+  }, [selectedRegion, boundsById, dims.width, dims.height, insets.left, insets.top, insets.right, insets.bottom]);
+
+  // De-overlap offsets (px), computed once per layout — not per animation frame.
+  const nationalOffsets = useMemo(() => {
+    const keys = [], pts = [];
+    for (const [regionId, list] of Object.entries(spotNat)) list.forEach((p, i) => { if (p) { keys.push(`${regionId}-${i}`); pts.push(p); } });
+    const relaxed = relax(pts, MARKER.national - 3);
+    return Object.fromEntries(keys.map((k, i) => [k, [relaxed[i][0] - pts[i][0], relaxed[i][1] - pts[i][1]]]));
+  }, [spotNat]);
+  const zoomOffsets = useMemo(() => {
+    if (!selectedRegion || !spotReal[selectedRegion]) return {};
+    const size = compact ? MARKER.zoomedCompact : MARKER.zoomed;
+    const pts = spotReal[selectedRegion].map((p) => [p[0] * target.s + target.tx, p[1] * target.s + target.ty]);
+    const relaxed = relax(pts, size + 6);
+    return Object.fromEntries(pts.map((p, i) => [`${selectedRegion}-${i}`, [relaxed[i][0] - p[0], relaxed[i][1] - p[1]]]));
+  }, [selectedRegion, spotReal, target, compact]);
+
+  const [view, setView] = useState({ tx: 0, ty: 0, s: 1, k: 1 });
+  const viewRef = useRef(view);
+  viewRef.current = view;
+  useEffect(() => {
+    const from = viewRef.current;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || (from.tx === target.tx && from.ty === target.ty && from.s === target.s)) { setView({ ...target, k: 1 }); return; }
+    let raf, start;
+    const step = (t) => {
+      if (start === undefined) start = t;
+      const k = easeInOutCubic(Math.min(1, (t - start) / ZOOM_MS));
+      // interpolate scale geometrically so the zoom feels uniform
+      const s = from.s * Math.pow(target.s / from.s, k);
+      setView({ s, tx: from.tx + (target.tx - from.tx) * k, ty: from.ty + (target.ty - from.ty) * k, k });
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target]);
+
+  const toScreen = useCallback((p) => (p ? [p[0] * view.s + view.tx, p[1] * view.s + view.ty] : null), [view]);
+  const zoomed = !!selectedRegion;
+
+  // ── Interaction handlers (stable identities so RegionPath memo holds) ──
+  const selectRegion = useCallback((regionId) => {
     if (!regionData[regionId]) return;
-    setHoveredRegion(regionId);
-    onRegionHover && onRegionHover(regionId);
+    onRegionSelect?.(regionId === selectedRegion ? null : regionId);
+  }, [onRegionSelect, selectedRegion]);
+  const selectRef = useRef(selectRegion);
+  selectRef.current = selectRegion;
+  const stableSelect = useCallback((id) => selectRef.current(id), []);
+
+  const enterRegion = useCallback((regionId) => {
+    setHover({ kind: 'region', regionId });
+    onRegionHover?.(regionId);
+  }, [onRegionHover]);
+  const leaveRegion = useCallback(() => {
+    setHover((h) => (h?.kind === 'region' ? null : h));
+    onRegionHover?.(null);
   }, [onRegionHover]);
 
-  const handleLeave = useCallback(() => {
-    setHoveredRegion(null);
-    onRegionHover && onRegionHover(null);
-  }, [onRegionHover]);
+  // One click per step: a marker outside the open region zooms into it; a marker inside the
+  // open region goes straight to its best destination (product, producer, recipe, guide…).
+  const activateSpot = useCallback((regionId, index) => {
+    if (regionId !== selectedRegion) { onRegionSelect?.(regionId); return; }
+    const dest = SPOT_DESTINATIONS[regionId]?.[index];
+    if (dest) navigate(dest.to);
+  }, [selectedRegion, onRegionSelect, navigate]);
 
-  const handleClick = useCallback((regionId) => {
-    if (regionData[regionId]) onRegionSelect && onRegionSelect(regionId === selectedRegion ? null : regionId);
-  }, [selectedRegion, onRegionSelect]);
+  // Tooltip follows the cursor via direct style writes (no re-render per mousemove)
+  const onMouseMove = useCallback((e) => {
+    const tip = tooltipRef.current, box = containerRef.current;
+    if (!tip || !box) return;
+    const r = box.getBoundingClientRect();
+    let x = e.clientX - r.left + 16, y = e.clientY - r.top + 18;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    if (x + tw > r.width - 8) x = e.clientX - r.left - tw - 16;
+    if (y + th > r.height - 8) y = e.clientY - r.top - th - 14;
+    tip.style.transform = `translate(${Math.max(8, x)}px, ${Math.max(8, y)}px)`;
+  }, []);
 
-  const handleSpotClick = useCallback((spot) => {
-    if (spot.to) { navigate(spot.to); return; } // explicit deep link to the spot's own page
-    const slug = toSlug(spot.name || spot.label || '');
-    // For spots without their own page, deep-link to the list pre-filtered on the
-    // most distinctive word of the label (e.g. "Truffle Hunt Alba" -> ?q=Truffle)
-    const words = (spot.label || spot.name || '').split(' ');
-    const q = encodeURIComponent(words.sort((a, b) => b.length - a.length)[0] || '');
-    if (spot.type === 'producer') navigate('/producers/' + slug);
-    else if (spot.type === 'wine') navigate('/products?q=' + q);
-    else if (spot.type === 'experience') navigate('/experiences?q=' + q);
-    else if (spot.type === 'dish') navigate('/recipes?q=' + q);
-    else if (spot.type === 'ingredient') navigate('/products?q=' + q);
-    else navigate('/producers/' + slug);
-  }, [navigate]);
+  // ── Derived marker list ──
+  const allowedTypes = activeLayer !== 'all' ? LAYER_TYPE_MAP[activeLayer] || [] : null;
+  const markers = [];
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const glide = zoomed ? view.k : 0; // selected region's markers glide from constellation → real towns
+  for (const [regionId, spots] of Object.entries(gastronomySpots)) {
+    const nat = spotNat[regionId], real = spotReal[regionId];
+    if (!nat) continue;
+    const isSel = regionId === selectedRegion;
+    if (zoomed && !isSel) continue; // other regions' markers are hidden while zoomed
+    const journeyDim = activeJourney && !zoomed && !activeJourney.regions.includes(regionId);
+    spots.forEach((spot, index) => {
+      if (allowedTypes && !allowedTypes.includes(spot.type)) return;
+      const key = `${regionId}-${index}`;
+      const a = toScreen(nat[index]), aOff = nationalOffsets[key] || [0, 0];
+      if (!a) return;
+      let pos = [a[0] + aOff[0], a[1] + aOff[1]];
+      const t = isSel ? glide : 0;
+      if (t > 0) {
+        const b = toScreen(real[index]), bOff = zoomOffsets[key] || [0, 0];
+        pos = [lerp(pos[0], b[0] + bOff[0], t), lerp(pos[1], b[1] + bOff[1], t)];
+      }
+      markers.push({ regionId, index, spot, pos, isSel, journeyDim, t });
+    });
+  }
+
+  const hoverRegion = hover?.kind === 'region' ? regionData[hover.regionId] : null;
+  const hoverSpot = hover?.kind === 'spot' ? gastronomySpots[hover.regionId]?.[hover.index] : null;
+  const showTooltip = !coarse && ((hoverRegion && !zoomed) || hoverSpot);
+
+  const markerInteractive = !coarse || zoomed; // on touch screens, the first tap picks a region
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-      {geojson && pathGen ? (
+    <div
+      ref={containerRef}
+      onMouseMove={coarse ? undefined : onMouseMove}
+      style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', touchAction: 'manipulation' }}
+    >
+      <style>{`
+        .it-region:focus { outline: none; }
+        .it-region:focus-visible { stroke: #C8E6C9 !important; stroke-width: 2.5px !important; }
+        .it-spot:focus { outline: none; }
+        .it-spot:focus-visible .it-ring { opacity: 1 !important; }
+        .it-spot .it-ring { opacity: 0; transition: opacity .15s ease; pointer-events: none; }
+        .it-spot:hover .it-ring { opacity: 1; }
+        @keyframes itPulse { 0%,100% { opacity: .9 } 50% { opacity: .35 } }
+        @keyframes itCardIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+      `}</style>
+
+      {proj ? (
         <svg
           id="map-svg"
+          width={dims.width}
+          height={dims.height}
           viewBox={`0 0 ${dims.width} ${dims.height}`}
-          width="100%" height="100%"
           style={{ display: 'block' }}
-          onClick={(e) => { if (selectedRegion && (e.target.tagName === 'svg' || e.target.tagName === 'rect')) onRegionSelect(null); }}
+          role="application"
+          aria-label="Interactive map of Italian food regions"
+          onClick={() => { if (selectedRegion) onRegionSelect?.(null); }}
         >
-          <style>{`
-            .hover-ring-outer, .hover-ring { opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
-            g.map-spot:hover > .hover-ring-outer { opacity: 0.7; }
-            g.map-spot:hover > .hover-ring { opacity: 0.25; }
-          `}</style>
           <defs>
-            <filter id="glowSelected">
-              <feGaussianBlur stdDeviation="5" result="b" />
-              <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
-            <filter id="spotGlow">
-              <feGaussianBlur stdDeviation="1.8" result="b" />
-              <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
             <pattern id="mapgrid" width="36" height="36" patternUnits="userSpaceOnUse">
               <path d="M 36 0 L 0 0 0 36" fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="0.5" />
             </pattern>
           </defs>
-
           <rect width="100%" height="100%" fill="url(#mapgrid)" />
 
-          <g transform={`translate(${zoomTransform.tx}, ${zoomTransform.ty}) scale(${zoomTransform.scale})`} style={{ transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-
-            {/* Region paths */}
-            {geojson.features.map((feature, i) => {
-              const regionId = feature.properties.regionId;
-              const d = regionData[regionId];
-              const count = d?.producerCount || 0;
-              const isSelected = selectedRegion === regionId;
-              const isHovered = hoveredRegion === regionId;
-              const isDimmed = selectedRegion && !isSelected;
-              const isInJourney = activeJourney?.regions?.includes(regionId);
-              const journeyDimmed = activeJourney && !selectedRegion && !isInJourney;
-              const journeyHighlighted = activeJourney && !selectedRegion && isInJourney;
-              const baseColor = getRegionColor(regionId, count, isHovered);
-
-              const opacity = isDimmed ? 0.3 : journeyDimmed ? 0.2 : 1;
-              const filterVal = isSelected
-                ? 'url(#glowSelected)'
-                : journeyHighlighted
-                ? `saturate(1.4) drop-shadow(0 0 10px ${activeJourney.color}80)`
-                : 'none';
-
+          {/* Region layer — one transform for zoom */}
+          <g transform={`translate(${view.tx} ${view.ty}) scale(${view.s})`}>
+            {shapes.map(({ regionId, d, name }) => {
+              const data = regionData[regionId];
+              const isSel = selectedRegion === regionId;
+              const isHov = hover?.kind === 'region' && hover.regionId === regionId;
+              const inJourney = activeJourney?.regions?.includes(regionId);
+              const opacity = zoomed && !isSel ? 0.35 : activeJourney && !zoomed && !inJourney ? 0.3 : 1;
               return (
-                <path
-                  key={i}
-                  ref={el => { if (el && regionId) regionPathRefs.current[regionId] = el; }}
-                  d={pathGen(feature)}
-                  fill={isSelected ? '#2D6A4F' : baseColor}
-                  stroke={isSelected ? 'rgba(76,175,80,0.6)' : isHovered ? 'rgba(76,175,80,0.4)' : 'rgba(255,255,255,0.1)'}
-                  strokeWidth={isSelected ? 1.5 : isHovered ? 1 : 0.5}
+                <RegionPath
+                  key={regionId || name}
+                  regionId={regionId}
+                  d={d}
+                  name={name}
+                  fill={isSel ? SELECTED_FILL : isHov ? HOVER_FILL : regionFill(data?.producerCount || 0)}
+                  stroke={isSel ? 'rgba(76,175,80,0.6)' : isHov ? 'rgba(76,175,80,0.4)' : 'rgba(255,255,255,0.1)'}
+                  strokeWidth={isSel ? 1.5 : isHov ? 1 : 0.5}
                   opacity={opacity}
-                  role={d ? 'button' : undefined}
-                  aria-label={d ? d.name : undefined}
-                  style={{
-                    cursor: d ? 'pointer' : 'default',
-                    transition: 'fill 0.2s, opacity 0.2s, stroke 0.2s, filter 0.3s',
-                    filter: filterVal,
-                  }}
-                  onClick={() => handleClick(regionId)}
-                  onMouseEnter={() => handleEnter(regionId)}
-                  onMouseLeave={handleLeave}
+                  glow={isSel}
+                  journeyColor={activeJourney && !zoomed && inJourney ? activeJourney.color : null}
+                  interactive={!!data}
+                  onEnter={enterRegion}
+                  onLeave={leaveRegion}
+                  onSelect={stableSelect}
                 />
               );
             })}
-
-            {/* Gastronomy spot markers at real geographic positions, with layer filtering */}
-            {Object.entries(gastronomySpots).map(([regionId, spots]) => {
-              const positions = spotPositions[regionId];
-              if (!positions) return null;
-              const isSelected = selectedRegion === regionId;
-              const isDimmed = selectedRegion && !isSelected;
-              const isInJourney = activeJourney?.regions?.includes(regionId);
-              const journeyDimmed = activeJourney && !selectedRegion && !isInJourney;
-
-              return spots.map((spot, si) => {
-                if (activeLayer !== 'all') {
-                  const allowed = LAYER_TYPE_MAP[activeLayer] || [];
-                  if (!allowed.includes(spot.type)) return null;
-                }
-                const pos = positions[si];
-                if (!pos) return null;
-
-                const spotOpacity = isDimmed ? 0.1 : journeyDimmed ? 0.15 : isSelected ? 1 : 0.75;
-                const isZoomed = selectedRegion === regionId;
-                const s = isZoomed ? zoomTransform.scale : 1;
-                const mSz = (isZoomed ? 38 : 17) / s;
-                const eSz = (isZoomed ? 20 : 9) / s;
-                const cfg = CATEGORY_CONFIG[spot.category || ''] || TYPE_CONFIG[spot.type] || TYPE_CONFIG.producer;
-                const spotKey = `${regionId}-spot-${si}`;
-
-                return (
-                  <g
-                    key={spotKey}
-                    className="map-spot"
-                    style={{ cursor: 'pointer', transition: 'opacity 0.2s ease' }}
-                    opacity={spotOpacity}
-                    role="button"
-                    aria-label={`${spot.label} (${TYPE_CONFIG[spot.type]?.label || spot.type})`}
-                    onClick={(e) => { e.stopPropagation(); handleSpotClick(spot); }}
-                    onMouseEnter={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const crect = containerRef.current?.getBoundingClientRect();
-                      if (!crect) return;
-                      setHoveredSpot({
-                        spotKey, spot, regionId,
-                        x: rect.left + rect.width / 2 - crect.left,
-                        y: rect.top - crect.top,
-                      });
-                    }}
-                    onMouseLeave={() => setHoveredSpot(null)}
-                  >
-                    {/* Invisible enlarged hit-area: keeps markers easy to click at any zoom level */}
-                    <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 10 / s} fill="transparent" stroke="none" />
-                    {/* Green hover ring - outer stroke */}
-                    <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 8 / s} className="hover-ring-outer" fill="none" stroke="#4CAF50" strokeWidth={1.5 / s} />
-                    {/* Green hover ring - inner glow */}
-                    <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 4 / s} className="hover-ring" fill="#4CAF50" />
-                    <circle cx={pos[0]} cy={pos[1]} r={mSz / 2 + 2 / s} fill={cfg.bg} opacity={0.15} />
-                    <circle cx={pos[0]} cy={pos[1]} r={mSz / 2} fill={cfg.bg} />
-                    <text x={pos[0]} y={pos[1]} textAnchor="middle" dominantBaseline="central" fontSize={eSz} style={{ userSelect: 'none', pointerEvents: 'none' }}>{cfg.em}</text>
-                  </g>
-                );
-              });
-            })}
-
-            {/* Region centroid producer-count dots — hidden when a non-producer layer is active */}
-            {activeLayer === 'all' || activeLayer === 'producers' ? Object.entries(regionCentroids).map(([regionId, centroid]) => {
-              const pos = getPos(centroid.lng, centroid.lat);
-              if (!pos) return null;
-              const d = regionData[regionId];
-              if (!d) return null;
-              const isSelected = selectedRegion === regionId;
-              const isDimmed = selectedRegion && !isSelected;
-              const isInJourney = activeJourney?.regions?.includes(regionId);
-              const journeyDimmed = activeJourney && !selectedRegion && !isInJourney;
-              const r = d.producerCount >= 40 ? 5.5 : d.producerCount >= 20 ? 4.5 : d.producerCount >= 10 ? 3.5 : 2.5;
-
-              return (
-                <g key={`dot-${regionId}`} style={{ opacity: isDimmed ? 0.2 : journeyDimmed ? 0.1 : 1, transition: 'opacity 0.25s' }}>
-                  <circle cx={pos[0]} cy={pos[1]} r={r * 2.2} fill="rgba(76,175,80,0.1)"
-                    style={{ animation: `markerPulse 3s ease-in-out infinite`, animationDelay: `${Math.abs(centroid.lat % 2)}s` }}
-                  />
-                  <circle cx={pos[0]} cy={pos[1]} r={r}
-                    fill={isSelected ? '#fff' : '#4CAF50'}
-                    stroke={isSelected ? '#4CAF50' : 'rgba(10,10,10,0.5)'}
-                    strokeWidth={1} filter="url(#spotGlow)"
-                    style={{ cursor: 'pointer' }}
-                    onClick={(e) => { e.stopPropagation(); handleClick(regionId); }}
-                  />
-                </g>
-              );
-            }) : null}
-
-            {/* Journey route polyline */}
-            {journeyRoutePoints && (
-              <polyline
-                points={journeyRoutePoints}
-                fill="none"
-                stroke={activeJourney.color}
-                strokeWidth={2.5}
-                strokeDasharray="6 4"
-                opacity={0.75}
-                style={{ animation: 'dashMove 1s linear infinite', pointerEvents: 'none' }}
-              />
-            )}
-
           </g>
+
+          {/* Journey route (screen space, constant stroke) */}
+          {activeJourney && !zoomed && (() => {
+            const pts = activeJourney.regions.map((id) => toScreen(centroidBase[id])).filter(Boolean);
+            return pts.length > 1 ? (
+              <polyline points={pts.map((p) => p.join(',')).join(' ')} fill="none" stroke={activeJourney.color} strokeWidth={2.5}
+                strokeDasharray="6 4" opacity={0.85} style={{ animation: 'dashMove 1s linear infinite', pointerEvents: 'none' }} />
+            ) : null;
+          })()}
+
+          {/* Producer-density dots (national view only) */}
+          {!zoomed && (activeLayer === 'all' || activeLayer === 'producers') && Object.entries(centroidBase).map(([regionId, p]) => {
+            const d = regionData[regionId];
+            const pos = toScreen(p);
+            if (!d || !pos) return null;
+            const r = d.producerCount >= 40 ? 5.5 : d.producerCount >= 20 ? 4.5 : d.producerCount >= 10 ? 3.5 : 2.5;
+            const dim = activeJourney && !activeJourney.regions.includes(regionId);
+            return (
+              <g key={`dot-${regionId}`} opacity={dim ? 0.15 : 1} style={{ pointerEvents: 'none' }}>
+                <circle cx={pos[0]} cy={pos[1]} r={r * 2.2} fill="rgba(76,175,80,0.14)" style={{ animation: 'itPulse 3s ease-in-out infinite', animationDelay: `${(Math.abs(p[0]) % 20) / 10}s` }} />
+                <circle cx={pos[0]} cy={pos[1]} r={r} fill="#66BB6A" stroke="rgba(10,10,10,0.55)" strokeWidth={1} />
+              </g>
+            );
+          })}
+
+          {/* Gastronomy markers — unscaled overlay, constant on-screen size */}
+          {markers.map(({ regionId, index, spot, pos, isSel, journeyDim, t }) => {
+            const size = lerp(MARKER.national, compact ? MARKER.zoomedCompact : MARKER.zoomed, t);
+            const cfg = TYPE_CONFIG[spot.type] || TYPE_CONFIG.producer;
+            const dest = SPOT_DESTINATIONS[regionId]?.[index];
+            const label = isSel && dest ? `${spot.label} — ${dest.label}` : `${spot.label} — ${cfg.label}`;
+            return (
+              <g
+                key={`${regionId}-${index}`}
+                className="it-spot"
+                transform={`translate(${pos[0]} ${pos[1]})`}
+                opacity={journeyDim ? 0.15 : lerp(0.75, 1, t)}
+                style={{ cursor: 'pointer', pointerEvents: markerInteractive ? 'auto' : 'none', transition: 'opacity .2s' }}
+                role="button"
+                tabIndex={isSel ? 0 : -1}
+                aria-label={label}
+                onClick={(e) => { e.stopPropagation(); activateSpot(regionId, index); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activateSpot(regionId, index); } }}
+                onMouseEnter={coarse ? undefined : () => setHover({ kind: 'spot', regionId, index })}
+                onMouseLeave={coarse ? undefined : () => setHover((h) => (h?.kind === 'spot' ? null : h))}
+              >
+                {/* hit area: exactly the marker, plus a small touch margin when zoomed */}
+                <circle r={size / 2 + (isSel ? 6 : 1)} fill="transparent" />
+                <circle className="it-ring" r={size / 2 + 5} fill="rgba(76,175,80,0.22)" stroke="#81C784" strokeWidth={1.5} />
+                <circle r={size / 2 + 2} fill={cfg.bg} opacity={0.15} />
+                <circle r={size / 2} fill={cfg.bg} />
+                <text textAnchor="middle" dominantBaseline="central" fontSize={size * (t > 0.5 ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
+                  {t > 0.5 ? (spot.emoji || cfg.em) : cfg.em}
+                </text>
+              </g>
+            );
+          })}
         </svg>
       ) : (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.3)', fontSize: 13, gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.35)', fontSize: 13, gap: 8 }}>
           <div style={{ width: 16, height: 16, border: '2px solid rgba(76,175,80,0.4)', borderTop: '2px solid #4CAF50', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
           Loading atlas…
         </div>
       )}
 
-      {/* Spot hover tooltip */}
-      {hoveredSpot && (
-        <div style={{
-          position: 'absolute',
-          left: hoveredSpot.x,
-          top: hoveredSpot.y,
-          transform: 'translate(-50%, calc(-100% - 10px))',
-          zIndex: 400,
-          pointerEvents: 'none',
-          background: 'rgba(255,255,255,0.97)',
-          backdropFilter: 'blur(12px)',
-          borderRadius: 10,
-          boxShadow: '0 8px 28px rgba(0,0,0,0.25)',
-          padding: '8px 12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          whiteSpace: 'nowrap',
-          animation: 'fadeSlideIn 0.15s ease',
-        }}>
-          <span style={{ fontSize: 18 }}>{hoveredSpot.spot.emoji}</span>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 8, color: '#2E7D32', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              {TYPE_CONFIG[hoveredSpot.spot.type]?.label || 'Gastronomy'}
-            </span>
-            <span style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12, fontWeight: 700, color: '#1A1A1A' }}>{hoveredSpot.spot.label}</span>
+      {/* Mouse-follow tooltip (desktop only) */}
+      <div
+        ref={tooltipRef}
+        aria-hidden="true"
+        style={{
+          position: 'absolute', left: 0, top: 0, zIndex: 400, pointerEvents: 'none',
+          opacity: showTooltip ? 1 : 0, transition: 'opacity .12s ease',
+          maxWidth: 280,
+        }}
+      >
+        {hoverSpot ? (
+          <div style={{ background: 'rgba(255,255,255,0.97)', borderRadius: 10, boxShadow: '0 8px 28px rgba(0,0,0,0.3)', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 18 }}>{hoverSpot.emoji}</span>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: '#2E7D32', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                {TYPE_CONFIG[hoverSpot.type]?.label || 'Gastronomy'} · {regionData[hover.regionId]?.name}
+              </span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{hoverSpot.label}</span>
+              <span style={{ fontSize: 11, color: '#2E7D32', fontWeight: 600 }}>
+                {hover.regionId === selectedRegion ? `${SPOT_DESTINATIONS[hover.regionId]?.[hover.index]?.label || 'Open'} →` : `Click to explore ${regionData[hover.regionId]?.name}`}
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        ) : hoverRegion ? (
+          <div style={{ background: 'rgba(6,13,6,0.94)', border: '1px solid rgba(76,175,80,0.35)', borderRadius: 12, padding: '11px 15px', boxShadow: '0 8px 32px rgba(0,0,0,0.45)', minWidth: 210 }}>
+            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 700, color: '#fff', margin: '0 0 3px' }}>{hoverRegion.name}</p>
+            <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 11, color: '#81C784', margin: '0 0 5px' }}>{hoverRegion.producerCount} producers · {hoverRegion.experienceCount} experiences</p>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5, margin: 0 }}>{hoverRegion.featuredProducts.slice(0, 3).join(' · ')}</p>
+            <p style={{ fontSize: 10, color: 'rgba(129,199,132,0.85)', margin: '6px 0 0', fontWeight: 600 }}>Click to explore →</p>
+          </div>
+        ) : null}
+      </div>
+
     </div>
   );
 }

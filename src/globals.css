@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap');
+/* Brand fonts are loaded in index.html (<link> + preconnect is faster than @import). */
 
 :root {
   --green-primary: #2E7D32;
@@ -17,13 +17,13 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html, body, #root { height: 100%; margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; }
 
 body {
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--text-primary);
   background: var(--bg-light);
-  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5 { font-family: 'Playfair Display', Georgia, serif; }
@@ -45,10 +45,6 @@ h1, h2, h3, h4, h5 { font-family: 'Playfair Display', Georgia, serif; }
   100% { transform: scale(1); }
 }
 
-@keyframes markerPulse {
-  0%, 100% { opacity: 0.9; r: attr(r); }
-  50% { opacity: 0.5; }
-}
 
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -73,4 +69,9 @@ h1, h2, h3, h4, h5 { font-family: 'Playfair Display', Georgia, serif; }
 @keyframes dashMove {
   from { stroke-dashoffset: 0; }
   to   { stroke-dashoffset: -20; }
+}
+:focus-visible { outline: 2px solid #4CAF50; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }

@@ -6,27 +6,28 @@ import { recipesData } from '../components/recipesData';
 import { isSaved, toggleSave } from '../components/tasteMapStore';
 import FoodConnections from '../components/FoodConnections';
 import GastronomyNetwork from '../components/GastronomyNetwork';
+import { slugify } from '@/lib/catalog';
 const WIKI = {
-  toscana: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/7e69b3d03_generated_image.png',
-  lombardia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/5caaf3d0f_generated_image.png',
-  sicilia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/48f5ee453_generated_image.png',
-  campania: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/acd73822c_generated_image.png',
-  veneto: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/e687e5690_generated_image.png',
-  piemonte: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/fc338e179_generated_image.png',
-  puglia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/45aa42495_generated_image.png',
-  emilia_romagna: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/a27d2b16a_generated_image.png',
-  lazio: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/d3871d123_generated_image.png',
-  sardegna: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/4f83999be_generated_image.png',
-  liguria: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/362518852_generated_image.png',
-  calabria: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/ebbd6ed12_generated_image.png',
-  marche: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/bf764a187_generated_image.png',
-  abruzzo: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/f32d70314_generated_image.png',
-  umbria: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/1db533ce9_generated_image.png',
-  trentino_alto_adige: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/27a95cfc3_generated_image.png',
-  friuli_venezia_giulia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/3b48fadc7_generated_image.png',
-  basilicata: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/7c56426f4_generated_image.png',
-  molise: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/94c651f0b_generated_image.png',
-  valle_daosta: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/d0c62424d_generated_image.png',
+  toscana: '/img/b44/7e69b3d03.webp',
+  lombardia: '/img/b44/5caaf3d0f.webp',
+  sicilia: '/img/b44/48f5ee453.webp',
+  campania: '/img/b44/acd73822c.webp',
+  veneto: '/img/b44/e687e5690.webp',
+  piemonte: '/img/b44/fc338e179.webp',
+  puglia: '/img/b44/45aa42495.webp',
+  emilia_romagna: '/img/b44/a27d2b16a.webp',
+  lazio: '/img/b44/d3871d123.webp',
+  sardegna: '/img/b44/4f83999be.webp',
+  liguria: '/img/b44/362518852.webp',
+  calabria: '/img/b44/ebbd6ed12.webp',
+  marche: '/img/b44/bf764a187.webp',
+  abruzzo: '/img/b44/f32d70314.webp',
+  umbria: '/img/b44/1db533ce9.webp',
+  trentino_alto_adige: '/img/b44/27a95cfc3.webp',
+  friuli_venezia_giulia: '/img/b44/3b48fadc7.webp',
+  basilicata: '/img/b44/7c56426f4.webp',
+  molise: '/img/b44/94c651f0b.webp',
+  valle_daosta: '/img/b44/d0c62424d.webp',
 };
 
 export default function RegionDetail() {
@@ -48,9 +49,9 @@ export default function RegionDetail() {
 
   const fcNodes = [
     { id, type: 'region', label: region.name },
-    ...(region.producers || []).slice(0, 2).map(p => ({ id: p.id, type: 'producer', label: p.name, path: `/producers/${p.id}` })),
+    ...(region.producers || []).slice(0, 2).map(p => ({ id: slugify(p.name), type: 'producer', label: p.name, path: `/producers/${slugify(p.name)}` })),
     ...(featuredRecipe ? [{ id: featuredRecipe.id, type: 'recipe', label: featuredRecipe.name, path: `/recipes/${featuredRecipe.id}` }] : []),
-    ...(region.experiences || []).slice(0, 1).map(e => ({ id: e.id, type: 'experience', label: e.name })),
+    ...(region.experiences || []).slice(0, 1).map(e => ({ id: 'exp-' + slugify(e.name), type: 'experience', label: e.name, path: `/Experiences?region=${id}` })),
   ];
 
   return (
@@ -117,7 +118,7 @@ export default function RegionDetail() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
             {(region.producers || []).map((p, i) => (
-              <Link key={i} to={`/producers/${p.id}`} style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, padding: '18px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #F0F7EE', transition: 'all 0.15s', display: 'flex', gap: 14, alignItems: 'flex-start' }}
+              <Link key={i} to={`/producers/${slugify(p.name)}`} style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, padding: '18px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #F0F7EE', transition: 'all 0.15s', display: 'flex', gap: 14, alignItems: 'flex-start' }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#F9FBF9'; e.currentTarget.style.borderColor = '#E8F5E9'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.08)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#F0F7EE'; e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.05)'; }}>
                 <div style={{ width: 48, height: 48, borderRadius: 12, background: '#2E7D32', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>

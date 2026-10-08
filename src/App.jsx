@@ -7,24 +7,35 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { Navigate } from 'react-router-dom';
-import Recipes from './pages/Recipes';
-import RecipeDetail from './pages/RecipeDetail';
-import TasteMap from './pages/TasteMap';
-import Ingredient from './pages/Ingredient';
-import Regions from './pages/Regions';
-import RegionDetail from './pages/RegionDetail';
-import CreatorProfile from './pages/CreatorProfile';
-import TasteMaps from './pages/TasteMaps';
-import ProducerDetail from './pages/ProducerDetail';
-import Checkout from './pages/Checkout';
+import { lazy, Suspense } from 'react';
+// Route-level code splitting: each page ships as its own chunk.
+const Recipes = lazy(() => import('./pages/Recipes'));
+const RecipeDetail = lazy(() => import('./pages/RecipeDetail'));
+const TasteMap = lazy(() => import('./pages/TasteMap'));
+const Ingredient = lazy(() => import('./pages/Ingredient'));
+const Regions = lazy(() => import('./pages/Regions'));
+const RegionDetail = lazy(() => import('./pages/RegionDetail'));
+const CreatorProfile = lazy(() => import('./pages/CreatorProfile'));
+const TasteMaps = lazy(() => import('./pages/TasteMaps'));
+const ProducerDetail = lazy(() => import('./pages/ProducerDetail'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+
+function PageFallback() {
+  return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+      <div style={{ width: 26, height: 26, border: '3px solid #C8E6C9', borderTopColor: '#2E7D32', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
+    </div>
+  );
+}
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
+const LayoutWrapper = ({ children, currentPageName }) => {
+  const content = <Suspense fallback={<PageFallback />}>{children}</Suspense>;
+  return Layout ? <Layout currentPageName={currentPageName}>{content}</Layout> : content;
+};
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();

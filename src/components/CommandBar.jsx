@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, ChefHat, BookOpen, X, ArrowRight } from 'lucide-react';
+import { Search, X, ArrowRight } from 'lucide-react';
 import { regionData } from './regionData';
 import { recipesData } from './recipesData';
 import { creatorsData } from './creatorsData';

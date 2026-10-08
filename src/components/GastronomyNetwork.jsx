@@ -5,18 +5,18 @@ import { regionData } from './regionData';
 // ── Static entity lookup maps ──────────────────────────────────────────────
 
 const regionImages = {
-  toscana: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=400&q=70',
-  lombardia: 'https://images.unsplash.com/photo-1520175480921-4edfa2983e0f?w=400&q=70',
-  sicilia: 'https://images.unsplash.com/photo-1523365280197-f1783db9fe62?w=400&q=70',
-  campania: 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&q=70',
-  veneto: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=70',
-  piemonte: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=70',
-  puglia: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&q=70',
-  emilia_romagna: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&q=70',
-  lazio: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&q=70',
-  sardegna: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&q=70',
-  liguria: 'https://images.unsplash.com/photo-1499678329028-101435549a4e?w=400&q=70',
-  calabria: 'https://images.unsplash.com/photo-1504214208698-ea1916a2195a?w=400&q=70',
+  toscana: '/img/lib/r-toscana.webp',
+  lombardia: '/img/lib/r-lombardia.webp',
+  sicilia: '/img/lib/r-sicilia.webp',
+  campania: '/img/lib/r-campania.webp',
+  veneto: '/img/lib/r-veneto.webp',
+  piemonte: '/img/lib/r-piemonte.webp',
+  puglia: '/img/lib/r-puglia.webp',
+  emilia_romagna: '/img/lib/r-emilia.webp',
+  lazio: '/img/u/1552832230-c0197dd311b5-400.webp',
+  sardegna: '/img/lib/r-sardegna.webp',
+  liguria: '/img/u/1499678329028-101435549a4e-400.webp',
+  calabria: '/img/lib/r-calabria.webp',
 };
 
 const producerNames = {
@@ -39,21 +39,21 @@ const producerNames = {
 };
 
 const producerImages = {
-  'caseificio-salvo': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'caseificio-gennari': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'caseificio-lombardo': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'caseificio-vannulo': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'acetaia-malpighi': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&q=70',
-  'frantoio-franci': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&q=70',
-  'frantoio-roi': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&q=70',
-  'tartufi-morra': 'https://images.unsplash.com/photo-1609501676614-6f01f0f3d0ea?w=300&q=70',
-  'pesto-rossi': 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=300&q=70',
-  'gustarosso': 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=300&q=70',
-  'prosciuttificio-san-nicola': 'https://images.unsplash.com/photo-1625938144755-652e08e359b7?w=300&q=70',
-  'formaggi-argiolas': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'pastificio-cavalieri': 'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=300&q=70',
-  'riseria-costanzo': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&q=70',
-  'olio-callipo': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&q=70',
+  'caseificio-salvo': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'caseificio-gennari': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'caseificio-lombardo': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'caseificio-vannulo': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'acetaia-malpighi': '/img/products/balsamico-malpighi.webp',
+  'frantoio-franci': '/img/u/1474979266404-7eaacbcd87c5-300.webp',
+  'frantoio-roi': '/img/u/1474979266404-7eaacbcd87c5-300.webp',
+  'tartufi-morra': '/img/products/tartufo-morra.webp',
+  'pesto-rossi': '/img/products/pesto-rossi.webp',
+  'gustarosso': '/img/products/sanmarzano-gustarosso.webp',
+  'prosciuttificio-san-nicola': '/img/u/1625938144755-652e08e359b7-300.webp',
+  'formaggi-argiolas': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'pastificio-cavalieri': '/img/u/1555949258-eb67b1ef0ceb-300.webp',
+  'riseria-costanzo': '/img/products/riso-costanzo.webp',
+  'olio-callipo': '/img/u/1474979266404-7eaacbcd87c5-300.webp',
 };
 
 const ingredientNames = {
@@ -70,16 +70,16 @@ const ingredientNames = {
 };
 
 const ingredientImages = {
-  'pecorino-romano': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'parmigiano-reggiano': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'tartufo-bianco-alba': 'https://images.unsplash.com/photo-1609501676614-6f01f0f3d0ea?w=300&q=70',
-  'mozzarella-di-bufala': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'san-marzano': 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=300&q=70',
-  'pesto-genovese': 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=300&q=70',
-  'nduja': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&q=70',
-  'aceto-balsamico': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&q=70',
-  'olio-extra-vergine': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&q=70',
-  'prosciutto-di-parma': 'https://images.unsplash.com/photo-1625938144755-652e08e359b7?w=300&q=70',
+  'pecorino-romano': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'parmigiano-reggiano': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'tartufo-bianco-alba': '/img/products/tartufo-morra.webp',
+  'mozzarella-di-bufala': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'san-marzano': '/img/products/sanmarzano-gustarosso.webp',
+  'pesto-genovese': '/img/products/pesto-rossi.webp',
+  'nduja': '/img/products/nduja-toraldo.webp',
+  'aceto-balsamico': '/img/products/balsamico-malpighi.webp',
+  'olio-extra-vergine': '/img/u/1474979266404-7eaacbcd87c5-300.webp',
+  'prosciutto-di-parma': '/img/u/1625938144755-652e08e359b7-300.webp',
 };
 
 // ── Gastronomy Graph ───────────────────────────────────────────────────────

@@ -1,4 +1,6 @@
-import { Check, Users, Globe, Award, TrendingUp } from 'lucide-react';
+import { Check, Users, Globe, Award } from 'lucide-react';
+
+import { photoCredits } from '../components/photoCredits';
 
 export default function About() {
   const team = [
@@ -148,6 +150,23 @@ export default function About() {
           </div>
         </div>
       </div>
+
+      {/* Photo credits (required by CC BY / BY-SA licences) */}
+      <section id="photo-credits" style={{ maxWidth: 1100, margin: '0 auto', padding: '8px 24px 56px' }}>
+        <details style={{ background: '#fff', border: '1px solid #E8F5E9', borderRadius: 12, padding: '14px 18px' }}>
+          <summary style={{ cursor: 'pointer', fontSize: 13, fontWeight: 700, color: '#2E7D32' }}>Photo credits</summary>
+          <p style={{ fontSize: 12, color: '#777', margin: '10px 0' }}>Some photos are used under Creative Commons licences (resized and cropped). Others are from Unsplash or created for Bottega.</p>
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#555', lineHeight: 1.8 }}>
+            {photoCredits.map((c) => (
+              <li key={c.file}>
+                <a href={c.source} target="_blank" rel="noopener noreferrer" style={{ color: '#2E7D32' }}>{c.title}</a>
+                {' by '}{c.creatorUrl ? <a href={c.creatorUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#555' }}>{c.creator}</a> : c.creator}
+                {' — '}<a href={c.licenseUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#888' }}>{c.license}</a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </section>
     </div>
   );
 }

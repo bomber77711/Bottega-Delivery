@@ -6,7 +6,7 @@ export const storiesData = [
     region: 'Piedmont',
     excerpt: 'Matteo Costanzo tends the same paddy fields his grandfather worked, producing Carnaroli rice for the finest risotto kitchens in Europe. We spend a day in the Po Valley understanding why great risotto begins long before the kitchen.',
     readTime: '6 min read',
-    image: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/9b8e7db72_generated_image.png',
+    image: '/img/b44/9b8e7db72.webp',
     tall: true,
   },
   {
@@ -16,7 +16,7 @@ export const storiesData = [
     region: 'Emilia-Romagna',
     excerpt: "Traditional balsamic vinegar from Modena can cost €300 for 100ml. It's not marketing — it's 25 years of patient aging in seven successive barrels. Here's the full story.",
     readTime: '8 min read',
-    image: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/70c592df2_generated_image.png',
+    image: '/img/b44/70c592df2.webp',
     tall: false,
   },
   {
@@ -26,7 +26,7 @@ export const storiesData = [
     region: 'Calabria',
     excerpt: 'Born in the hills of Spilinga, nduja is Calabria concentrated — fiery, fatty, deeply savoury. A working-class food that became a global obsession. Meet the family that still makes it the original way.',
     readTime: '5 min read',
-    image: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/8490b2c9a_generated_image.png',
+    image: '/img/b44/8490b2c9a.webp',
     tall: false,
   },
   {
@@ -36,7 +36,7 @@ export const storiesData = [
     region: 'Campania',
     excerpt: "Caseificio Vannulo milks its organic buffalo at 4am and has mozzarella on the table by 8am. There is no fresher mozzarella di bufala DOP on earth. We spent a full day to understand why.",
     readTime: '7 min read',
-    image: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/ec6ef1dcd_generated_image.png',
+    image: '/img/b44/ec6ef1dcd.webp',
     tall: true,
   },
   {
@@ -46,7 +46,7 @@ export const storiesData = [
     region: 'Emilia-Romagna',
     excerpt: 'Each wheel of Parmigiano Reggiano weighs 40kg and contains 550 litres of milk. It takes a minimum of 12 months of aging before a needle test determines its fate. The science and art behind the king of cheeses.',
     readTime: '9 min read',
-    image: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/26d4078b4_generated_image.png',
+    image: '/img/b44/26d4078b4.webp',
     tall: false,
   },
   {
@@ -56,7 +56,7 @@ export const storiesData = [
     region: 'Umbria',
     excerpt: "Between October and December, the forests around Norcia belong to the tartufai. Three generations of the Bianconi family wake before dawn to hunt the black diamonds of the Umbrian woods.",
     readTime: '6 min read',
-    image: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/dd1e8092d_generated_image.png',
+    image: '/img/b44/dd1e8092d.webp',
     tall: false,
   },
 ];

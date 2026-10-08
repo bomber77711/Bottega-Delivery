@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { regionData } from './regionData';
 import { recipesData } from './recipesData';
 import { X, Sparkles, ArrowRight } from 'lucide-react';
@@ -8,7 +8,7 @@ const buildDiscoveries = () => {
   const discoveries = [];
   // Regions
   Object.entries(regionData).forEach(([id, r]) => {
-    discoveries.push({ type: 'Region', icon: '🗺️', title: r.name, sub: `${r.producerCount} producers · ${r.featuredProducts[0]}`, href: '/ExploreMap', badge: '📍 Region Discovery', badgeColor: '#2E7D32' });
+    discoveries.push({ type: 'Region', icon: '🗺️', title: r.name, sub: `${r.producerCount} producers · ${r.featuredProducts[0]}`, href: `/?region=${id}`, badge: '📍 Region Discovery', badgeColor: '#2E7D32' });
   });
   // Recipes
   recipesData.forEach(r => {
@@ -17,7 +17,7 @@ const buildDiscoveries = () => {
   // Producers
   Object.values(regionData).forEach(r => {
     r.producers?.forEach(p => {
-      discoveries.push({ type: 'Producer', icon: '👨‍🌾', title: p.name, sub: `${p.city} · ${p.category} · ★${p.rating}`, href: '/Producers', badge: '👨‍🌾 Producer Spotlight', badgeColor: '#2E7D32' });
+      discoveries.push({ type: 'Producer', icon: '👨‍🌾', title: p.name, sub: `${p.city} · ${p.category} · ★${p.rating}`, href: `/producers/${p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`, badge: '👨‍🌾 Producer Spotlight', badgeColor: '#2E7D32' });
     });
   });
   return discoveries;
@@ -30,6 +30,13 @@ export default function DiscoveryFloat() {
   const [current, setCurrent] = useState(null);
   const [dismissed, setDismissed] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isPhone, setIsPhone] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  useEffect(() => {
+    const on = () => setIsPhone(window.innerWidth < 768);
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, []);
 
   const showDiscovery = useCallback(() => {
     const idx = Math.floor(Math.random() * discoveries.length);
@@ -49,15 +56,17 @@ export default function DiscoveryFloat() {
   };
 
   if (dismissed) return null;
+  // On phones the map's region sheet owns the bottom of the screen
+  if (isPhone && location.pathname === '/' && new URLSearchParams(location.search).has('region')) return null;
 
   return (
     <>
       {/* Floating button */}
       {!visible && (
-        <button onClick={showDiscovery} style={{
-          position: 'fixed', bottom: 28, right: 28, zIndex: 1000,
+        <button onClick={showDiscovery} aria-label="Discover something new" style={{
+          position: 'fixed', bottom: isPhone ? 16 : 28, right: isPhone ? 14 : 28, zIndex: 1000,
           display: 'flex', alignItems: 'center', gap: 8,
-          padding: '13px 20px', background: '#1A1A1A',
+          padding: isPhone ? '12px' : '13px 20px', background: '#1A1A1A',
           color: '#fff', borderRadius: 100, fontSize: 13, fontWeight: 700,
           border: '1px solid rgba(76,175,80,0.3)', cursor: 'pointer',
           boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
@@ -66,15 +75,15 @@ export default function DiscoveryFloat() {
           onMouseEnter={e => { e.currentTarget.style.background = '#2E7D32'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(46,125,50,0.4)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = '#1A1A1A'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4)'; }}>
           <Sparkles size={14} color="#4CAF50" />
-          ✦ Discover
+          {!isPhone && '✦ Discover'}
         </button>
       )}
 
       {/* Discovery card */}
       {visible && current && (
         <div style={{
-          position: 'fixed', bottom: 28, right: 28, zIndex: 1001,
-          width: 300, background: '#111',
+          position: 'fixed', bottom: isPhone ? 14 : 28, right: isPhone ? 12 : 28, zIndex: 1001,
+          width: isPhone ? 'calc(100vw - 24px)' : 300, maxWidth: 340, background: '#111',
           border: '1px solid rgba(76,175,80,0.2)', borderRadius: 16,
           boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
           overflow: 'hidden', animation: 'fadeSlideIn 0.25s ease'

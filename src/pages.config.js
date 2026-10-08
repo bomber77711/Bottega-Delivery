@@ -1,70 +1,19 @@
 /**
- * pages.config.js - Page routing configuration
- * 
- * This file is AUTO-GENERATED. Do not add imports or modify PAGES manually.
- * Pages are auto-registered when you create files in the ./pages/ folder.
- * 
- * THE ONLY EDITABLE VALUE: mainPage
- * This controls which page is the landing page (shown when users visit the app).
- * 
- * Example file structure:
- * 
- *   import HomePage from './pages/HomePage';
- *   import Dashboard from './pages/Dashboard';
- *   import Settings from './pages/Settings';
- *   
- *   export const PAGES = {
- *       "HomePage": HomePage,
- *       "Dashboard": Dashboard,
- *       "Settings": Settings,
- *   }
- *   
- *   export const pagesConfig = {
- *       mainPage: "HomePage",
- *       Pages: PAGES,
- *   };
- * 
- * Example with Layout (wraps all pages):
- *
- *   import Home from './pages/Home';
- *   import Settings from './pages/Settings';
- *   import __Layout from './Layout.jsx';
- *
- *   export const PAGES = {
- *       "Home": Home,
- *       "Settings": Settings,
- *   }
- *
- *   export const pagesConfig = {
- *       mainPage: "Home",
- *       Pages: PAGES,
- *       Layout: __Layout,
- *   };
- *
- * To change the main page from HomePage to Dashboard, use find_replace:
- *   Old: mainPage: "HomePage",
- *   New: mainPage: "Dashboard",
- *
- * The mainPage value must match a key in the PAGES object exactly.
+ * pages.config.js — top-level page routing.
+ * Each key becomes a route at "/<Key>". Pages are lazy-loaded (code-split) except Home,
+ * which is the landing page and should paint immediately.
  */
-import About from './pages/About';
-import ExploreMap from './pages/ExploreMap';
+import { lazy } from 'react';
 import Home from './pages/Home';
-import Producers from './pages/Producers';
-import Products from './pages/Products';
-import Experiences from './pages/Experiences';
-import Stories from './pages/Stories';
 import __Layout from './Layout.jsx';
 
-
 export const PAGES = {
-    "About": About,
-    "ExploreMap": ExploreMap,
+    "About": lazy(() => import('./pages/About')),
     "Home": Home,
-    "Producers": Producers,
-    "Products": Products,
-    "Experiences": Experiences,
-    "Stories": Stories,
+    "Producers": lazy(() => import('./pages/Producers')),
+    "Products": lazy(() => import('./pages/Products')),
+    "Experiences": lazy(() => import('./pages/Experiences')),
+    "Stories": lazy(() => import('./pages/Stories')),
 }
 
 export const pagesConfig = {

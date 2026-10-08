@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { regionData } from '../components/regionData';
 import { productsData } from '../components/productsData';
 import { recipesData } from '../components/recipesData';
 import { useCart } from '../components/cartStore';
-import { ArrowLeft, Star, MapPin, ShoppingCart, Check, Award, Leaf, Clock, Users, ChevronRight, Globe, Instagram, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, ShoppingCart, Check, Award, Leaf, Clock, Users, ChevronRight } from 'lucide-react';
 
 const allProducers = Object.entries(regionData).flatMap(([regionId, region]) =>
   region.producers.map((p, i) => ({
@@ -13,49 +13,49 @@ const allProducers = Object.entries(regionData).flatMap(([regionId, region]) =>
 );
 
 const categoryHeroImages = {
-  'Olive Oil': 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/generated_olive_oil.png',
-  'Wine': 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=1400&q=90',
-  'Cheese': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=1400&q=90',
-  'Coffee': 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1400&q=90',
-  'Pasta': 'https://images.unsplash.com/photo-1551183053-bf91798d2233?w=1400&q=90',
-  'Truffle': 'https://images.unsplash.com/photo-1609501676614-6f01f0f3d0ea?w=1400&q=90',
-  'Cured Meats': 'https://images.unsplash.com/photo-1559054663-e8d23213f55c?w=1400&q=90',
-  'Honey': 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=1400&q=90',
-  'Nuts': 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1400&q=90',
-  'Liqueurs': 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=1400&q=90',
-  'Condiments': 'https://images.unsplash.com/photo-1472476443507-c7a5948772fc?w=1400&q=90',
-  'Baked Goods': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1400&q=90',
-  'Rice': 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=1400&q=90',
-  'Spices': 'https://images.unsplash.com/photo-1506806732259-39c2d0268443?w=1400&q=90',
-  'Spirits': 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=1400&q=90',
-  'Citrus': 'https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=1400&q=90',
-  'Meat': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=1400&q=90',
-  'Vegetables': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=1400&q=90',
-  'Fish': 'https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?w=1400&q=90',
-  'Fruit': 'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=1400&q=90',
+  'Olive Oil': '/img/lib/olive-harvest.webp',
+  'Wine': '/img/u/1510812431401-41d2bd2722f3-1400.webp',
+  'Cheese': '/img/u/1486297678162-eb2a19b0a32d-1400.webp',
+  'Coffee': '/img/u/1495474472287-4d71bcdd2085-1400.webp',
+  'Pasta': '/img/lib/fresh-pasta.webp',
+  'Truffle': '/img/lib/black-truffles.webp',
+  'Cured Meats': '/img/lib/cured-meats.webp',
+  'Honey': '/img/lib/honey.webp',
+  'Nuts': '/img/lib/nuts.webp',
+  'Liqueurs': '/img/lib/limoncello.webp',
+  'Condiments': '/img/u/1472476443507-c7a5948772fc-1400.webp',
+  'Baked Goods': '/img/u/1509440159596-0249088772ff-1400.webp',
+  'Rice': '/img/u/1536304993881-ff6e9eefa2a6-1400.webp',
+  'Spices': '/img/lib/saffron-risotto.webp',
+  'Spirits': '/img/lib/limoncello.webp',
+  'Citrus': '/img/lib/citrus.webp',
+  'Meat': '/img/u/1544025162-d76694265947-1400.webp',
+  'Vegetables': '/img/u/1542838132-92c53300491e-1400.webp',
+  'Fish': '/img/u/1580476262798-bddd9f4b7369-1400.webp',
+  'Fruit': '/img/u/1490474418585-ba9bad8fd0ea-1400.webp',
 };
 
 const regionLandscapes = {
-  toscana: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/85bc38620_riccardo-cervia-1e_ciLqqTV0-unsplash.jpg',
-  lombardia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/c47d474d1_stanislav-gulei-32oHXq6phvA-unsplash.jpg',
-  sicilia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/8b7808501_sterling-lanier-EYeWIJu5Mc0-unsplash.jpg',
-  campania: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/9d60c1054_antonio-sessa-MHhf6RmbQWQ-unsplash.jpg',
-  veneto: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/03c802e32_henrique-ferreira-RKsLQoSnuTc-unsplash.jpg',
-  piemonte: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/2e605a220_federico-di-dio-photography-9MzTjgxpIYA-unsplash.jpg',
-  puglia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/9f4c481b7_sam-ferrara-uNvgvo2cs7k-unsplash.jpg',
-  emilia_romagna: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/d96f7e04e_richard-hedrick-ug4-b19KX5o-unsplash.jpg',
-  lazio: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/c25962b57_petr-slovacek-SXk8BWKvoXE-unsplash.jpg',
-  sardegna: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/7397f32c2_giulia-gasperini-0vHwXA42NzU-unsplash.jpg',
-  liguria: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/e754515ae_gabriele-romano-kU6ZP3W_M4k-unsplash.jpg',
-  calabria: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/ca4c2a634_vincenzo-de-simone-ag-2vUYJLpM-unsplash.jpg',
-  marche: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/629d0f7c8_bernard-hermant-Bhsj6ai7pUA-unsplash.jpg',
-  abruzzo: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/b9af25e26_chris-weiher-M39zQlScA84-unsplash.jpg',
-  umbria: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/bdc34d534_krzysztof-maksimiuk-4GgBxc3CgeQ-unsplash.jpg',
-  trentino_alto_adige: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/7b4fd0fe3_nicola-pavan-5ZvYfLOuSzw-unsplash.jpg',
-  friuli_venezia_giulia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/4b23cd7e8_kristof-van-rentergem-lpYWtWpTwbs-unsplash.jpg',
-  basilicata: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/26e1be612_katie-kalmykova-JkgYrViv8Q8-unsplash.jpg',
-  molise: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/47e0c006a_massimiliano-morosinotto-PlRRMpAWZKU-unsplash.jpg',
-  valle_daosta: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/9531fd2b6_antonio-sessa-Mwz1wWm9Xvk-unsplash.jpg',
+  toscana: '/img/b44/85bc38620.webp',
+  lombardia: '/img/b44/c47d474d1.webp',
+  sicilia: '/img/b44/8b7808501.webp',
+  campania: '/img/b44/9d60c1054.webp',
+  veneto: '/img/b44/03c802e32.webp',
+  piemonte: '/img/b44/2e605a220.webp',
+  puglia: '/img/b44/9f4c481b7.webp',
+  emilia_romagna: '/img/b44/d96f7e04e.webp',
+  lazio: '/img/b44/c25962b57.webp',
+  sardegna: '/img/b44/7397f32c2.webp',
+  liguria: '/img/b44/e754515ae.webp',
+  calabria: '/img/b44/ca4c2a634.webp',
+  marche: '/img/b44/629d0f7c8.webp',
+  abruzzo: '/img/b44/b9af25e26.webp',
+  umbria: '/img/b44/bdc34d534.webp',
+  trentino_alto_adige: '/img/b44/7b4fd0fe3.webp',
+  friuli_venezia_giulia: '/img/b44/4b23cd7e8.webp',
+  basilicata: '/img/b44/26e1be612.webp',
+  molise: '/img/b44/47e0c006a.webp',
+  valle_daosta: '/img/b44/9531fd2b6.webp',
 };
 
 const terroir = {
@@ -222,7 +222,7 @@ export default function ProducerDetail() {
     );
   }
 
-  const heroUrl = categoryHeroImages[producer.category] || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1400&q=90';
+  const heroUrl = categoryHeroImages[producer.category] || '/img/u/1556909114-f6e7ad7d3136-1400.webp';
   const producerProducts = productsData.filter(p => p.producer === producer.name);
   const regionProducts = producerProducts.length > 0
     ? producerProducts

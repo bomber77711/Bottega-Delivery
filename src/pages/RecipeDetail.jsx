@@ -6,19 +6,19 @@ import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink } from 'lucide-react';
 import GastronomyNetwork from '../components/GastronomyNetwork';
 
 const producerImages = {
-  'caseificio-salvo': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'pastificio-cavalieri': 'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=300&q=70',
-  'prosciuttificio-san-nicola': 'https://images.unsplash.com/photo-1625938144755-652e08e359b7?w=300&q=70',
-  'caseificio-gennari': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'gustarosso': 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=300&q=70',
-  'riseria-costanzo': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&q=70',
-  'caseificio-lombardo': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'zafferano-altopiano': 'https://images.unsplash.com/photo-1609501676614-6f01f0f3d0ea?w=300&q=70',
-  'pesto-rossi': 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=300&q=70',
-  'frantoio-roi': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&q=70',
-  'formaggi-argiolas': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&q=70',
-  'olio-callipo': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&q=70',
-  'tartufi-morra': 'https://images.unsplash.com/photo-1609501676614-6f01f0f3d0ea?w=300&q=70',
+  'caseificio-salvo': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'pastificio-cavalieri': '/img/u/1555949258-eb67b1ef0ceb-300.webp',
+  'prosciuttificio-san-nicola': '/img/u/1625938144755-652e08e359b7-300.webp',
+  'caseificio-gennari': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'gustarosso': '/img/products/sanmarzano-gustarosso.webp',
+  'riseria-costanzo': '/img/products/riso-costanzo.webp',
+  'caseificio-lombardo': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'zafferano-altopiano': '/img/lib/saffron-risotto.webp',
+  'pesto-rossi': '/img/products/pesto-rossi.webp',
+  'frantoio-roi': '/img/u/1474979266404-7eaacbcd87c5-300.webp',
+  'formaggi-argiolas': '/img/u/1486297678162-eb2a19b0a32d-300.webp',
+  'olio-callipo': '/img/u/1474979266404-7eaacbcd87c5-300.webp',
+  'tartufi-morra': '/img/products/tartufo-morra.webp',
 };
 
 const producerNames = {
@@ -159,7 +159,7 @@ export default function RecipeDetail() {
                 <Link key={i} to={`/producers/${ing.producerId}`} style={{ textDecoration: 'none', display: 'flex', gap: 12, padding: '12px 14px', background: '#F9FBF9', borderRadius: 10, border: '1px solid #E8F5E9', transition: 'all 0.15s' }}
                   onMouseEnter={e => { e.currentTarget.style.background = '#E8F5E9'; e.currentTarget.style.border = '1px solid #2E7D32'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = '#F9FBF9'; e.currentTarget.style.border = '1px solid #E8F5E9'; }}>
-                  <img src={producerImages[ing.producerId] || 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=60&q=60'} alt=""
+                  <img src={producerImages[ing.producerId] || '/img/u/1486297678162-eb2a19b0a32d-300.webp'} alt=""
                     style={{ width: 44, height: 44, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
                   <div>
                     <p style={{ fontSize: 12, fontWeight: 700, color: '#1A1A1A', marginBottom: 2 }}>{producerNames[ing.producerId] || ing.producerId}</p>

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ShoppingCart, Search, Menu, X, Command } from 'lucide-react';
+import { ShoppingCart, Search, Menu, X } from 'lucide-react';
 import { CartProvider, useCart } from './components/cartStore';
 import CartDrawer from './components/CartDrawer';
 import CommandBar from './components/CommandBar';
