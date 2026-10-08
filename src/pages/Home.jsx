@@ -507,16 +507,14 @@ export default function Home() {
             </div>
           )}
 
-          {/* Legend — same scale the map uses */}
+          {/* Legend — same scale the map uses, kept as subtle as the original */}
           {!compact && (
-            <div style={{ position: 'absolute', top: 60, right: selectedRegion ? PANEL_W + 16 : 16, zIndex: 10, display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 8, background: 'rgba(6,13,6,0.7)', border: '1px solid rgba(255,255,255,0.06)', transition: 'right 0.32s ease' }}>
-              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontFamily: "'DM Mono',monospace", textTransform: 'uppercase', letterSpacing: '0.06em' }}>Producers</span>
+            <div style={{ position: 'absolute', top: 58, right: selectedRegion ? PANEL_W + 18 : 18, zIndex: 10, display: 'flex', alignItems: 'center', gap: 6, pointerEvents: 'none', transition: 'right 0.32s ease' }}>
+              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontFamily: "'DM Mono',monospace", textTransform: 'uppercase' }}>Low</span>
               {[...DENSITY_SCALE].reverse().map((b) => (
-                <span key={b.label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ width: 12, height: 9, borderRadius: 2, background: b.color, display: 'inline-block', border: '1px solid rgba(255,255,255,0.15)' }} />
-                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', fontFamily: "'DM Mono',monospace" }}>{b.label}</span>
-                </span>
+                <span key={b.label} title={`${b.label} producers`} style={{ width: 12, height: 7, borderRadius: 2, background: b.color, display: 'inline-block', border: '1px solid rgba(255,255,255,0.08)' }} />
               ))}
+              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontFamily: "'DM Mono',monospace", textTransform: 'uppercase' }}>High</span>
             </div>
           )}
 

@@ -35,14 +35,15 @@ const ITALY = (() => {
 })();
 
 // ── Visual config (exported so the legend uses the exact same scale) ──
+// The original Bottega palette: subtle dark greens, deliberately low-contrast.
 export const DENSITY_SCALE = [
-  { min: 40, color: '#3E8E47', label: '40+' },
-  { min: 20, color: '#2E6E36', label: '20–39' },
-  { min: 10, color: '#22512A', label: '10–19' },
-  { min: 0, color: '#1A3A1F', label: '<10' },
+  { min: 40, color: '#2D5A2D', label: '40+' },
+  { min: 20, color: '#1E3E1E', label: '20–39' },
+  { min: 10, color: '#183218', label: '10–19' },
+  { min: 0, color: '#132513', label: '<10' },
 ];
-const HOVER_FILL = '#55A85E';
-const SELECTED_FILL = '#4A9D53';
+const HOVER_FILL = '#2D6A4F';
+const SELECTED_FILL = '#2D6A4F';
 const regionFill = (count) => DENSITY_SCALE.find((b) => count >= b.min).color;
 
 export const TYPE_CONFIG = {
@@ -61,7 +62,7 @@ const LAYER_TYPE_MAP = {
   experiences: ['experience'],
 };
 
-const MARKER = { national: 15, zoomed: 34, zoomedCompact: 28 };
+const MARKER = { national: 17, zoomed: 34, zoomedCompact: 28 };
 const ZOOM_MS = 650;
 const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -158,15 +159,14 @@ export default function ItalyMap({
   const compact = dims.width > 0 && dims.width < 768;
 
   // Base projection: whole of Italy fitted inside the area not covered by overlays.
-  const baseTop = Math.min(insets.top, dims.height * 0.3);
   const proj = useMemo(() => {
     if (!dims.width || !dims.height) return null;
-    const pad = compact ? 10 : 24;
+    // Italy fills the screen (like the original): it may tuck under the floating controls.
     return geoMercator().fitExtent(
-      [[pad, baseTop], [dims.width - pad, dims.height - (compact ? 70 : 24)]],
+      compact ? [[8, 112], [dims.width - 8, dims.height - 56]] : [[0, 72], [dims.width, dims.height + 30]],
       ITALY,
     );
-  }, [dims.width, dims.height, compact, baseTop]);
+  }, [dims.width, dims.height, compact]);
 
   // Path strings + bounds — computed once per projection, never on hover.
   const shapes = useMemo(() => {
@@ -176,16 +176,19 @@ export default function ItalyMap({
   }, [proj]);
   const boundsById = useMemo(() => Object.fromEntries(shapes.map((s) => [s.regionId, s.bounds])), [shapes]);
 
-  // Marker base positions (projected, un-zoomed)
-  const spotBase = useMemo(() => {
-    if (!proj) return {};
-    const out = {};
+  // Two marker layouts, projected once:
+  //  - spotNat:  the original evenly-spread "constellation" (authored offsets) for the national view
+  //  - spotReal: the real town each spot represents, used once you zoom into a region
+  const { spotNat, spotReal } = useMemo(() => {
+    if (!proj) return { spotNat: {}, spotReal: {} };
+    const nat = {}, real = {};
     for (const [regionId, spots] of Object.entries(gastronomySpots)) {
       const c = regionCentroids[regionId];
       if (!c) continue;
-      out[regionId] = spots.map((s) => proj(s.coords || [c.lng + (s.offset?.[0] || 0), c.lat + (s.offset?.[1] || 0)]));
+      nat[regionId] = spots.map((s) => proj([c.lng + (s.offset?.[0] || 0), c.lat + (s.offset?.[1] || 0)]));
+      real[regionId] = spots.map((s, i) => (s.coords ? proj(s.coords) : nat[regionId][i]));
     }
-    return out;
+    return { spotNat: nat, spotReal: real };
   }, [proj]);
 
   const centroidBase = useMemo(() => {
@@ -210,32 +213,32 @@ export default function ItalyMap({
   // De-overlap offsets (px), computed once per layout — not per animation frame.
   const nationalOffsets = useMemo(() => {
     const keys = [], pts = [];
-    for (const [regionId, list] of Object.entries(spotBase)) list.forEach((p, i) => { if (p) { keys.push(`${regionId}-${i}`); pts.push(p); } });
-    const relaxed = relax(pts, MARKER.national - 2);
+    for (const [regionId, list] of Object.entries(spotNat)) list.forEach((p, i) => { if (p) { keys.push(`${regionId}-${i}`); pts.push(p); } });
+    const relaxed = relax(pts, MARKER.national - 3);
     return Object.fromEntries(keys.map((k, i) => [k, [relaxed[i][0] - pts[i][0], relaxed[i][1] - pts[i][1]]]));
-  }, [spotBase]);
+  }, [spotNat]);
   const zoomOffsets = useMemo(() => {
-    if (!selectedRegion || !spotBase[selectedRegion]) return {};
+    if (!selectedRegion || !spotReal[selectedRegion]) return {};
     const size = compact ? MARKER.zoomedCompact : MARKER.zoomed;
-    const pts = spotBase[selectedRegion].map((p) => [p[0] * target.s + target.tx, p[1] * target.s + target.ty]);
+    const pts = spotReal[selectedRegion].map((p) => [p[0] * target.s + target.tx, p[1] * target.s + target.ty]);
     const relaxed = relax(pts, size + 6);
     return Object.fromEntries(pts.map((p, i) => [`${selectedRegion}-${i}`, [relaxed[i][0] - p[0], relaxed[i][1] - p[1]]]));
-  }, [selectedRegion, spotBase, target, compact]);
+  }, [selectedRegion, spotReal, target, compact]);
 
-  const [view, setView] = useState({ tx: 0, ty: 0, s: 1 });
+  const [view, setView] = useState({ tx: 0, ty: 0, s: 1, k: 1 });
   const viewRef = useRef(view);
   viewRef.current = view;
   useEffect(() => {
     const from = viewRef.current;
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (reduce || (from.tx === target.tx && from.ty === target.ty && from.s === target.s)) { setView(target); return; }
+    if (reduce || (from.tx === target.tx && from.ty === target.ty && from.s === target.s)) { setView({ ...target, k: 1 }); return; }
     let raf, start;
     const step = (t) => {
       if (start === undefined) start = t;
       const k = easeInOutCubic(Math.min(1, (t - start) / ZOOM_MS));
       // interpolate scale geometrically so the zoom feels uniform
       const s = from.s * Math.pow(target.s / from.s, k);
-      setView({ s, tx: from.tx + (target.tx - from.tx) * k, ty: from.ty + (target.ty - from.ty) * k });
+      setView({ s, tx: from.tx + (target.tx - from.tx) * k, ty: from.ty + (target.ty - from.ty) * k, k });
       if (k < 1) raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
@@ -284,26 +287,33 @@ export default function ItalyMap({
   // ── Derived marker list ──
   const allowedTypes = activeLayer !== 'all' ? LAYER_TYPE_MAP[activeLayer] || [] : null;
   const markers = [];
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const glide = zoomed ? view.k : 0; // selected region's markers glide from constellation → real towns
   for (const [regionId, spots] of Object.entries(gastronomySpots)) {
-    const base = spotBase[regionId];
-    if (!base) continue;
+    const nat = spotNat[regionId], real = spotReal[regionId];
+    if (!nat) continue;
     const isSel = regionId === selectedRegion;
     if (zoomed && !isSel) continue; // other regions' markers are hidden while zoomed
     const journeyDim = activeJourney && !zoomed && !activeJourney.regions.includes(regionId);
     spots.forEach((spot, index) => {
       if (allowedTypes && !allowedTypes.includes(spot.type)) return;
-      const raw = toScreen(base[index]);
-      if (!raw) return;
-      const off = (zoomed ? zoomOffsets : nationalOffsets)[`${regionId}-${index}`] || [0, 0];
-      const pos = [raw[0] + off[0], raw[1] + off[1]];
-      markers.push({ regionId, index, spot, pos, isSel, journeyDim });
+      const key = `${regionId}-${index}`;
+      const a = toScreen(nat[index]), aOff = nationalOffsets[key] || [0, 0];
+      if (!a) return;
+      let pos = [a[0] + aOff[0], a[1] + aOff[1]];
+      const t = isSel ? glide : 0;
+      if (t > 0) {
+        const b = toScreen(real[index]), bOff = zoomOffsets[key] || [0, 0];
+        pos = [lerp(pos[0], b[0] + bOff[0], t), lerp(pos[1], b[1] + bOff[1], t)];
+      }
+      markers.push({ regionId, index, spot, pos, isSel, journeyDim, t });
     });
   }
 
   const selectedSpotData = selectedSpot && gastronomySpots[selectedSpot.regionId]?.[selectedSpot.index];
   const selectedSpotPos = (() => {
     if (!selectedSpotData) return null;
-    const raw = toScreen(spotBase[selectedSpot.regionId]?.[selectedSpot.index]);
+    const raw = toScreen(spotReal[selectedSpot.regionId]?.[selectedSpot.index]);
     const off = zoomOffsets[`${selectedSpot.regionId}-${selectedSpot.index}`] || [0, 0];
     return raw ? [raw[0] + off[0], raw[1] + off[1]] : null;
   })();
@@ -368,8 +378,8 @@ export default function ItalyMap({
                   d={d}
                   name={name}
                   fill={isSel ? SELECTED_FILL : isHov ? HOVER_FILL : regionFill(data?.producerCount || 0)}
-                  stroke={isSel ? 'rgba(200,230,201,0.9)' : isHov ? 'rgba(200,230,201,0.7)' : 'rgba(255,255,255,0.14)'}
-                  strokeWidth={isSel ? 1.6 : isHov ? 1.2 : 0.6}
+                  stroke={isSel ? 'rgba(76,175,80,0.6)' : isHov ? 'rgba(76,175,80,0.4)' : 'rgba(255,255,255,0.1)'}
+                  strokeWidth={isSel ? 1.5 : isHov ? 1 : 0.5}
                   opacity={opacity}
                   glow={isSel}
                   journeyColor={activeJourney && !zoomed && inJourney ? activeJourney.color : null}
@@ -407,8 +417,8 @@ export default function ItalyMap({
           })}
 
           {/* Gastronomy markers — unscaled overlay, constant on-screen size */}
-          {markers.map(({ regionId, index, spot, pos, isSel, journeyDim }) => {
-            const size = isSel ? (compact ? MARKER.zoomedCompact : MARKER.zoomed) : MARKER.national;
+          {markers.map(({ regionId, index, spot, pos, isSel, journeyDim, t }) => {
+            const size = lerp(MARKER.national, compact ? MARKER.zoomedCompact : MARKER.zoomed, t);
             const cfg = TYPE_CONFIG[spot.type] || TYPE_CONFIG.producer;
             const active = selectedSpot?.regionId === regionId && selectedSpot?.index === index;
             const label = `${spot.label} — ${cfg.label}`;
@@ -417,7 +427,7 @@ export default function ItalyMap({
                 key={`${regionId}-${index}`}
                 className={`it-spot${active ? ' is-active' : ''}`}
                 transform={`translate(${pos[0]} ${pos[1]})`}
-                opacity={journeyDim ? 0.18 : isSel ? 1 : 0.85}
+                opacity={journeyDim ? 0.15 : lerp(0.75, 1, t)}
                 style={{ cursor: 'pointer', pointerEvents: markerInteractive ? 'auto' : 'none', transition: 'opacity .2s' }}
                 role="button"
                 tabIndex={isSel ? 0 : -1}
@@ -430,9 +440,10 @@ export default function ItalyMap({
                 {/* hit area: exactly the marker, plus a small touch margin when zoomed */}
                 <circle r={size / 2 + (isSel ? 6 : 1)} fill="transparent" />
                 <circle className="it-ring" r={size / 2 + 5} fill="rgba(76,175,80,0.22)" stroke="#81C784" strokeWidth={1.5} />
-                <circle r={size / 2} fill={cfg.bg} stroke="rgba(0,0,0,0.35)" strokeWidth={1} />
-                <text textAnchor="middle" dominantBaseline="central" fontSize={size * 0.52} style={{ userSelect: 'none', pointerEvents: 'none' }}>
-                  {spot.emoji || cfg.em}
+                <circle r={size / 2 + 2} fill={cfg.bg} opacity={0.15} />
+                <circle r={size / 2} fill={cfg.bg} />
+                <text textAnchor="middle" dominantBaseline="central" fontSize={size * (t > 0.5 ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
+                  {t > 0.5 ? (spot.emoji || cfg.em) : cfg.em}
                 </text>
               </g>
             );
