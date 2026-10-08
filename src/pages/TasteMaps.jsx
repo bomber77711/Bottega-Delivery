@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Heart } from 'lucide-react';
+import { Search, Heart } from 'lucide-react';
 import { publicTasteMaps } from '../components/creatorsData';
 
 const tagColors = ['#E8F5E9', '#FBE9E7', '#FFF3E0', '#E3F2FD', '#F3E5F5', '#F0F7EE'];
@@ -54,9 +54,9 @@ export default function TasteMaps() {
               </div>
               <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, fontWeight: 700, color: '#1A1A1A', marginBottom: 6, lineHeight: 1.25 }}>{m.title}</h3>
               <p style={{ fontSize: 13, color: '#888', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 5 }}>
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#2E7D32', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#2E7D32', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 8, fontWeight: 700, color: '#fff' }}>{m.author.split(' ').map(n => n[0]).join('').slice(0,2)}</span>
-                </div>
+                </span>
                 {m.author}
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>

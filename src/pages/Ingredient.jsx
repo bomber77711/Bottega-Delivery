@@ -7,71 +7,14 @@ import FoodConnections from '../components/FoodConnections';
 import { isSaved, toggleSave } from '../components/tasteMapStore';
 import GastronomyNetwork from '../components/GastronomyNetwork';
 
-// Static ingredient knowledge base
-const ingredients = {
-  'pecorino-romano': {
-    id: 'pecorino-romano', name: 'Pecorino Romano DOP', region: 'lazio', regionName: 'Lazio',
-    image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=900&q=80',
-    description: 'One of Italy\'s oldest cheeses, Pecorino Romano DOP is a hard, salty sheep\'s milk cheese produced in Lazio and Sardinia. Its sharp, pungent flavour makes it essential to Roman pasta dishes.',
-    flavors: ['Salty', 'Sharp', 'Umami', 'Nutty', 'Pungent'],
-    pairings: ['Black Pepper', 'Guanciale', 'Eggs', 'Pasta', 'Chianti', 'Honeys'],
-    pairingIds: ['black-pepper', 'guanciale', 'eggs', 'pasta', 'chianti', 'honey'],
-    nutrition: ['High Protein', 'Rich in Calcium', 'Aged', 'Low Lactose'],
-    producerIds: ['caseificio-salvo', 'formaggi-argiolas'],
-    recipeIds: ['cacio-e-pepe', 'trofie-al-pesto'],
-  },
-  'parmigiano-reggiano': {
-    id: 'parmigiano-reggiano', name: 'Parmigiano Reggiano DOP', region: 'emilia_romagna', regionName: 'Emilia-Romagna',
-    image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=900&q=80',
-    description: 'The "King of Italian Cheeses" — an aged, granular hard cheese produced in Parma, Reggio Emilia, and surrounding provinces. Aged 12 to 36 months, its crystalline texture and complex umami depth are unparalleled.',
-    flavors: ['Umami', 'Nutty', 'Savory', 'Sweet', 'Crystalline'],
-    pairings: ['Prosciutto di Parma', 'Balsamic Vinegar', 'Pasta', 'Risotto', 'Lambrusco'],
-    pairingIds: ['prosciutto-di-parma', 'balsamic-vinegar', 'pasta', 'risotto', 'lambrusco'],
-    nutrition: ['High Protein', 'Rich in Calcium', 'Aged', 'Lactose-Free'],
-    producerIds: ['caseificio-gennari', 'caseificio-lombardo'],
-    recipeIds: ['tagliatelle-ragu', 'risotto-milanese', 'tajarin-tartufo'],
-  },
-  'tartufo-bianco': {
-    id: 'tartufo-bianco', name: "Tartufo Bianco d'Alba", region: 'piemonte', regionName: 'Piedmont',
-    image: 'https://images.unsplash.com/photo-1609501676614-6f01f0f3d0ea?w=900&q=80',
-    description: "The white truffle from Alba is the most prized food in Italy — earthy, garlicky, honey-sweet, and intensely perfumed. Harvested October to December in the Langhe forests. Never cooked. Always shaved raw.",
-    flavors: ['Earthy', 'Garlicky', 'Honey', 'Musky', 'Intense'],
-    pairings: ['Tajarin', 'Butter', 'Parmigiano Reggiano', 'Risotto', 'Eggs'],
-    pairingIds: ['tajarin', 'butter', 'parmigiano-reggiano', 'risotto', 'eggs'],
-    nutrition: ['Low Calorie', 'High in Antioxidants', 'Seasonal', 'Rare'],
-    producerIds: ['tartufi-morra', 'tartufi-ponti'],
-    recipeIds: ['tajarin-tartufo'],
-  },
-  'pesto-genovese': {
-    id: 'pesto-genovese', name: 'Pesto Genovese DOP', region: 'liguria', regionName: 'Liguria',
-    image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=900&q=80',
-    description: 'True Pesto Genovese is made only with DOP Genovese basil, Ligurian extra virgin olive oil, Sardinian Fiore Sardo, Parmigiano, pine nuts, and garlic. Never heat it. Always use a marble mortar ideally.',
-    flavors: ['Fresh', 'Herbal', 'Nutty', 'Savory', 'Bright'],
-    pairings: ['Trofie', 'Focaccia', 'Burrata', 'Cherry Tomatoes', 'Pecorino'],
-    pairingIds: ['trofie', 'focaccia', 'burrata', 'cherry-tomatoes', 'pecorino-sardo'],
-    nutrition: ['High in Healthy Fats', 'Antioxidant-rich', 'Vegetarian', 'Gluten-Free'],
-    producerIds: ['pesto-rossi', 'frantoio-roi'],
-    recipeIds: ['trofie-al-pesto'],
-  },
-  'san-marzano': {
-    id: 'san-marzano', name: 'San Marzano DOP Tomatoes', region: 'campania', regionName: 'Campania',
-    image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=900&q=80',
-    description: 'San Marzano tomatoes grown in the volcanic plains of Sarno — the gold standard for tomato sauce. Lower acidity, fewer seeds, and a meaty flesh that makes them the only tomato permitted in authentic Neapolitan pizza.',
-    flavors: ['Sweet', 'Low Acid', 'Bright', 'Fresh', 'Umami'],
-    pairings: ['Mozzarella di Bufala', 'Basil', 'Olive Oil', 'Pasta', 'Pizza'],
-    pairingIds: ['mozzarella-bufala', 'basil', 'olive-oil', 'pasta', 'pizza'],
-    nutrition: ['Low Calorie', 'Rich in Lycopene', 'Vegan', 'Gluten-Free'],
-    producerIds: ['gustarosso'],
-    recipeIds: ['pasta-alla-norma', 'tagliatelle-ragu'],
-  },
-};
+import { ingredients } from '../components/ingredientsData';
 
 const heroImages = {
-  lazio: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=900&q=80',
-  emilia_romagna: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=900&q=80',
-  piemonte: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80',
-  liguria: 'https://images.unsplash.com/photo-1499678329028-101435549a4e?w=900&q=80',
-  campania: 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=900&q=80',
+  lazio: '/img/u/1552832230-c0197dd311b5-900.webp',
+  emilia_romagna: '/img/lib/r-emilia.webp',
+  piemonte: '/img/lib/r-piemonte.webp',
+  liguria: '/img/u/1499678329028-101435549a4e-900.webp',
+  campania: '/img/lib/r-campania.webp',
 };
 
 export default function Ingredient() {
@@ -93,7 +36,13 @@ export default function Ingredient() {
 
   const region = regionData[ingredient.region];
   const heroImg = ingredient.image || heroImages[ingredient.region] || heroImages.lazio;
-  const relatedProducers = (region?.producers || []).filter(p => ingredient.producerIds.includes(p.id));
+  // regionData producers have no id field — match by slugified name (same slug used by /producers/:id).
+  // Search all regions, since some producers (e.g. Formaggi Argiolas for Pecorino Romano) are outside the home region.
+  const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const relatedProducers = Object.values(regionData)
+    .flatMap(r => r.producers || [])
+    .filter(p => ingredient.producerIds.includes(slugify(p.name)))
+    .map(p => ({ ...p, id: slugify(p.name) }));
   const relatedRecipes = recipesData.filter(r => ingredient.recipeIds.includes(r.id));
 
   // Food connections

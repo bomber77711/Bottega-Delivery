@@ -14,7 +14,7 @@ export const recipesData = [
     category: 'Pasta',
     difficulty: 'Medium',
     cookTime: '20 min',
-    image: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=900&q=80',
+    image: '/img/u/1473093295043-cdd812d0e601-900.webp',
     description: 'Three ingredients, zero margin for error: Pecorino Romano, black pepper, and pasta water emulsified into the silkiest sauce in Roman cooking.',
     creator: { id: 'chef-antonio', name: 'Chef Antonio Rossi' },
     culturalStory: 'Born among the shepherds of the Roman countryside, cacio e pepe was the meal you could carry: dried pasta, aged pecorino, and pepper that kept for the long transhumance. Its genius is restraint. There is nowhere to hide, which is exactly why every Roman trattoria is judged by it.',
@@ -40,7 +40,7 @@ export const recipesData = [
     category: 'Pasta',
     difficulty: 'Medium',
     cookTime: '25 min',
-    image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=900&q=80',
+    image: '/img/u/1612874742237-6526221588e3-900.webp',
     description: 'Guanciale, egg yolks, Pecorino Romano and pepper. No cream, no garlic, no shortcuts - the discipline is the dish.',
     creator: { id: 'chef-antonio', name: 'Chef Antonio Rossi' },
     culturalStory: 'Carbonara is a postwar Roman invention, its name tangled in legends of charcoal workers and American GI rations of eggs and bacon. What is not debatable is the technique: the heat of the pasta, not a flame, must cook the yolks into a glossy sauce. Scramble it and you have failed; nail it and it is sublime.',
@@ -67,7 +67,7 @@ export const recipesData = [
     category: 'Pasta',
     difficulty: 'Easy',
     cookTime: '40 min',
-    image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=900&q=80',
+    image: '/img/u/1621996346565-e3dbc646d9a9-900.webp',
     description: 'Catania on a plate: fried aubergine, sweet tomato, basil and a snowfall of salted ricotta.',
     creator: { id: 'chef-sofia', name: 'Chef Sofia Rizzo' },
     culturalStory: 'Said to be named after Bellini\'s opera Norma - a Catanese masterpiece for a Catanese masterpiece - this dish is Sicily\'s love letter to the aubergine. The volcanic soil of Etna gives the vegetables and tomatoes an intensity you taste in every forkful.',
@@ -94,7 +94,7 @@ export const recipesData = [
     category: 'Pasta',
     difficulty: 'Easy',
     cookTime: '25 min',
-    image: 'https://images.unsplash.com/photo-1551892374-ecf8754cf8b0?w=900&q=80',
+    image: '/img/u/1551892374-ecf8754cf8b0-900.webp',
     description: "Calabria's spreadable fire - 'nduja - melted into tomato until the whole pan glows red.",
     creator: { id: 'chef-sofia', name: 'Chef Sofia Rizzo' },
     culturalStory: "'Nduja is the soul of Spilinga, a soft, spicy salume of pork and Calabrian chillies that melts rather than slices. Stirred into a quick tomato sauce it dissolves into pure heat and depth - peasant ingenuity turned into one of Italy's most addictive plates of pasta.",
@@ -120,7 +120,7 @@ export const recipesData = [
     category: 'Pizza',
     difficulty: 'Hard',
     cookTime: '90 min + proof',
-    image: 'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=900&q=80',
+    image: '/img/u/1604068549290-dea0e4a305ca-900.webp',
     description: 'The Neapolitan original: San Marzano tomato, fior di latte or mozzarella di bufala, basil - the colours of the Italian flag.',
     creator: { id: 'chef-antonio', name: 'Chef Antonio Rossi' },
     culturalStory: 'In 1889 Naples pizzaiolo Raffaele Esposito is said to have built a pizza in the colours of the new nation\'s flag for Queen Margherita: red tomato, white mozzarella, green basil. Whether or not the tale is exact, the Margherita became the benchmark - protected today as a Specialita Tradizionale Garantita with rules on dough, heat and time.',
@@ -149,7 +149,7 @@ export const recipesData = [
     category: 'Rice',
     difficulty: 'Medium',
     cookTime: '35 min',
-    image: 'https://images.unsplash.com/photo-1633436375153-d7045cb93e38?w=900&q=80',
+    image: '/img/u/1633436375153-d7045cb93e38-900.webp',
     description: 'Saffron-gold risotto mantecato with butter and Grana Padano - Milan\'s most elegant plate.',
     creator: { id: 'chef-lucia', name: 'Chef Lucia Ferretti' },
     culturalStory: 'Legend gives it to a glassmaker\'s apprentice who tinted a wedding risotto with the saffron he used on stained glass for the Duomo. Real or not, saffron made this rice a symbol of Milanese luxury, traditionally served alongside ossobuco. The mantecatura - beating in cold butter and cheese off the heat - is what makes it shimmer.',
@@ -177,7 +177,7 @@ export const recipesData = [
     category: 'Pasta',
     difficulty: 'Medium',
     cookTime: '3 hr',
-    image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=900&q=80',
+    image: '/img/u/1551183053-bf91a1d81141-900.webp',
     description: 'The real Bolognese: a slow, milk-enriched meat ragu on fresh egg tagliatelle - never spaghetti.',
     creator: { id: 'chef-lucia', name: 'Chef Lucia Ferretti' },
     culturalStory: 'The Bolognese guard their ragu like a state secret - a recipe lodged with the Chamber of Commerce in 1982 specifies the cut of meat and the egg tagliatelle it belongs to. Patience is the only real ingredient: hours of the gentlest simmer, a little milk to soften, and wide ribbons of pasta that catch the sauce.',
@@ -206,7 +206,7 @@ export const recipesData = [
     category: 'Pasta',
     difficulty: 'Hard',
     cookTime: '1 hr',
-    image: 'https://images.unsplash.com/photo-1473093226795-af9932fe5856?w=900&q=80',
+    image: '/img/u/1473093226795-af9932fe5856-900.webp',
     description: 'Hand-cut 40-yolk Piedmontese pasta, butter, and shavings of white truffle from Alba.',
     creator: { id: 'chef-luca', name: 'Chef Luca Carnevale' },
     culturalStory: 'Tajarin is the Langhe\'s show of richness - a pasta worked with an extravagance of egg yolks, cut to threads by hand. In autumn it becomes the carrier for the most precious ingredient in Italy: the white truffle of Alba, shaved tableside over nothing more than melted butter so the perfume can speak.',
@@ -232,7 +232,7 @@ export const recipesData = [
     category: 'Pasta',
     difficulty: 'Easy',
     cookTime: '30 min',
-    image: 'https://images.unsplash.com/photo-1595295333158-4742f28fbd85?w=900&q=80',
+    image: '/img/u/1595295333158-4742f28fbd85-900.webp',
     description: 'Twisted Ligurian trofie with basil pesto pounded in a mortar, plus the traditional potato and green beans.',
     creator: { id: 'chef-marco', name: 'Chef Marco Bianchi' },
     culturalStory: 'Genoa\'s pesto is a ritual as much as a sauce: Genovese DOP basil, pine nuts, garlic, two cheeses and Ligurian olive oil ground in a marble mortar with a wooden pestle - the friction, not a blade, keeps it sweet and green. Tradition tosses it with trofie, plus slices of potato and green beans cooked in the same pot.',
@@ -254,5 +254,15 @@ export const recipesData = [
     relatedRecipes: ['cacio-e-pepe', 'pasta-alla-norma'],
   },
 ];
+
+// Region id for each recipe (regionData key). Lets producer pages, the map and the
+// Recipes region filter match recipes to regions without string-comparing names.
+const REGION_ID_BY_NAME = {
+  Piemonte: 'piemonte', "Valle d'Aosta": 'valle_daosta', Lombardia: 'lombardia', 'Trentino-Alto Adige': 'trentino_alto_adige',
+  Veneto: 'veneto', 'Friuli-Venezia Giulia': 'friuli_venezia_giulia', Liguria: 'liguria', 'Emilia-Romagna': 'emilia_romagna',
+  Toscana: 'toscana', Umbria: 'umbria', Marche: 'marche', Lazio: 'lazio', Abruzzo: 'abruzzo', Molise: 'molise',
+  Campania: 'campania', Puglia: 'puglia', Basilicata: 'basilicata', Calabria: 'calabria', Sicilia: 'sicilia', Sardegna: 'sardegna',
+};
+recipesData.forEach((r) => { if (!r.region) r.region = REGION_ID_BY_NAME[r.regionName] || null; });
 
 export default recipesData;

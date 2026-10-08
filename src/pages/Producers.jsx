@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { regionData } from '../components/regionData';
 import { Search, MapPin, Star, ChevronDown } from 'lucide-react';
@@ -85,8 +86,14 @@ function ProducerCard({ producer }) {
 }
 
 export default function Producers() {
-  const [search, setSearch] = useState('');
-  const [regionFilter, setRegionFilter] = useState('');
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('q') || '');
+  const [regionFilter, setRegionFilter] = useState(searchParams.get('region') || '');
+  // Deep links from the map's region panel (/Producers?region=toscana)
+  useEffect(() => {
+    setSearch(searchParams.get('q') || '');
+    setRegionFilter(searchParams.get('region') || '');
+  }, [searchParams]);
   const [categoryFilter, setCategoryFilter] = useState('');
 
   const filtered = useMemo(() => {

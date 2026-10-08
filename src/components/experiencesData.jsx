@@ -7,12 +7,12 @@ export const experienceTypes = [
 ];
 
 const img = {
-  oil: 'https://images.unsplash.com/photo-1445282768818-728615cc910a?w=800&q=80',
-  wine: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&q=80',
-  cook: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80',
-  farm: 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800&q=80',
-  truffle: 'https://images.unsplash.com/photo-1609252925148-b0f2f3a4f2a0?w=800&q=80',
-  cheese: 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=800&q=80',
+  oil: '/img/lib/olive-harvest.webp',
+  wine: '/img/u/1506377247377-2a5b3b417ebb-800.webp',
+  cook: '/img/u/1556910103-1c02745aae4d-800.webp',
+  farm: '/img/u/1500595046743-cd271d694d30-800.webp',
+  truffle: '/img/lib/truffle-hunt.webp',
+  cheese: '/img/u/1452195100486-9cc805987862-800.webp',
 };
 
 export const experiencesData = [

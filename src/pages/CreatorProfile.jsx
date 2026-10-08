@@ -1,9 +1,9 @@
 import { useParams, Link } from 'react-router-dom';
+import { allProducers } from '@/lib/catalog';
 import { useState } from 'react';
-import { ArrowLeft, Users, Heart, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Users, ExternalLink } from 'lucide-react';
 import { creatorsData } from '../components/creatorsData';
 import { recipesData } from '../components/recipesData';
-import { regionData } from '../components/regionData';
 
 const tabs = ['Recipes', 'Favorite Producers', 'Taste Map'];
 
@@ -23,7 +23,8 @@ export default function CreatorProfile() {
   }
 
   const creatorRecipes = recipesData.filter(r => creator.recipes?.includes(r.id));
-  const favoriteProducers = Object.values(regionData).flatMap(r => r.producers || []).filter(p => creator.favoriteProducers?.includes(p.id));
+  // regionData producers have no id field — allProducers adds the slug id used by /producers/:id
+  const favoriteProducers = allProducers.filter(p => creator.favoriteProducers?.includes(p.id));
   const initials = creator.name.split(' ').map(n => n[0]).slice(0, 2).join('');
 
   return (

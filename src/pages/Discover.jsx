@@ -8,10 +8,10 @@ import { ChefHat, MapPin, BookOpen } from 'lucide-react';
 
 const feedPosts = [
   { type: 'recipe', id: 'cacio-e-pepe' },
-  { type: 'producer', id: 'frantoio-franci', name: 'Frantoio Franci', region: 'Tuscany', producerId: 'frantoio-franci', specialty: 'Olive Oil', description: 'Cold-pressed extra virgin oils from the Tuscan hills since 1958.', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&q=80' },
+  { type: 'producer', id: 'frantoio-franci', name: 'Frantoio Franci', region: 'Tuscany', producerId: 'frantoio-franci', specialty: 'Olive Oil', description: 'Cold-pressed extra virgin oils from the Tuscan hills since 1958.', image: '/img/u/1474979266404-7eaacbcd87c5-600.webp' },
   { type: 'experience', id: 'e1' },
   { type: 'recipe', id: 'tagliatelle-ragu' },
-  { type: 'producer', id: 'acetaia-malpighi', name: 'Acetaia Malpighi', region: 'Emilia-Romagna', producerId: 'acetaia-malpighi', specialty: 'Balsamic Vinegar', description: 'Traditional balsamic vinegar of Modena aged 12–25 years in successive barrels.', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600&q=80' },
+  { type: 'producer', id: 'acetaia-malpighi', name: 'Acetaia Malpighi', region: 'Emilia-Romagna', producerId: 'acetaia-malpighi', specialty: 'Balsamic Vinegar', description: 'Traditional balsamic vinegar of Modena aged 12–25 years in successive barrels.', image: '/img/products/balsamico-malpighi.webp' },
   { type: 'story', id: 's1' },
   { type: 'recipe', id: 'pasta-alla-norma' },
   { type: 'experience', id: 'e9' },

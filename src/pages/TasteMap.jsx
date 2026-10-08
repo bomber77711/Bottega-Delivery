@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getSaved, removeSave } from '../components/tasteMapStore';
 import { publicTasteMaps } from '../components/creatorsData';
-import { Heart, MapPin, Trash2, Share2 } from 'lucide-react';
+import { MapPin, Trash2, Share2 } from 'lucide-react';
 
 const typeConfig = {
   producers: { label: 'Saved Producers', icon: '👨‍🌾', color: '#2E7D32', bg: '#E8F5E9', linkPrefix: '/producers/' },

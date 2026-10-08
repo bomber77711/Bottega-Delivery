@@ -6,7 +6,7 @@ export const creatorsData = [
     title: "Chef · Rome, Italy",
     bio: "Roman chef specializing in classic cucina romana. Pasta is my religion, and cacio e pepe is my prayer.",
     followers: 2840,
-    banner: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=80",
+    banner: "/img/u/1414235077428-338989a2e8c0-900.webp",
     recipes: ["cacio-e-pepe", "pasta-alla-norma"],
     favoriteProducers: ["caseificio-salvo", "gustarosso", "gotto-doro"]
   },
@@ -17,7 +17,7 @@ export const creatorsData = [
     title: "Chef · Bologna",
     bio: "Born in Bologna, raised in my grandmother's kitchen. The keeper of authentic Bolognese — and proud of it.",
     followers: 3210,
-    banner: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=900&q=80",
+    banner: "/img/u/1555396273-367ea4eb4db5-900.webp",
     recipes: ["tagliatelle-ragu", "risotto-milanese"],
     favoriteProducers: ["caseificio-gennari", "prosciuttificio-san-nicola", "acetaia-malpighi"]
   },
@@ -28,7 +28,7 @@ export const creatorsData = [
     title: "Chef · Milano",
     bio: "Milanese chef and food writer. Risotto and Franciacorta are my life. I write about Italian food culture.",
     followers: 1890,
-    banner: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=80",
+    banner: "/img/u/1476124369491-e7addf5db371-800.webp",
     recipes: ["risotto-milanese"],
     favoriteProducers: ["riseria-costanzo", "caseificio-lombardo", "cantina-berlucchi"]
   },
@@ -39,7 +39,7 @@ export const creatorsData = [
     title: "Food Creator · Genova",
     bio: "Ligurian food creator. I make pesto every Sunday. Olive oil on everything. No compromises on basil.",
     followers: 4150,
-    banner: "https://images.unsplash.com/photo-1472393365320-db77a5abbecc?w=900&q=80",
+    banner: "/img/u/1472393365320-db77a5abbecc-900.webp",
     recipes: ["trofie-al-pesto"],
     favoriteProducers: ["pesto-rossi", "frantoio-roi", "panificio-moltedo"]
   },
@@ -50,7 +50,7 @@ export const creatorsData = [
     title: "Chef · Palermo",
     bio: "Sicilian chef and culinary storyteller. Aubergines, capers, sea salt, and the best olive oil on earth.",
     followers: 2670,
-    banner: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=900&q=80",
+    banner: "/img/u/1567620905732-2d1ec7ab7445-900.webp",
     recipes: ["pasta-alla-norma"],
     favoriteProducers: ["pistacchi-bronte", "mokarico", "cantine-florio"]
   },
@@ -61,7 +61,7 @@ export const creatorsData = [
     title: "Chef · Alba, Piemonte",
     bio: "Piedmontese chef. Truffle hunter, Barolo enthusiast, tajarin evangelist. I believe white truffle is edible gold.",
     followers: 3890,
-    banner: "https://images.unsplash.com/photo-1543353071-873f17a7a088?w=900&q=80",
+    banner: "/img/u/1543353071-873f17a7a088-900.webp",
     recipes: ["tajarin-tartufo"],
     favoriteProducers: ["tartufi-morra", "giacomo-conterno", "riseria-costanzo"]
   }

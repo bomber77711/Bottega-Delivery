@@ -1,5 +1,7 @@
-import { useState, useMemo } from 'react';
-import { experiencesData, experienceTypes } from '../components/experiencesData';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { searchExperiences } from '@/lib/catalog';
+import { experienceTypes } from '../components/experiencesData';
 import { regionData } from '../components/regionData';
 import { Search, Star, ChevronDown, MapPin } from 'lucide-react';
 
@@ -65,18 +67,20 @@ function ExperienceCard({ exp }) {
 }
 
 export default function Experiences() {
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('q') || '');
   const [typeFilter, setTypeFilter] = useState('All');
-  const [regionFilter, setRegionFilter] = useState('');
+  const [regionFilter, setRegionFilter] = useState(searchParams.get('region') || '');
+  // Deep links from the map (/Experiences?q=truffle or ?region=piemonte) pre-fill the filters
+  useEffect(() => {
+    setSearch(searchParams.get('q') || '');
+    setRegionFilter(searchParams.get('region') || '');
+  }, [searchParams]);
 
   const filtered = useMemo(() => {
-    return experiencesData.filter(e => {
-      const matchSearch = !search || [e.name, e.producer, e.region, e.type]
-        .some(s => s.toLowerCase().includes(search.toLowerCase()));
-      const matchType = typeFilter === 'All' || e.type === typeFilter;
-      const matchRegion = !regionFilter || e.regionId === regionFilter;
-      return matchSearch && matchType && matchRegion;
-    });
+    // Same matcher the map uses, so counts promised on map cards match this list.
+    return searchExperiences(search, { regionId: regionFilter || undefined })
+      .filter(e => typeFilter === 'All' || e.type === typeFilter);
   }, [search, typeFilter, regionFilter]);
 
   return (

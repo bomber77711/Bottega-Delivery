@@ -1,32 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ItalyMap from '../components/ItalyMap';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import ItalyMap, { DENSITY_SCALE } from '../components/ItalyMap';
 import { regionData } from '../components/regionData';
-import { recipesData } from '../components/recipesData';
-import { Sparkles, Search, MapPin, Maximize2, Minimize2, X, Star, ChevronRight, ArrowRight, Heart, Compass, Utensils, Users } from 'lucide-react';
+import { getRegionImage } from '../components/imageConfig';
+import { searchExperiences, resolveSpot } from '@/lib/catalog';
+import { MapPin, Maximize2, Minimize2, X, Star, ChevronRight, ArrowRight, Heart, Compass, Utensils, Users } from 'lucide-react';
 import AskBottega from '../components/AskBottega';
-const WIKI = {
-  toscana: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/7e69b3d03_generated_image.png',
-  lombardia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/5caaf3d0f_generated_image.png',
-  sicilia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/48f5ee453_generated_image.png',
-  campania: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/acd73822c_generated_image.png',
-  veneto: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/e687e5690_generated_image.png',
-  piemonte: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/fc338e179_generated_image.png',
-  puglia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/45aa42495_generated_image.png',
-  emilia_romagna: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/a27d2b16a_generated_image.png',
-  lazio: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/d3871d123_generated_image.png',
-  sardegna: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/4f83999be_generated_image.png',
-  liguria: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/362518852_generated_image.png',
-  calabria: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/ebbd6ed12_generated_image.png',
-  marche: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/bf764a187_generated_image.png',
-  abruzzo: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/f32d70314_generated_image.png',
-  umbria: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/1db533ce9_generated_image.png',
-  trentino_alto_adige: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/27a95cfc3_generated_image.png',
-  friuli_venezia_giulia: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/3b48fadc7_generated_image.png',
-  basilicata: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/7c56426f4_generated_image.png',
-  molise: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/94c651f0b_generated_image.png',
-  valle_daosta: 'https://media.base44.com/images/public/69b28610d2d035157c27d27a/d0c62424d_generated_image.png',
-};
 
 const foodJourneys = [
   { id: 'olive-oil-route', title: 'The Olive Oil Route', emoji: '🫒', description: 'Follow the ancient olive oil tradition from the Ligurian coast to the heel of Italy.', regions: ['liguria', 'toscana', 'puglia', 'sicilia'], color: '#D4A017' },
@@ -82,277 +61,204 @@ const regionExtra = {
   valle_daosta: { ingredients: ['Fontina DOP', 'Lard d\'Arnad', 'Boudin', 'Mocetta'], tradition: 'Fonduta — melted Fontina with egg yolks and white truffle — is the region\'s warming answer to the Alpine cold, stirred slowly over bain-marie.', wine: { name: 'Donnas', doc: 'DOC', note: 'Nebbiolo-based reds from Europe\'s most extreme high-altitude vineyards' } },
 };
 
-// ── Discovery cards ────────────────────────────
-const discoveryCards = [
-  { icon: '🍝', title: 'Dish of the Day', name: 'Cacio e Pepe', region: 'lazio' },
-  { icon: '🧀', title: 'Regional Ingredient', name: 'Parmigiano Reggiano', region: 'emilia_romagna' },
-  { icon: '👨‍🌾', title: 'Producer Spotlight', name: 'Acetaia Malpighi', region: 'emilia_romagna' },
-  { icon: '🍷', title: 'Wine Discovery', name: 'Barolo DOCG', region: 'piemonte' },
-  { icon: '🫒', title: 'Artisan Product', name: 'Riviera Ligure DOP', region: 'liguria' },
-];
 
-// ── AI Search bar ──────────────────────────────
-function AISearchBar({ onSelect, compact = false }) {
-  const [query, setQuery] = useState('');
-  const [focused, setFocused] = useState(false);
-  const [results, setResults] = useState([]);
-  const inputRef = useRef(null);
-  const suggestions = ['best cheese for pasta', 'traditional dishes from Tuscany', 'low carb Italian recipes', 'Pecorino Romano producers', 'seafood dishes from Sicily'];
+// ── Region panel: right-hand drawer on desktop, bottom sheet on phones ──
+const PANEL_W = 380;
 
-  const handleInput = (val) => {
-    setQuery(val);
-    if (!val) { setResults([]); return; }
-    const q = val.toLowerCase();
-    const regionMatches = Object.entries(regionData)
-      .filter(([, r]) => r.name.toLowerCase().includes(q) || r.featuredProducts.some(p => p.toLowerCase().includes(q)))
-      .slice(0, 3).map(([id, r]) => ({ type: 'Region', icon: '🗺️', label: r.name, sub: r.featuredProducts.slice(0, 2).join(' · '), id }));
-    const recipeMatches = (recipesData || [])
-      .filter(r => r.name?.toLowerCase().includes(q) || r.description?.toLowerCase().includes(q))
-      .slice(0, 2).map(r => ({ type: 'Recipe', icon: '🍝', label: r.name, sub: r.regionName || '', id: r.id }));
-    const producerMatches = Object.values(regionData)
-      .flatMap(r => r.producers || [])
-      .filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
-      .slice(0, 2).map(p => ({ type: 'Producer', icon: '👨‍🌾', label: p.name, sub: `${p.city} · ${p.category}` }));
-    setResults([...regionMatches, ...recipeMatches, ...producerMatches]);
-  };
+function RegionPanel({ regionId, onClose, compact }) {
+  const navigate = useNavigate();
+  const data = regionId ? regionData[regionId] : null;
+  const extra = regionId ? regionExtra[regionId] : null;
+  const open = !!data;
+
+  const sheet = compact
+    ? { left: 0, right: 0, bottom: 0, height: '56%', borderRadius: '18px 18px 0 0', transform: open ? 'translateY(0)' : 'translateY(105%)', boxShadow: '0 -8px 40px rgba(0,0,0,0.35)' }
+    : { top: 0, right: 0, bottom: 0, width: PANEL_W, borderRadius: '16px 0 0 16px', transform: open ? 'translateX(0)' : 'translateX(105%)', boxShadow: '-4px 0 40px rgba(0,0,0,0.15)' };
+
+  const ingredientLink = (name) => resolveSpot({ label: name, type: 'ingredient' }, regionId).primary?.to;
+  const experienceLink = (name) => (searchExperiences(name).length ? `/Experiences?q=${encodeURIComponent(name)}` : `/Experiences?region=${regionId}`);
 
   return (
-    <div style={{ position: 'relative', width: compact ? 320 : '100%', maxWidth: compact ? 320 : 540 }}>
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 10,
-        padding: compact ? '10px 16px' : '10px 16px',
-        borderRadius: 100, background: 'rgba(255,255,255,0.95)',
-        backdropFilter: 'blur(12px)',
-        border: `2px solid ${focused ? '#4CAF50' : 'rgba(200,200,200,0.5)'}`,
-        boxShadow: focused ? '0 0 0 4px rgba(76,175,80,0.2), 0 4px 24px rgba(0,0,0,0.25)' : '0 4px 24px rgba(0,0,0,0.25)',
-        transition: 'all 0.2s ease'
+    <aside
+      aria-hidden={!open}
+      aria-label={data ? `${data.name} region details` : undefined}
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        position: 'absolute', zIndex: 50, ...sheet,
+        pointerEvents: open ? 'auto' : 'none',
+        transition: 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)',
+        background: 'rgba(255,255,255,0.98)', backdropFilter: 'blur(12px)',
+        overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'contain',
       }}>
-        <Search size={13} color="#999" />
-        <input ref={inputRef} value={query} onChange={e => handleInput(e.target.value)}
-          onFocus={() => setFocused(true)} onBlur={() => setTimeout(() => setFocused(false), 150)}
-          placeholder="Ask Bottega about Italian food…"
-          style={{ border: 'none', outline: 'none', fontSize: 13, color: '#1A1A1A', flex: 1, fontFamily: "'DM Sans',sans-serif", background: 'transparent' }} />
-        <Sparkles size={13} color="#4CAF50" />
-      </div>
-      {focused && (results.length > 0 || !query) && (
-        <div style={{
-          position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 8, zIndex: 300,
-          background: '#fff', border: '1px solid #e8e8e8', borderRadius: 16,
-          boxShadow: '0 16px 48px rgba(0,0,0,0.15)', overflow: 'hidden'
-        }}>
-          {!query && <>
-            <div style={{ padding: '10px 16px 4px', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: '#aaa', textTransform: 'uppercase' }}>Try asking</div>
-            {suggestions.map((s, i) => (
-              <button key={i} onClick={() => handleInput(s)} style={{ width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#555', transition: 'all 0.1s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#F0F7EE'; e.currentTarget.style.color = '#2E7D32'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#555'; }}>
-                {s}
-              </button>
-            ))}
-          </>}
-          {results.map((r, i) => (
-            <button key={i} onClick={() => { onSelect && onSelect(r); setQuery(''); setResults([]); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.1s' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#F0F7EE'}
-              onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-              <span style={{ fontSize: 16 }}>{r.icon}</span>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A', marginBottom: 1 }}>{r.label}</p>
-                <p style={{ fontSize: 11, color: '#999' }}>{r.sub}</p>
+      {data && (
+        <>
+          {compact && <div style={{ position: 'sticky', top: 0, zIndex: 3, display: 'flex', justifyContent: 'center', padding: '7px 0 0' }}><span style={{ width: 38, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.85)' }} /></div>}
+          {/* Hero image */}
+          <div style={{ position: 'relative', height: compact ? 150 : 200, overflow: 'hidden', flexShrink: 0, background: '#1B5E20', marginTop: compact ? -11 : 0 }}>
+            <img src={getRegionImage(regionId)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75) saturate(1.1)' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 55%)' }} />
+            <button onClick={onClose} aria-label="Close region" style={{
+              position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.92)', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+            }}><X size={14} color="#333" /></button>
+            <div style={{ position: 'absolute', bottom: 14, left: 18, right: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                <MapPin size={10} color="#81C784" />
+                <span style={{ fontSize: 10, fontFamily: "'DM Mono',monospace", color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Italian Region</span>
               </div>
-              <span style={{ fontSize: 10, fontWeight: 700, color: '#2E7D32', background: '#E8F5E9', borderRadius: 100, padding: '2px 8px' }}>{r.type}</span>
-            </button>
-          ))}
-        </div>
+              <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 800, color: '#fff', lineHeight: 1.1, margin: 0 }}>{data.name}</h2>
+              <div style={{ display: 'flex', gap: 10, marginTop: 5 }}>
+                <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 11, color: '#81C784', fontWeight: 700 }}>{data.producerCount} Producers</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>·</span>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>{data.experienceCount} Experiences</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ padding: '18px 20px 28px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <p style={{ fontSize: 13, color: '#555', lineHeight: 1.75, margin: 0 }}>{data.description}</p>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => navigate(`/regions/${regionId}`)} style={{ flex: 1, padding: '11px', background: '#2E7D32', color: '#fff', border: 'none', borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                Explore {data.name} →
+              </button>
+              <button onClick={() => navigate(`/Products?region=${regionId}`)} style={{ padding: '11px 14px', background: '#F0F7EE', border: '1.5px solid #DCEDDC', borderRadius: 9, cursor: 'pointer', fontSize: 12, fontWeight: 700, color: '#2E7D32' }}>
+                Shop
+              </button>
+            </div>
+
+            {/* Specialties */}
+            <section>
+              <SectionLabel icon={<Utensils size={11} color="#C76A3A" />} color="#C76A3A">Regional Specialties</SectionLabel>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {data.featuredProducts.map((p, i) => {
+                  const to = ingredientLink(p);
+                  return (
+                    <button key={i} onClick={() => to && navigate(to)} disabled={!to} style={{ padding: '5px 11px', borderRadius: 100, border: 'none', background: i === 0 ? '#FBE9E7' : '#F0F7EE', color: i === 0 ? '#C76A3A' : '#2E7D32', fontSize: 11, fontWeight: 600, cursor: to ? 'pointer' : 'default' }}>{p}</button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Top Producers */}
+            <section>
+              <SectionLabel icon={<Users size={11} color="#2E7D32" />}>Top Producers</SectionLabel>
+              {(data.producers || []).slice(0, 3).map((p, i) => (
+                <button key={i} className="rp-row" onClick={() => navigate('/producers/' + p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''))}
+                  style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#F8FAF8', border: 'none', borderRadius: 10, marginBottom: 6, cursor: 'pointer', textAlign: 'left' }}>
+                  <span>
+                    <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#1A1A1A', marginBottom: 2 }}>{p.name}</span>
+                    <span style={{ display: 'block', fontSize: 10, color: '#888', fontFamily: "'DM Mono',monospace" }}>{p.city} · {p.category}</span>
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: '#2E7D32', fontWeight: 600 }}>
+                    {p.rating} <Star size={9} fill="#2E7D32" color="#2E7D32" />
+                  </span>
+                </button>
+              ))}
+              <button onClick={() => navigate(`/Producers?region=${regionId}`)} style={{ width: '100%', padding: '9px', background: 'none', border: '1.5px solid #E8F5E9', borderRadius: 8, fontSize: 12, fontWeight: 600, color: '#2E7D32', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 4 }}>
+                All {data.name} producers <ChevronRight size={13} />
+              </button>
+            </section>
+
+            {/* Experiences */}
+            {(data.experiences || []).length > 0 && (
+              <section>
+                <SectionLabel icon={<Compass size={11} color="#C76A3A" />}>Experiences</SectionLabel>
+                {data.experiences.map((exp, i) => (
+                  <button key={i} className="rp-row rp-exp" onClick={() => navigate(experienceLink(exp.name))}
+                    style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#FBE9E7', border: 'none', borderRadius: 10, marginBottom: 6, cursor: 'pointer', textAlign: 'left' }}>
+                    <span>
+                      <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#1A1A1A', marginBottom: 2 }}>{exp.name}</span>
+                      <span style={{ display: 'block', fontSize: 10, color: '#C76A3A' }}>{exp.type}</span>
+                    </span>
+                    <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, fontWeight: 800, color: '#C76A3A' }}>{exp.price}</span>
+                  </button>
+                ))}
+              </section>
+            )}
+
+            {/* Iconic Ingredients */}
+            {extra?.ingredients && (
+              <section>
+                <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '0 0 14px' }} />
+                <SectionLabel icon={<span style={{ fontSize: 11 }}>🫙</span>}>Iconic Ingredients</SectionLabel>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {extra.ingredients.map((ing, i) => {
+                    const to = ingredientLink(ing);
+                    return (
+                      <button key={i} onClick={() => to && navigate(to)} disabled={!to} style={{ padding: '5px 11px', borderRadius: 100, background: '#FFF8E1', color: '#E65100', fontSize: 11, fontWeight: 600, border: '1px solid rgba(230,81,0,0.15)', cursor: to ? 'pointer' : 'default' }}>{ing}</button>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {extra?.tradition && (
+              <div style={{ background: '#F8FAF8', borderRadius: 10, padding: '13px 14px', borderLeft: '3px solid #4CAF50' }}>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: '#4CAF50', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace", marginBottom: 7 }}>✦ Food Tradition</div>
+                <p style={{ fontSize: 12, color: '#444', lineHeight: 1.7, fontStyle: 'italic', margin: 0 }}>“{extra.tradition}”</p>
+              </div>
+            )}
+
+            {extra?.wine && (
+              <div style={{ background: 'rgba(90,20,60,0.04)', borderRadius: 10, padding: '13px 14px', border: '1px solid rgba(90,20,60,0.1)' }}>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: '#7B1FA2', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace", marginBottom: 7 }}>🍷 Wine Specialty</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', margin: '0 0 3px' }}>{extra.wine.name}</p>
+                    <p style={{ fontSize: 11, color: '#888', lineHeight: 1.6, margin: 0 }}>{extra.wine.note}</p>
+                  </div>
+                  <span style={{ padding: '3px 8px', borderRadius: 6, background: '#EDE7F6', color: '#6A1B9A', fontSize: 10, fontWeight: 800, flexShrink: 0, fontFamily: "'DM Mono',monospace" }}>{extra.wine.doc}</span>
+                </div>
+              </div>
+            )}
+
+            <SaveRegionButton regionId={regionId} />
+          </div>
+        </>
       )}
+    </aside>
+  );
+}
+
+function SectionLabel({ icon, color = '#888', children }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
+      {icon}
+      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color, textTransform: 'uppercase', fontFamily: "'DM Mono',monospace" }}>{children}</span>
     </div>
   );
 }
 
-// ── Floating Region Panel ──────────────────────
-function RegionPanel({ regionId, onClose }) {
-  const navigate = useNavigate();
-  
-  const data = regionId ? regionData[regionId] : null;
-
-  useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
+// Favourite regions persist per browser (wrapped: storage can be unavailable).
+function SaveRegionButton({ regionId }) {
+  const read = () => { try { return JSON.parse(localStorage.getItem('bottega:savedRegions') || '[]'); } catch { return []; } };
+  const [saved, setSaved] = useState(() => read().includes(regionId));
+  useEffect(() => { setSaved(read().includes(regionId)); }, [regionId]);
+  const toggle = () => {
+    const list = read();
+    const next = list.includes(regionId) ? list.filter((r) => r !== regionId) : [...list, regionId];
+    try { localStorage.setItem('bottega:savedRegions', JSON.stringify(next)); } catch { /* ignore */ }
+    setSaved(next.includes(regionId));
+  };
   return (
-    <>
-      {/* Backdrop — pointer-events:none so SVG spots get :hover; click-to-close handled by SVG background click */}
-      {data && <div style={{ position: 'absolute', inset: 0, zIndex: 49, pointerEvents: 'none' }} />}
-
-      <div style={{
-        position: 'absolute', top: 0, right: 0, bottom: 0, width: 380,
-        zIndex: 50, pointerEvents: data ? 'all' : 'none',
-        transform: data ? 'translateX(0)' : 'translateX(100%)',
-        transition: 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)',
-        background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(12px)',
-        borderRadius: '16px 0 0 16px',
-        boxShadow: '-4px 0 40px rgba(0,0,0,0.15)',
-        overflowY: 'auto', overflowX: 'hidden',
-      }}>
-        {data && (
-          <>
-            {/* Hero image */}
-            <div style={{ position: 'relative', height: 200, overflow: 'hidden', flexShrink: 0 }}>
-              <img src={(WIKI[regionId] || WIKI.toscana)} alt={data.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75) saturate(1.1)' }}
-                onError={e => { e.currentTarget.style.background = '#1B5E20'; e.currentTarget.style.display = 'none'; }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)' }} />
-              <button onClick={onClose} style={{
-                position: 'absolute', top: 12, right: 12, width: 30, height: 30, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.9)', border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-              }}><X size={14} color="#333" /></button>
-              <div style={{ position: 'absolute', bottom: 16, left: 18 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-                  <MapPin size={10} color="#4CAF50" />
-                  <span style={{ fontSize: 10, fontFamily: "'DM Mono',monospace", color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Italian Region</span>
-                </div>
-                <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 800, color: '#fff', lineHeight: 1.1 }}>{data.name}</h2>
-                <div style={{ display: 'flex', gap: 10, marginTop: 5 }}>
-                  <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 11, color: '#4CAF50', fontWeight: 700 }}>{data.producerCount} Producers</span>
-                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>·</span>
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>{data.experienceCount} Experiences</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div style={{ padding: '20px 20px 28px', display: 'flex', flexDirection: 'column', gap: 20 }}>
-              <p style={{ fontSize: 13, color: '#555', lineHeight: 1.75 }}>{data.description}</p>
-
-              {/* Specialties */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-                  <Utensils size={11} color="#C76A3A" />
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: '#C76A3A', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace" }}>Regional Specialties</span>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {data.featuredProducts.map((p, i) => (
-                    <span key={i} style={{ padding: '5px 11px', borderRadius: 100, background: i === 0 ? '#FBE9E7' : '#F0F7EE', color: i === 0 ? '#C76A3A' : '#2E7D32', fontSize: 11, fontWeight: 600 }}>{p}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Top Producers */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-                  <Users size={11} color="#2E7D32" />
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: '#888', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace" }}>Top Producers</span>
-                </div>
-                {(data.producers || []).slice(0, 3).map((p, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#F8FAF8', borderRadius: 10, marginBottom: 6, cursor: 'pointer', transition: 'all 0.15s' }}
-                    onClick={() => navigate('/producers/' + p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/g, '').replace(/^-+/g, ''))}
-                    onMouseEnter={e => e.currentTarget.style.background = '#E8F5E9'}
-                    onMouseLeave={e => e.currentTarget.style.background = '#F8FAF8'}>
-                    <div>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', marginBottom: 2 }}>{p.name}</p>
-                      <p style={{ fontSize: 10, color: '#888', fontFamily: "'DM Mono',monospace" }}>{p.city} · {p.category}</p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: '#2E7D32', fontWeight: 600 }}>
-                      {p.rating} <Star size={9} fill="#2E7D32" color="#2E7D32" />
-                    </div>
-                  </div>
-                ))}
-                <button onClick={() => navigate('/Producers')} style={{ width: '100%', padding: '9px', background: 'none', border: '1.5px solid #E8F5E9', borderRadius: 8, fontSize: 12, fontWeight: 600, color: '#2E7D32', cursor: 'pointer', transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 4 }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#F0F7EE'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-                  View All Producers <ChevronRight size={13} />
-                </button>
-              </div>
-
-              {/* Experiences */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-                  <Compass size={11} color="#C76A3A" />
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: '#888', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace" }}>Experiences</span>
-                </div>
-                {(data.experiences || []).map((exp, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#FBE9E7', borderRadius: 10, marginBottom: 6, cursor: 'pointer', transition: 'all 0.15s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = '#f5d6c8'}
-                    onMouseLeave={e => e.currentTarget.style.background = '#FBE9E7'}>
-                    <div>
-                      <p style={{ fontSize: 12, fontWeight: 700, color: '#1A1A1A', marginBottom: 2 }}>{exp.name}</p>
-                      <p style={{ fontSize: 10, color: '#C76A3A' }}>{exp.type}</p>
-                    </div>
-                    <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, fontWeight: 800, color: '#C76A3A' }}>{exp.price}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Iconic Ingredients */}
-              {regionExtra[regionId]?.ingredients && (
-                <div>
-                  <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '0 0 14px' }} />
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-                    <span style={{ fontSize: 11 }}>🫙</span>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: '#888', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace" }}>Iconic Ingredients</span>
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {regionExtra[regionId].ingredients.map((ing, i) => (
-                      <span key={i} style={{ padding: '5px 11px', borderRadius: 100, background: '#FFF8E1', color: '#E65100', fontSize: 11, fontWeight: 600, border: '1px solid rgba(230,81,0,0.15)', cursor: 'pointer' }}>{ing}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Food Tradition */}
-              {regionExtra[regionId]?.tradition && (
-                <div style={{ background: '#F8FAF8', borderRadius: 10, padding: '13px 14px', borderLeft: '3px solid #4CAF50' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: '#4CAF50', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace", marginBottom: 7 }}>✦ Food Tradition</div>
-                  <p style={{ fontSize: 12, color: '#444', lineHeight: 1.7, fontStyle: 'italic' }}>"{regionExtra[regionId].tradition}"</p>
-                </div>
-              )}
-
-              {/* Wine Specialty */}
-              {regionExtra[regionId]?.wine && (
-                <div style={{ background: 'rgba(90,20,60,0.04)', borderRadius: 10, padding: '13px 14px', border: '1px solid rgba(90,20,60,0.1)' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: '#7B1FA2', textTransform: 'uppercase', fontFamily: "'DM Mono',monospace", marginBottom: 7 }}>🍷 Wine Specialty</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
-                    <div>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', marginBottom: 3 }}>{regionExtra[regionId].wine.name}</p>
-                      <p style={{ fontSize: 11, color: '#888', lineHeight: 1.6 }}>{regionExtra[regionId].wine.note}</p>
-                    </div>
-                    <span style={{ padding: '3px 8px', borderRadius: 6, background: '#EDE7F6', color: '#6A1B9A', fontSize: 10, fontWeight: 800, flexShrink: 0, fontFamily: "'DM Mono',monospace" }}>{regionExtra[regionId].wine.doc}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Save + Full Region link */}
-              <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-                <button onClick={() => navigate(`/regions/${regionId}`)} style={{ flex: 1, padding: '11px', background: '#2E7D32', color: '#fff', border: 'none', borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#1B5E20'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#2E7D32'}>
-                  Explore Region →
-                </button>
-                <button style={{ padding: '11px 14px', background: '#F0F7EE', border: '1.5px solid #E8F5E9', borderRadius: 9, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                  <Heart size={15} color="#E53935" />
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </>
+    <button onClick={toggle} aria-pressed={saved} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px', background: saved ? '#FFEBEE' : '#F7F7F7', border: '1px solid ' + (saved ? '#FFCDD2' : '#EEE'), borderRadius: 9, cursor: 'pointer', fontSize: 12, fontWeight: 600, color: saved ? '#C62828' : '#666' }}>
+      <Heart size={14} color="#E53935" fill={saved ? '#E53935' : 'none'} /> {saved ? 'Saved to favourites' : 'Save region'}
+    </button>
   );
 }
 
 // ── Animated stat ──────────────────────────────
 function AnimatedStat({ target, label, suffix = '' }) {
   const [v, setV] = useState(0);
-  const started = useRef(false);
   useEffect(() => {
+    let iv;
     const t = setTimeout(() => {
-      if (started.current) return; started.current = true;
       let n = 0; const step = target / 50;
-      const iv = setInterval(() => { n = Math.min(n + step, target); setV(Math.round(n)); if (n >= target) clearInterval(iv); }, 25);
+      iv = setInterval(() => { n = Math.min(n + step, target); setV(Math.round(n)); if (n >= target) clearInterval(iv); }, 25);
     }, 400);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); clearInterval(iv); };
   }, [target]);
   return (
     <div style={{ textAlign: 'center' }}>
@@ -362,50 +268,94 @@ function AnimatedStat({ target, label, suffix = '' }) {
   );
 }
 
+function useContainerWidth(ref) {
+  const [w, setW] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1280));
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setW(el.clientWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return w;
+}
+
 // ══════════════════════════════════════════════
 // HOME PAGE
 // ══════════════════════════════════════════════
 export default function Home() {
   const navigate = useNavigate();
-  const [selectedRegion, setSelectedRegion] = useState(null);
-  const [hoveredRegion, setHoveredRegion] = useState(null);
-  const [mousePos, setMousePos] = useState({x: 0, y: 0});
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlRegion = searchParams.get('region');
+  const selectedRegion = urlRegion && regionData[urlRegion] ? urlRegion : null;
+  const [selectedSpot, setSelectedSpot] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [cardIdx, setCardIdx] = useState(0);
   const [activeLayer, setActiveLayer] = useState('all');
   const [activeJourney, setActiveJourney] = useState(null);
   const [showJourneys, setShowJourneys] = useState(false);
   const mapContainerRef = useRef(null);
+  const scrollRef = useRef(null);
+  const mapWidth = useContainerWidth(mapContainerRef);
+  const compact = mapWidth < 768;
+
+  // The selected region lives in the URL (?region=toscana): shareable, and Back closes it.
+  const selectRegion = useCallback((id) => {
+    // Opening a region pushes a history entry (Back closes it); switching/closing replaces it.
+    const hadRegion = new URLSearchParams(window.location.search).has('region');
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (id) next.set('region', id); else next.delete('region');
+      return next;
+    }, { replace: hadRegion });
+  }, [setSearchParams]);
+
+  // A selected spot always belongs to the selected region.
+  useEffect(() => {
+    if (selectedSpot && selectedSpot.regionId !== selectedRegion) setSelectedSpot(null);
+  }, [selectedRegion, selectedSpot]);
 
   useEffect(() => {
     const t = setInterval(() => setCardIdx(i => (i + 1) % extendedDiscovery.length), 8000);
     return () => clearInterval(t);
   }, []);
 
-  // Exit fullscreen / deselect on Escape
+  // Escape peels back one layer at a time: spot card → region → journey → fullscreen
   useEffect(() => {
     const handler = (e) => {
-      if (e.key === 'Escape') {
-        if (isFullscreen) setIsFullscreen(false);
-        if (selectedRegion) setSelectedRegion(null);
-        if (activeJourney) setActiveJourney(null);
-      }
+      if (e.key !== 'Escape') return;
+      if (selectedSpot) setSelectedSpot(null);
+      else if (selectedRegion) selectRegion(null);
+      else if (activeJourney) setActiveJourney(null);
+      else if (isFullscreen) setIsFullscreen(false);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [isFullscreen, selectedRegion, activeJourney]);
+  }, [isFullscreen, selectedRegion, selectedSpot, activeJourney, selectRegion]);
 
   const handleSearchSelect = useCallback((r) => {
-    if (r.type === 'Region' && r.id) setSelectedRegion(r.id);
+    if (r.type === 'Region' && r.id) selectRegion(r.id);
     else if (r.type === 'Recipe' && r.id) navigate(`/recipes/${r.id}`);
     else if (r.type === 'Producer') navigate('/Producers');
-  }, [navigate]);
+  }, [navigate, selectRegion]);
 
-  const activeHover = hoveredRegion ? regionData[hoveredRegion] : null;
-  const card = discoveryCards[cardIdx];
+  // Screen area covered by floating UI — the map frames the zoomed region inside what's left.
+  const mapInsets = useMemo(() => compact
+    ? { top: 128, right: 14, bottom: selectedRegion ? Math.round((mapContainerRef.current?.clientHeight || 700) * 0.56) + 12 : 90, left: 14 }
+    : { top: 150, right: selectedRegion ? PANEL_W + 28 : 24, bottom: 36, left: 250 },
+  [compact, selectedRegion]);
+
+  const card = extendedDiscovery[cardIdx % extendedDiscovery.length];
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', background: '#F0F7EE' }}>
+    <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', background: '#F0F7EE' }}>
+      <style>{`
+        .rp-row { transition: background .15s ease; }
+        .rp-row:hover { background: #E8F5E9 !important; }
+        .rp-exp:hover { background: #f5d6c8 !important; }
+        .map-layers { scrollbar-width: none; }
+        .map-layers::-webkit-scrollbar { display: none; }
+      `}</style>
 
       {/* ══ MAP: EDGE-TO-EDGE ══ */}
       <div style={{ position: 'relative', width: '100%' }}>
@@ -414,171 +364,163 @@ export default function Home() {
           id="map-container"
           style={{
             position: isFullscreen ? 'fixed' : 'relative',
-            top: isFullscreen ? 0 : 'auto',
-            left: isFullscreen ? 0 : 'auto',
+            inset: isFullscreen ? 0 : 'auto',
             width: isFullscreen ? '100vw' : '100%',
-            height: isFullscreen ? '100vh' : 'calc(100vh - 60px)',
-            margin: 0,
-            padding: 0,
-            borderRadius: 0,
+            height: isFullscreen ? '100dvh' : 'calc(100dvh - 60px)',
+            minHeight: 460,
             overflow: 'hidden',
             background: '#060D06',
             zIndex: isFullscreen ? 9999 : 1,
-            boxShadow: 'none',
-            transition: 'all 0.3s ease'
-    }} onMouseMove={(e) => { var r = e.currentTarget.getBoundingClientRect(); setMousePos({x: e.clientX - r.left, y: e.clientY - r.top}); }}>
+          }}>
 
-          {/* Grid overlay */}
+          {/* Grid overlay + edge vignette */}
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1, backgroundImage: 'linear-gradient(rgba(76,175,80,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(76,175,80,0.03) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
-          {/* Edge vignette */}
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1, background: 'radial-gradient(ellipse 85% 90% at 50% 50%, transparent 50%, rgba(6,13,6,0.55) 90%, rgba(6,13,6,0.8) 100%)' }} />
 
-          {/* Map fills container */}
-          <ItalyMap
-            selectedRegion={selectedRegion}
-            onRegionSelect={setSelectedRegion}
-            onRegionHover={setHoveredRegion}
-            activeLayer={activeLayer}
-            activeJourney={activeJourney}
-          />
+          <div style={{ position: 'absolute', inset: 0, zIndex: 2 }}>
+            <ItalyMap
+              selectedRegion={selectedRegion}
+              onRegionSelect={selectRegion}
+              activeLayer={activeLayer}
+              activeJourney={activeJourney}
+              selectedSpot={selectedSpot}
+              onSpotSelect={setSelectedSpot}
+              insets={mapInsets}
+            />
+          </div>
 
-          {/* ── Floating search bar / Ask Bottega AI ── */}
-          <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 200, width: 420, maxWidth: 'calc(100% - 48px)' }}>
+          {/* ── Ask Bottega ── */}
+          <div style={{ position: 'absolute', top: compact ? 12 : 16, left: '50%', transform: 'translateX(-50%)', zIndex: 200, width: 420, maxWidth: 'calc(100% - 24px)' }}>
             <AskBottega onSelect={handleSearchSelect} />
           </div>
 
-          {/* ── Food Layers ── */}
-          <div style={{ position: 'absolute', top: 52, left: 16, zIndex: 200, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(6,13,6,0.75)', backdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 11px', border: '1px solid rgba(76,175,80,0.2)' }}>
-            <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 3 }}>Explore by</span>
+          {/* ── Food layers (horizontally scrollable on phones) ── */}
+          <div className="map-layers" role="toolbar" aria-label="Map layers" style={{
+            position: 'absolute', top: compact ? 66 : 70, left: compact ? 12 : 16, right: compact ? 12 : 'auto', zIndex: 200,
+            display: 'flex', alignItems: 'center', gap: 5, overflowX: 'auto', whiteSpace: 'nowrap',
+            background: 'rgba(6,13,6,0.78)', backdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 11px', border: '1px solid rgba(76,175,80,0.2)'
+          }}>
+            {!compact && <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 3 }}>Explore by</span>}
             {MAP_LAYERS.map(layer => (
-              <button key={layer.id} onClick={() => setActiveLayer(layer.id)} style={{
-                fontFamily: "'DM Sans',sans-serif", fontSize: 11, color: activeLayer === layer.id ? '#4CAF50' : 'rgba(255,255,255,0.6)',
-                background: activeLayer === layer.id ? 'rgba(76,175,80,0.18)' : 'transparent',
-                border: 'none', borderRadius: 100, padding: '4px 9px', cursor: 'pointer',
+              <button key={layer.id} onClick={() => setActiveLayer(layer.id)} aria-pressed={activeLayer === layer.id} style={{
+                fontFamily: "'DM Sans',sans-serif", fontSize: 11, color: activeLayer === layer.id ? '#81C784' : 'rgba(255,255,255,0.7)',
+                background: activeLayer === layer.id ? 'rgba(76,175,80,0.2)' : 'transparent',
+                border: 'none', borderRadius: 100, padding: '5px 10px', cursor: 'pointer', flexShrink: 0,
                 fontWeight: activeLayer === layer.id ? 700 : 400, whiteSpace: 'nowrap', transition: 'all 0.15s'
               }}>{layer.label}</button>
             ))}
           </div>
 
-          {/* ── Map top controls ── */}
-          <div style={{ position: 'absolute', top: 14, left: 16, zIndex: 20, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4CAF50', display: 'inline-block', boxShadow: '0 0 8px rgba(76,175,80,0.9)' }} />
-            <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(76,175,80,0.65)', textTransform: 'uppercase' }}>
-              Bottega · 20 Regions Live
-            </span>
-          </div>
+          {/* Status label (desktop) */}
+          {!compact && (
+            <div style={{ position: 'absolute', top: 24, left: 18, zIndex: 20, display: 'flex', alignItems: 'center', gap: 6, pointerEvents: 'none' }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4CAF50', display: 'inline-block', boxShadow: '0 0 8px rgba(76,175,80,0.9)' }} />
+              <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(129,199,132,0.75)', textTransform: 'uppercase' }}>
+                Bottega · 20 Regions
+              </span>
+            </div>
+          )}
 
-          {/* Top-right: fullscreen toggle */}
-          <button
-            onClick={() => setIsFullscreen(f => !f)}
-            style={{ position: 'absolute', top: 12, right: selectedRegion ? 396 : 12, zIndex: 55, padding: '7px 12px', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'rgba(255,255,255,0.8)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, transition: 'right 0.32s ease' }}>
-            {isFullscreen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
-            {isFullscreen ? 'Exit' : 'Full Map'}
-          </button>
+          {/* Fullscreen toggle */}
+          {!compact && (
+            <button
+              onClick={() => setIsFullscreen(f => !f)}
+              style={{ position: 'absolute', top: 18, right: selectedRegion ? PANEL_W + 16 : 16, zIndex: 55, padding: '7px 12px', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, color: 'rgba(255,255,255,0.85)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, transition: 'right 0.32s ease' }}>
+              {isFullscreen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+              {isFullscreen ? 'Exit' : 'Full Map'}
+            </button>
+          )}
 
-          {/* Active journey card — top-center below search */}
-          {activeJourney && (
-            <div style={{ position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 250, background: 'rgba(6,13,6,0.88)', backdropFilter: 'blur(16px)', border: `1px solid ${activeJourney.color}40`, borderRadius: 12, padding: '10px 16px', maxWidth: 420, display: 'flex', alignItems: 'center', gap: 12, animation: 'fadeSlideIn 0.25s ease' }}>
+          {/* Active journey card */}
+          {activeJourney && !selectedRegion && (
+            <div style={{ position: 'absolute', top: compact ? 112 : 116, left: '50%', transform: 'translateX(-50%)', zIndex: 250, background: 'rgba(6,13,6,0.9)', backdropFilter: 'blur(16px)', border: `1px solid ${activeJourney.color}55`, borderRadius: 12, padding: '10px 16px', width: 420, maxWidth: 'calc(100% - 24px)', display: 'flex', alignItems: 'center', gap: 12, animation: 'fadeSlideIn 0.25s ease' }}>
               <span style={{ fontSize: 20 }}>{activeJourney.emoji}</span>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 2 }}>{activeJourney.title}</p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>{activeJourney.description}</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>{activeJourney.title}</p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, margin: 0 }}>{activeJourney.description}</p>
               </div>
-              <button onClick={() => setActiveJourney(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 16, padding: 0, flexShrink: 0 }}>✕</button>
+              <button onClick={() => setActiveJourney(null)} aria-label="Close journey" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 16, padding: 0, flexShrink: 0 }}>✕</button>
             </div>
           )}
 
-          {/* Selected region chip */}
-          {selectedRegion && (
-            <div style={{ position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)', zIndex: 30, display: 'flex', alignItems: 'center', gap: 7, padding: '5px 14px', borderRadius: 100, background: 'rgba(46,125,50,0.2)', backdropFilter: 'blur(8px)', border: '1px solid rgba(76,175,80,0.4)', animation: 'fadeSlideIn 0.2s ease' }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#4CAF50', display: 'inline-block' }} />
-              <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 12, fontWeight: 700, color: '#fff' }}>{regionData[selectedRegion]?.name}</span>
-              <button onClick={() => setSelectedRegion(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', display: 'flex', padding: 0, marginLeft: 2 }}><X size={11} /></button>
-            </div>
+          {/* Selected region chip + back control */}
+          {selectedRegion && !(compact && selectedSpot) && (
+            <button onClick={() => selectRegion(null)} style={{ position: 'absolute', top: compact ? 112 : 116, left: compact ? 12 : 16, zIndex: 210, display: 'flex', alignItems: 'center', gap: 7, padding: '6px 14px', borderRadius: 100, background: 'rgba(6,13,6,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(76,175,80,0.45)', cursor: 'pointer', color: '#fff', animation: 'fadeSlideIn 0.2s ease' }}>
+              <span style={{ fontSize: 12 }}>←</span>
+              <span style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12, fontWeight: 600 }}>All of Italy</span>
+            </button>
           )}
 
-          {/* Hover tooltip */}
-          {activeHover && !selectedRegion && (
-            <div style={{ position: 'absolute', left: mousePos.x, top: mousePos.y - 130, transform: 'translateX(-50%)', zIndex: 20, background: 'rgba(6,13,6,0.93)', backdropFilter: 'blur(16px)', border: '1px solid rgba(76,175,80,0.3)', borderRadius: 13, padding: '12px 18px', minWidth: 240, pointerEvents: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', animation: 'fadeSlideIn 0.15s ease' }}>
-              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{activeHover.name}</p>
-              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 11, color: '#4CAF50', marginBottom: 5 }}>{activeHover.producerCount} Producers · {activeHover.experienceCount} Experiences</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>{activeHover.featuredProducts.slice(0, 3).join(' · ')}</p>
-              <p style={{ fontSize: 10, color: 'rgba(76,175,80,0.65)', marginTop: 6, fontWeight: 600 }}>Click to explore →</p>
-            </div>
-          )}
-
-          {!activeHover && !selectedRegion && (
+          {/* Hint */}
+          {!selectedRegion && !compact && (
             <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 10, pointerEvents: 'none' }}>
-              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Hover a region · Click to explore</p>
+              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', margin: 0 }}>Hover a region · Click to zoom · Click a marker for details</p>
+            </div>
+          )}
+          {!selectedRegion && compact && (
+            <div style={{ position: 'absolute', bottom: 86, left: '50%', transform: 'translateX(-50%)', zIndex: 10, pointerEvents: 'none' }}>
+              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', margin: 0 }}>Tap a region to explore</p>
             </div>
           )}
 
-          {/* Food Journeys widget — bottom-left */}
-          <div style={{ position: 'absolute', bottom: 200, left: 18, zIndex: 20, minWidth: 220 }}>
-            <div style={{ background: 'rgba(6,13,6,0.82)', backdropFilter: 'blur(12px)', border: '1px solid rgba(76,175,80,0.2)', borderRadius: 12, padding: '10px 14px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showJourneys ? 8 : 0 }}>
-                <span style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>🇮🇹 Food Journeys</span>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {activeJourney && <button onClick={() => setActiveJourney(null)} style={{ fontSize: 10, color: '#E57373', background: 'none', border: '1px solid rgba(229,115,115,0.4)', borderRadius: 100, padding: '2px 8px', cursor: 'pointer' }}>Clear</button>}
-                  <button onClick={() => setShowJourneys(j => !j)} style={{ fontSize: 10, color: '#4CAF50', background: 'none', border: '1px solid rgba(76,175,80,0.4)', borderRadius: 100, padding: '2px 9px', cursor: 'pointer' }}>{showJourneys ? 'Close' : 'Explore'}</button>
-                </div>
-              </div>
-              {activeJourney && !showJourneys && (
-                <p style={{ fontSize: 10, color: activeJourney.color, fontFamily: "'DM Mono',monospace", marginTop: 4 }}>{activeJourney.emoji} {activeJourney.title}</p>
-              )}
-              {showJourneys && foodJourneys.map(j => (
-                <div key={j.id} onClick={() => { setActiveJourney(activeJourney?.id === j.id ? null : j); setShowJourneys(false); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', transition: 'opacity 0.15s', opacity: activeJourney?.id === j.id ? 1 : 0.85 }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={e => e.currentTarget.style.opacity = activeJourney?.id === j.id ? '1' : '0.85'}>
-                  <span style={{ fontSize: 18 }}>{j.emoji}</span>
-                  <div>
-                    <p style={{ fontSize: 12, color: '#fff', fontWeight: 500, marginBottom: 2 }}>{j.title}</p>
-                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Mono',monospace" }}>{j.regions.map(r => regionData[r]?.name).join(' → ')}</p>
+          {/* Food Journeys + discovery card (bottom-left); hidden on phones while a region is open */}
+          {!(compact && selectedRegion) && (
+            <div style={{ position: 'absolute', bottom: compact ? 14 : 20, left: compact ? 12 : 18, zIndex: 20, display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
+              <div style={{ background: 'rgba(6,13,6,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(76,175,80,0.22)', borderRadius: 12, padding: '10px 14px', minWidth: 220 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: showJourneys ? 8 : 0 }}>
+                  <span style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>🇮🇹 Food Journeys</span>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {activeJourney && <button onClick={() => setActiveJourney(null)} style={{ fontSize: 10, color: '#E57373', background: 'none', border: '1px solid rgba(229,115,115,0.4)', borderRadius: 100, padding: '2px 8px', cursor: 'pointer' }}>Clear</button>}
+                    <button onClick={() => setShowJourneys(j => !j)} aria-expanded={showJourneys} style={{ fontSize: 10, color: '#81C784', background: 'none', border: '1px solid rgba(76,175,80,0.4)', borderRadius: 100, padding: '2px 9px', cursor: 'pointer' }}>{showJourneys ? 'Close' : 'Explore'}</button>
                   </div>
                 </div>
+                {activeJourney && !showJourneys && (
+                  <p style={{ fontSize: 10, color: activeJourney.color, fontFamily: "'DM Mono',monospace", margin: '4px 0 0' }}>{activeJourney.emoji} {activeJourney.title}</p>
+                )}
+                {showJourneys && foodJourneys.map(j => (
+                  <button key={j.id} onClick={() => { setActiveJourney(activeJourney?.id === j.id ? null : j); setShowJourneys(false); selectRegion(null); }}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid rgba(255,255,255,0.07)', background: 'none', border: 'none', borderTopStyle: 'solid', cursor: 'pointer', textAlign: 'left', opacity: activeJourney?.id === j.id ? 1 : 0.88 }}>
+                    <span style={{ fontSize: 18 }}>{j.emoji}</span>
+                    <span>
+                      <span style={{ display: 'block', fontSize: 12, color: '#fff', fontWeight: 500, marginBottom: 2 }}>{j.title}</span>
+                      <span style={{ display: 'block', fontSize: 9, color: 'rgba(255,255,255,0.45)', fontFamily: "'DM Mono',monospace" }}>{j.regions.map(r => regionData[r]?.name).join(' → ')}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {!compact && (
+                <button onClick={() => selectRegion(card.region)} style={{ background: 'rgba(6,13,6,0.9)', backdropFilter: 'blur(16px)', border: '1px solid rgba(76,175,80,0.22)', borderRadius: 14, padding: '12px 14px', width: 220, cursor: 'pointer', textAlign: 'left' }}>
+                  <span style={{ display: 'block', fontSize: 9, fontFamily: "'DM Mono',monospace", fontWeight: 700, color: 'rgba(129,199,132,0.75)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 7 }}>✦ {card.label}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                    <span style={{ fontSize: 20 }}>{card.emoji}</span>
+                    <span>
+                      <span style={{ display: 'block', fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 2 }}>{card.name}</span>
+                      <span style={{ display: 'block', fontSize: 10, color: 'rgba(255,255,255,0.5)', fontFamily: "'DM Mono',monospace" }}>{card.subtitle}</span>
+                    </span>
+                  </span>
+                  <span style={{ display: 'flex', gap: 4, marginTop: 9, justifyContent: 'center' }}>
+                    {extendedDiscovery.map((_, i) => (<span key={i} onClick={e => { e.stopPropagation(); setCardIdx(i); }} style={{ width: i === cardIdx ? 14 : 5, height: 3, borderRadius: 2, background: i === cardIdx ? '#4CAF50' : 'rgba(255,255,255,0.22)', transition: 'all 0.2s' }} />))}
+                  </span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Legend — same scale the map uses */}
+          {!compact && (
+            <div style={{ position: 'absolute', top: 60, right: selectedRegion ? PANEL_W + 16 : 16, zIndex: 10, display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 8, background: 'rgba(6,13,6,0.7)', border: '1px solid rgba(255,255,255,0.06)', transition: 'right 0.32s ease' }}>
+              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontFamily: "'DM Mono',monospace", textTransform: 'uppercase', letterSpacing: '0.06em' }}>Producers</span>
+              {[...DENSITY_SCALE].reverse().map((b) => (
+                <span key={b.label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ width: 12, height: 9, borderRadius: 2, background: b.color, display: 'inline-block', border: '1px solid rgba(255,255,255,0.15)' }} />
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', fontFamily: "'DM Mono',monospace" }}>{b.label}</span>
+                </span>
               ))}
             </div>
-          </div>
+          )}
 
-          {/* Discovery card — bottom-left (below journeys) */}
-          {(() => {
-            const card = extendedDiscovery[cardIdx % extendedDiscovery.length];
-            return (
-              <div style={{ position: 'absolute', bottom: 20, left: 18, zIndex: 20 }}>
-                <div style={{ background: 'rgba(6,13,6,0.88)', backdropFilter: 'blur(16px)', border: '1px solid rgba(76,175,80,0.2)', borderRadius: 14, padding: '12px 14px', width: 210, cursor: 'pointer', transition: 'border-color 0.2s, opacity 0.3s', animation: 'fadeSlideIn 0.3s ease' }}
-                  onClick={() => setSelectedRegion(card.region)}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(76,175,80,0.45)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(76,175,80,0.2)'}>
-                  <p style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", fontWeight: 700, color: 'rgba(76,175,80,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 7 }}>✦ {card.label}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                    <span style={{ fontSize: 20 }}>{card.emoji}</span>
-                    <div>
-                      <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 2 }}>{card.name}</p>
-                      <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Mono',monospace" }}>{card.subtitle}</p>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 4, marginTop: 8, justifyContent: 'center' }}>
-                    {extendedDiscovery.map((_, i) => (<span key={i} onClick={e => { e.stopPropagation(); setCardIdx(i); }} style={{ width: i === cardIdx ? 14 : 5, height: 3, borderRadius: 2, background: i === cardIdx ? '#4CAF50' : 'rgba(255,255,255,0.2)', cursor: 'pointer', transition: 'all 0.2s' }} />))}
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Bottom legend */}
-          <div style={{ position: 'absolute', bottom: 16, right: 16, zIndex: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
-            {[['#132513', 'Low'], ['#1E3E1E', ''], ['#2E7D32', ''], ['#2D5A2D', ''], ['#43A047', 'High']].map(([c, l], i) => (
-              <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <span style={{ width: i === 0 || i === 4 ? 14 : 10, height: 8, borderRadius: 2, background: c, display: 'inline-block' }} />
-                {l && <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontFamily: "'DM Mono',monospace", textTransform: 'uppercase' }}>{l}</span>}
-              </span>
-            ))}
-            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', marginLeft: 4 }}>450 Producers · 80+ Experiences</span>
-          </div>
-
-          {/* Floating Region Panel */}
-          <RegionPanel regionId={selectedRegion} onClose={() => setSelectedRegion(null)} />
+          <RegionPanel regionId={selectedRegion} onClose={() => selectRegion(null)} compact={compact} />
         </div>
       </div>
 
@@ -622,10 +564,10 @@ export default function Home() {
         <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>Each Italian region is a world unto itself — click to open on the map above</p>
         <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 8 }}>
           {Object.entries(regionData).slice(0, 8).map(([id, r]) => (
-            <div key={id} onClick={() => { setSelectedRegion(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ minWidth: 200, borderRadius: 14, overflow: 'hidden', cursor: 'pointer', flexShrink: 0, position: 'relative', aspectRatio: '4/3', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
+            <div key={id} onClick={() => { selectRegion(id); scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ minWidth: 200, borderRadius: 14, overflow: 'hidden', cursor: 'pointer', flexShrink: 0, position: 'relative', aspectRatio: '4/3', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
-              <img src={(WIKI[id] || WIKI.toscana)} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.7) saturate(1.1)' }} />
+              <img src={getRegionImage(id)} alt={r.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.7) saturate(1.1)' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 50%)' }} />
               <div style={{ position: 'absolute', bottom: 14, left: 14 }}>
                 <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 3 }}>{r.name}</p>

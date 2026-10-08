@@ -1,5 +1,5 @@
 {
-  "name": "base44-app",
+  "name": "bottega-delivery",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,7 +9,9 @@
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "audit:links": "node scripts/audit-links.mjs",
+    "check": "npm run lint && npm run audit:links && npm run build"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
