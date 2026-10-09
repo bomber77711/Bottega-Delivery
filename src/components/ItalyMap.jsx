@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { geoMercator, geoPath } from 'd3-geo';
+import { geoContains, geoMercator, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import topology from './map/italy-regions.topo.json';
 import { regionData, regionCentroids } from './regionData';
@@ -32,6 +32,10 @@ const ITALY = (() => {
   fc.features.forEach((f) => { f.properties.regionId = ISTAT_TO_REGION[f.properties.reg_istat_code_num] || ''; });
   return fc;
 })();
+const REGION_FEATURE = Object.fromEntries(ITALY.features.map((f) => [f.properties.regionId, f]));
+// Mainland + Sicily + Sardinia corners (Aosta west, Alto Adige north, Salento east, Capo Passero south):
+// phones fit THIS box, so tiny far-off islands don't shrink or off-centre the map.
+const ITALY_CORE = { type: 'MultiPoint', coordinates: [[6.63, 36.64], [18.52, 47.09]] };
 
 // ── Visual config (exported so the legend uses the exact same scale) ──
 // The original Bottega palette: subtle dark greens, deliberately low-contrast.
@@ -66,7 +70,7 @@ export const SPOT_DESTINATIONS = Object.fromEntries(
   Object.entries(gastronomySpots).map(([regionId, spots]) => [regionId, spots.map((s) => resolveSpot(s, regionId).primary)]),
 );
 
-const MARKER = { national: 17, nationalCompact: 17, zoomed: 34, zoomedCompact: 28 };
+const MARKER = { national: 17, nationalCompact: 15, zoomed: 34, zoomedCompact: 28 };
 
 // Phones, national view: only a few signature icons per region (varied: ingredient, wine, dish…),
 // more for the big food regions — instead of all 160.
@@ -183,12 +187,10 @@ export default function ItalyMap({
   const proj = useMemo(() => {
     if (!dims.width || !dims.height) return null;
     // Italy fills the screen (like the original): it may tuck under the floating controls.
-    return geoMercator().fitExtent(
-      // phones: no floating bars any more → Italy uses the whole map area
-      // (a Food Journey card sits at the top on phones → Italy moves below it)
-      compact ? [[12, journeyOnPhone ? 112 : 14], [dims.width - 12, dims.height - 40]] : [[0, 72], [dims.width, dims.height + 30]],
-      ITALY,
-    );
+    // phones: Italy edge to edge (Salento and the Aosta tip touch the sides), centred vertically;
+    // a Food Journey card sits at the top on phones → Italy moves below it
+    if (compact) return geoMercator().fitExtent([[-4, journeyOnPhone ? 112 : 20], [dims.width + 4, dims.height - 20]], ITALY_CORE);
+    return geoMercator().fitExtent([[0, 72], [dims.width, dims.height + 30]], ITALY);
   }, [dims.width, dims.height, compact, journeyOnPhone]);
 
   // Path strings + bounds — computed once per projection, never on hover.
@@ -240,12 +242,47 @@ export default function ItalyMap({
     const relaxed = relax(pts, MARKER.national - 3);
     return Object.fromEntries(keys.map((k, i) => [k, [relaxed[i][0] - pts[i][0], relaxed[i][1] - pts[i][1]]]));
   }, [spotNat]);
-  const phoneNatOffsets = useMemo(() => {
-    const keys = [], pts = [];
-    for (const [regionId, list] of Object.entries(spotNat)) list.forEach((p, i) => { if (p && PHONE_PICKS[regionId]?.has(i)) { keys.push(`${regionId}-${i}`); pts.push(p); } });
-    const relaxed = relax(pts, MARKER.nationalCompact + 2);
-    return Object.fromEntries(keys.map((k, i) => [k, [relaxed[i][0] - pts[i][0], relaxed[i][1] - pts[i][1]]]));
-  }, [spotNat]);
+  // Phones, national view: each icon sits at its real town, nudged apart but never across its
+  // region's border; whatever doesn't fit in a small region is left out (it shows once zoomed).
+  const phonePos = useMemo(() => {
+    if (!compact || !proj) return {};
+    const r = MARKER.nationalCompact / 2, minDist = MARKER.nationalCompact + 2;
+    const probe = [[0, 0], [r * 0.8, 0], [-r * 0.8, 0], [0, r * 0.8], [0, -r * 0.8]];
+    const inside = (regionId, [x, y]) => probe.every(([dx, dy]) => geoContains(REGION_FEATURE[regionId], proj.invert([x + dx, y + dy])));
+    const centre = Object.fromEntries(shapes.map((sh) => [sh.regionId, sh.centroid]));
+    const items = [];
+    for (const [regionId, picks] of Object.entries(PHONE_PICKS)) {
+      if (!REGION_FEATURE[regionId] || !spotReal[regionId]) continue;
+      [...picks].forEach((index, prio) => {
+        let p = [...spotReal[regionId][index]];
+        // coastal/border towns: slide toward the region's centre until the whole icon is inside
+        const c = centre[regionId];
+        for (let k = 0; k < 12 && c && !inside(regionId, p); k++) p = [p[0] + (c[0] - p[0]) * 0.25, p[1] + (c[1] - p[1]) * 0.25];
+        if (inside(regionId, p)) items.push({ key: `${regionId}-${index}`, regionId, prio, p });
+      });
+    }
+    // constrained repulsion: a nudge is only accepted if the icon stays inside its own region
+    for (let it = 0; it < 40; it++) {
+      let moved = false;
+      for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+        const a = items[i], b = items[j];
+        let dx = b.p[0] - a.p[0], dy = b.p[1] - a.p[1], d = Math.hypot(dx, dy);
+        if (d >= minDist) continue;
+        if (d < 0.01) { dx = Math.cos(j * 2.4); dy = Math.sin(j * 2.4); d = 1; }
+        const push = (minDist - d) / 2, ux = dx / d, uy = dy / d;
+        const na = [a.p[0] - ux * push, a.p[1] - uy * push], nb = [b.p[0] + ux * push, b.p[1] + uy * push];
+        if (inside(a.regionId, na)) { a.p = na; moved = true; }
+        if (inside(b.regionId, nb)) { b.p = nb; moved = true; }
+      }
+      if (!moved) break;
+    }
+    // keep the most important icons; drop any that still overlap one already kept
+    const kept = [];
+    for (const item of [...items].sort((a, b) => a.prio - b.prio)) {
+      if (kept.every((k) => Math.hypot(k.p[0] - item.p[0], k.p[1] - item.p[1]) >= minDist - 1.5)) kept.push(item);
+    }
+    return Object.fromEntries(kept.map((k) => [k.key, k.p]));
+  }, [compact, proj, shapes, spotReal]);
   const zoomOffsets = useMemo(() => {
     if (!selectedRegion || !spotReal[selectedRegion]) return {};
     const size = compact ? MARKER.zoomedCompact : MARKER.zoomed;
@@ -344,9 +381,9 @@ export default function ItalyMap({
     const journeyDim = activeJourney && !zoomed && !activeJourney.regions.includes(regionId);
     spots.forEach((spot, index) => {
       if (allowedTypes && !allowedTypes.includes(spot.type)) return;
-      if (compact && !zoomed && !PHONE_PICKS[regionId]?.has(index)) return; // phones: a few per region
       const key = `${regionId}-${index}`;
-      const a = toScreen(nat[index]), aOff = (compact ? phoneNatOffsets : nationalOffsets)[key] || [0, 0];
+      if (compact && !zoomed && !phonePos[key]) return; // phones: a few per region, inside its borders
+      const a = toScreen(compact ? phonePos[key] || real[index] : nat[index]), aOff = compact ? [0, 0] : nationalOffsets[key] || [0, 0];
       if (!a) return;
       let pos = [a[0] + aOff[0], a[1] + aOff[1]];
       const t = isSel ? glide : 0;
