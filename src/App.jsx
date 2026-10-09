@@ -7,7 +7,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { Navigate } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 // Route-level code splitting: each page ships as its own chunk.
 const Recipes = lazy(() => import('./pages/Recipes'));
 const RecipeDetail = lazy(() => import('./pages/RecipeDetail'));
@@ -19,6 +19,26 @@ const CreatorProfile = lazy(() => import('./pages/CreatorProfile'));
 const TasteMaps = lazy(() => import('./pages/TasteMaps'));
 const ProducerDetail = lazy(() => import('./pages/ProducerDetail'));
 const Checkout = lazy(() => import('./pages/Checkout'));
+
+// After the first page has loaded, quietly download the code for the other pages in the
+// background so the first click on Regions/Producers/… is instant (skipped on data-saver / 2G).
+function usePrefetchPages() {
+  useEffect(() => {
+    const c = navigator.connection;
+    if (c && (c.saveData || /2g/.test(c.effectiveType || ''))) return;
+    const run = () => {
+      [
+        () => import('./pages/Producers'), () => import('./pages/Products'), () => import('./pages/Regions'),
+        () => import('./pages/Experiences'), () => import('./pages/Recipes'), () => import('./pages/Stories'),
+        () => import('./pages/RegionDetail'), () => import('./pages/ProducerDetail'), () => import('./pages/RecipeDetail'),
+        () => import('./pages/Ingredient'), () => import('./pages/About'), () => import('./pages/Checkout'),
+      ].reduce((p, load) => p.then(() => load().catch(() => {})), Promise.resolve());
+    };
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1));
+    const t = setTimeout(() => idle(run), 1500);
+    return () => clearTimeout(t);
+  }, []);
+}
 
 function PageFallback() {
   return (
@@ -99,6 +119,7 @@ const AuthenticatedApp = () => {
 
 
 function App() {
+  usePrefetchPages();
 
   return (
     <AuthProvider>
