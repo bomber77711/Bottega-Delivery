@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Landmark, ChefHat, BookOpen, Heart, Info, Sparkles, ChevronRight, X } from 'lucide-react';
 import { randomDiscovery } from '@/components/DiscoveryFloat';
+import { foodJourneys } from '@/components/foodJourneys';
+import { regionData } from '@/components/regionData';
 
 // Phone-only "More" menu (opened from the header ☰): secondary sections + Discover.
 const LINKS = [
@@ -41,6 +43,16 @@ export default function MoreSheet({ open, onClose }) {
             </Link>
           ))}
         </nav>
+        <p className="more-label">🇮🇹 Food Journeys</p>
+        <div className="more-journeys">
+          {foodJourneys.map((j) => (
+            <button key={j.id} type="button" className="more-journey" onClick={() => { onClose(); navigate(`/?journey=${j.id}`); }}>
+              <span aria-hidden>{j.emoji}</span>
+              <strong>{j.title}</strong>
+              <span>{j.regions.map((r) => regionData[r]?.name).join(' → ')}</span>
+            </button>
+          ))}
+        </div>
         <button type="button" className="more-discover" onClick={() => { const d = randomDiscovery(); onClose(); navigate(d.href); }}>
           <Sparkles size={18} /> Discover something new
         </button>

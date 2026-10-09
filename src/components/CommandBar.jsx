@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, ArrowRight } from 'lucide-react';
+import { Search, X, ArrowRight, Sparkles, ChevronLeft } from 'lucide-react';
 import { regionData } from './regionData';
 import { recipesData } from './recipesData';
 import { creatorsData } from './creatorsData';
@@ -8,6 +8,9 @@ import { productsData } from './productsData';
 import { ingredients } from './ingredientsData';
 import { slugify } from '@/lib/catalog';
 import { isPhoneNow } from '@/hooks/useIsPhone';
+import AskChat from '@/mobile/AskChat';
+
+const ASK_SUGGESTIONS = ['What wine goes with truffle?', 'Best cheese for carbonara?', 'Traditional dishes from Sicily', 'What is aceto balsamico DOP?'];
 
 const allResults = [
   // Regions
@@ -46,6 +49,7 @@ const phoneExtras = [
 
 export default function CommandBar({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
+  const [aiQ, setAiQ] = useState(null); // phones: question sent to Ask Bottega
   const inputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -53,6 +57,7 @@ export default function CommandBar({ isOpen, onClose }) {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
       setQuery('');
+      setAiQ(null);
     }
   }, [isOpen]);
 
@@ -67,7 +72,8 @@ export default function CommandBar({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const pool = isPhoneNow() ? [...phoneExtras, ...allResults] : allResults;
+  const phone = isPhoneNow();
+  const pool = phone ? [...phoneExtras, ...allResults] : allResults;
   const filtered = query.length < 1
     ? allResults.slice(0, 8)
     : pool.filter(r =>
@@ -79,6 +85,14 @@ export default function CommandBar({ isOpen, onClose }) {
   const handleSelect = (item) => {
     navigate(item.href);
     onClose();
+  };
+
+  // Phones: the keyboard's Search key opens an exact match, otherwise asks Bottega.
+  const onPhoneEnter = (e) => {
+    if (!phone || e.key !== 'Enter' || !query.trim()) return;
+    e.preventDefault();
+    const exact = filtered.find((r) => r.label.toLowerCase() === query.trim().toLowerCase());
+    if (exact) handleSelect(exact); else setAiQ(query.trim());
   };
 
   return (
@@ -95,11 +109,19 @@ export default function CommandBar({ isOpen, onClose }) {
       }} onClick={e => e.stopPropagation()}>
         {/* Search input */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          {phone && aiQ ? (
+            <>
+              <button type="button" onClick={() => setAiQ(null)} aria-label="Back to search" style={{ background: 'none', border: 'none', color: '#81C784', padding: 4, display: 'flex', alignItems: 'center' }}><ChevronLeft size={22} /></button>
+              <span style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 16, fontWeight: 700 }}><Sparkles size={16} color="#81C784" /> Ask Bottega</span>
+            </>
+          ) : (<>
           <Search size={16} color="rgba(255,255,255,0.4)" />
           <input
             ref={inputRef}
             value={query}
             onChange={e => setQuery(e.target.value)}
+            onKeyDown={phone ? onPhoneEnter : undefined}
+            enterKeyHint={phone ? 'search' : undefined}
             placeholder="Search regions, recipes, producers, chefs…"
             style={{
               flex: 1, border: 'none', background: 'none', outline: 'none',
@@ -111,13 +133,32 @@ export default function CommandBar({ isOpen, onClose }) {
               <X size={14} />
             </button>
           )}
+          </>)}
           <button type="button" onClick={onClose} className="show-mobile" style={{ display: 'none', background: 'none', border: 'none', color: '#81C784', fontSize: 15, fontWeight: 600, padding: '8px 4px', cursor: 'pointer' }}>Cancel</button>
           <kbd style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, padding: '2px 6px' }}>ESC</kbd>
         </div>
 
-        {/* Results */}
+        {phone && aiQ ? <AskChat key={aiQ} initialQuestion={aiQ} /> : (
+        /* Results */
         <div className="cmd-results" style={{ maxHeight: 400, overflowY: 'auto' }}>
-          {filtered.length === 0 ? (
+          {phone && (
+            <>
+              <button type="button" className="ask-row" onClick={() => query.trim() ? setAiQ(query.trim()) : inputRef.current?.focus()}>
+                <span className="ask-row-ic"><Sparkles size={18} color="#fff" /></span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <strong>Ask Bottega AI</strong>
+                  <span>{query.trim() ? `“${query.trim()}”` : 'Ask anything about Italian food & wine'}</span>
+                </span>
+                <ArrowRight size={16} color="#81C784" />
+              </button>
+              {!query && (
+                <div className="ask-sugg">
+                  {ASK_SUGGESTIONS.map((q) => <button key={q} type="button" onClick={() => setAiQ(q)}>{q}</button>)}
+                </div>
+              )}
+            </>
+          )}
+          {filtered.length === 0 ? (phone ? null :
             <div style={{ padding: '32px 20px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>
               No results for "{query}"
             </div>
@@ -152,13 +193,14 @@ export default function CommandBar({ isOpen, onClose }) {
             </>
           )}
         </div>
+        )}
 
         {/* Footer */}
-        <div style={{ padding: '10px 20px', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 16 }}>
+        {!(phone && aiQ) && <div style={{ padding: '10px 20px', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 16 }}>
           {['🗺️ Regions', '🍝 Recipes', '👨‍🌾 Producers'].map(label => (
             <span key={label} style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', gap: 4 }}>{label}</span>
           ))}
-        </div>
+        </div>}
       </div>
     </div>
   );

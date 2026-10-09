@@ -53,7 +53,7 @@ export const TYPE_CONFIG = {
   dish: { bg: '#C84040', em: '\u{1F37D}\u{FE0F}', label: 'Dish' },
 };
 
-const LAYER_TYPE_MAP = {
+export const LAYER_TYPE_MAP = {
   producers: ['producer'],
   ingredients: ['ingredient'],
   dishes: ['dish'],
@@ -62,9 +62,14 @@ const LAYER_TYPE_MAP = {
 };
 
 // Each marker's single click-through destination, resolved once against the catalogue.
-const SPOT_DESTINATIONS = Object.fromEntries(
+export const SPOT_DESTINATIONS = Object.fromEntries(
   Object.entries(gastronomySpots).map(([regionId, spots]) => [regionId, spots.map((s) => resolveSpot(s, regionId).primary)]),
 );
+
+// Phone labels for the national view (short forms of the long bilingual names).
+const SHORT_NAMES = { trentino_alto_adige: 'Trentino', friuli_venezia_giulia: 'Friuli', emilia_romagna: 'Emilia-R.', valle_daosta: "Aosta" };
+// [dx, dy] pixel nudges where the geometric centroid falls awkwardly.
+const LABEL_NUDGE = {};
 
 const MARKER = { national: 17, zoomed: 34, zoomedCompact: 28 };
 const ZOOM_MS = 650;
@@ -139,6 +144,7 @@ export default function ItalyMap({
   activeLayer = 'all',
   activeJourney = null,
   insets = { top: 110, right: 24, bottom: 24, left: 24 }, // screen area hidden by overlays
+  highlightSpot = null,         // phones: { regionId, index } of the card centred in the region sheet
 }) {
   const containerRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -159,22 +165,25 @@ export default function ItalyMap({
   }, []);
 
   const compact = dims.width > 0 && dims.width < 768;
+  const journeyOnPhone = compact && !!activeJourney;
 
   // Base projection: whole of Italy fitted inside the area not covered by overlays.
   const proj = useMemo(() => {
     if (!dims.width || !dims.height) return null;
     // Italy fills the screen (like the original): it may tuck under the floating controls.
     return geoMercator().fitExtent(
-      compact ? [[8, 112], [dims.width - 8, dims.height - 56]] : [[0, 72], [dims.width, dims.height + 30]],
+      // phones: no floating bars any more → Italy uses the whole map area
+      // (a Food Journey card sits at the top on phones → Italy moves below it)
+      compact ? [[12, journeyOnPhone ? 112 : 14], [dims.width - 12, dims.height - 40]] : [[0, 72], [dims.width, dims.height + 30]],
       ITALY,
     );
-  }, [dims.width, dims.height, compact]);
+  }, [dims.width, dims.height, compact, journeyOnPhone]);
 
   // Path strings + bounds — computed once per projection, never on hover.
   const shapes = useMemo(() => {
     if (!proj) return [];
     const pg = geoPath(proj);
-    return ITALY.features.map((f) => ({ regionId: f.properties.regionId, name: regionData[f.properties.regionId]?.name || f.properties.reg_name, d: pg(f), bounds: pg.bounds(f) }));
+    return ITALY.features.map((f) => ({ regionId: f.properties.regionId, name: regionData[f.properties.regionId]?.name || f.properties.reg_name, d: pg(f), bounds: pg.bounds(f), centroid: pg.centroid(f), area: pg.area(f) }));
   }, [proj]);
   const boundsById = useMemo(() => Object.fromEntries(shapes.map((s) => [s.regionId, s.bounds])), [shapes]);
 
@@ -223,7 +232,7 @@ export default function ItalyMap({
     if (!selectedRegion || !spotReal[selectedRegion]) return {};
     const size = compact ? MARKER.zoomedCompact : MARKER.zoomed;
     const pts = spotReal[selectedRegion].map((p) => [p[0] * target.s + target.tx, p[1] * target.s + target.ty]);
-    const relaxed = relax(pts, size + 6);
+    const relaxed = relax(pts, compact ? size + 22 : size + 6); // phones: room for the name label
     return Object.fromEntries(pts.map((p, i) => [`${selectedRegion}-${i}`, [relaxed[i][0] - p[0], relaxed[i][1] - p[1]]]));
   }, [selectedRegion, spotReal, target, compact]);
 
@@ -298,6 +307,7 @@ export default function ItalyMap({
     if (!nat) continue;
     const isSel = regionId === selectedRegion;
     if (zoomed && !isSel) continue; // other regions' markers are hidden while zoomed
+    if (compact && !zoomed) continue; // phones: clean national map — icons appear inside a region
     const journeyDim = activeJourney && !zoomed && !activeJourney.regions.includes(regionId);
     spots.forEach((spot, index) => {
       if (allowedTypes && !allowedTypes.includes(spot.type)) return;
@@ -312,6 +322,28 @@ export default function ItalyMap({
       }
       markers.push({ regionId, index, spot, pos, isSel, journeyDim, t });
     });
+  }
+
+  // Phones: names under the icons, but never on top of each other or of another icon.
+  // The highlighted card's name is placed first, then the rest in order; colliding ones are skipped.
+  const spotSize = (t) => lerp(MARKER.national, compact ? MARKER.zoomedCompact : MARKER.zoomed, t);
+  const shortLabel = (l) => (l.length > 16 ? l.slice(0, 15) + '…' : l);
+  const labelShown = new Map(); // key → 'below' | 'above'
+  if (compact && zoomed) {
+    const isHl = (m) => !!highlightSpot && highlightSpot.regionId === m.regionId && highlightSpot.index === m.index;
+    const icons = markers.map((m) => { const r = spotSize(m.t) / 2 + 2; return { key: `${m.regionId}-${m.index}`, box: [m.pos[0] - r, m.pos[1] - r, m.pos[0] + r, m.pos[1] + r] }; });
+    const hit = (a, b) => !(a[2] < b[0] || a[0] > b[2] || a[3] < b[1] || a[1] > b[3]);
+    const placed = [];
+    for (const m of [...markers].sort((a, b) => isHl(b) - isHl(a))) {
+      if (!(m.isSel && m.t > 0.6)) continue;
+      const key = `${m.regionId}-${m.index}`;
+      const w = shortLabel(m.spot.label).length * 6.2 + 4, half = spotSize(m.t) / 2;
+      const free = (box) => !placed.some((b) => hit(box, b)) && !icons.some((ic) => ic.key !== key && hit(box, ic.box));
+      const below = [m.pos[0] - w / 2, m.pos[1] + half + 4, m.pos[0] + w / 2, m.pos[1] + half + 17];
+      const above = [m.pos[0] - w / 2, m.pos[1] - half - 19, m.pos[0] + w / 2, m.pos[1] - half - 6];
+      if (free(below)) { placed.push(below); labelShown.set(key, 'below'); }
+      else if (free(above)) { placed.push(above); labelShown.set(key, 'above'); }
+    }
   }
 
   const hoverRegion = hover?.kind === 'region' ? regionData[hover.regionId] : null;
@@ -333,6 +365,9 @@ export default function ItalyMap({
         .it-spot:focus-visible .it-ring { opacity: 1 !important; }
         .it-spot .it-ring { opacity: 0; transition: opacity .15s ease; pointer-events: none; }
         .it-spot:hover .it-ring { opacity: 1; }
+        .it-region-label { font: 600 9.5px 'DM Sans', sans-serif; letter-spacing: .06em; text-transform: uppercase; fill: rgba(255,255,255,.6); paint-order: stroke; stroke: rgba(6,13,6,.7); stroke-width: 3px; pointer-events: none; }
+        .it-spot-label { font: 600 10.5px 'DM Sans', sans-serif; fill: #fff; paint-order: stroke; stroke: rgba(6,13,6,.85); stroke-width: 3px; pointer-events: none; }
+        .it-spot-label.is-hl { fill: #A5D6A7; }
         @keyframes itPulse { 0%,100% { opacity: .9 } 50% { opacity: .35 } }
         @keyframes itCardIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
       `}</style>
@@ -394,7 +429,7 @@ export default function ItalyMap({
           })()}
 
           {/* Producer-density dots (national view only) */}
-          {!zoomed && (activeLayer === 'all' || activeLayer === 'producers') && Object.entries(centroidBase).map(([regionId, p]) => {
+          {!zoomed && !compact && (activeLayer === 'all' || activeLayer === 'producers') && Object.entries(centroidBase).map(([regionId, p]) => {
             const d = regionData[regionId];
             const pos = toScreen(p);
             if (!d || !pos) return null;
@@ -408,9 +443,20 @@ export default function ItalyMap({
             );
           })}
 
+          {/* Phones, national view: region names instead of 160 icons */}
+          {compact && !zoomed && shapes.map(({ regionId, centroid, area }) => {
+            const label = SHORT_NAMES[regionId] || regionData[regionId]?.name;
+            if (!label || area < 650 || !centroid || Number.isNaN(centroid[0])) return null;
+            const [x, y] = toScreen([centroid[0] + (LABEL_NUDGE[regionId]?.[0] || 0), centroid[1] + (LABEL_NUDGE[regionId]?.[1] || 0)]);
+            return (
+              <text key={`lbl-${regionId}`} x={x} y={y} textAnchor="middle" dominantBaseline="central" className="it-region-label">{label}</text>
+            );
+          })}
+
           {/* Gastronomy markers — unscaled overlay, constant on-screen size */}
           {markers.map(({ regionId, index, spot, pos, isSel, journeyDim, t }) => {
-            const size = lerp(MARKER.national, compact ? MARKER.zoomedCompact : MARKER.zoomed, t);
+            const size = spotSize(t);
+            const hl = highlightSpot && highlightSpot.regionId === regionId && highlightSpot.index === index;
             const cfg = TYPE_CONFIG[spot.type] || TYPE_CONFIG.producer;
             const dest = SPOT_DESTINATIONS[regionId]?.[index];
             const label = isSel && dest ? `${spot.label} — ${dest.label}` : `${spot.label} — ${cfg.label}`;
@@ -431,12 +477,18 @@ export default function ItalyMap({
               >
                 {/* hit area: exactly the marker, plus a small touch margin when zoomed */}
                 <circle r={size / 2 + (isSel ? 6 : 1)} fill="transparent" />
-                <circle className="it-ring" r={size / 2 + 5} fill="rgba(76,175,80,0.22)" stroke="#81C784" strokeWidth={1.5} />
+                <circle className="it-ring" r={size / 2 + 5} fill="rgba(76,175,80,0.22)" stroke="#81C784" strokeWidth={1.5} style={hl ? { opacity: 1 } : undefined} />
                 <circle r={size / 2 + 2} fill={cfg.bg} opacity={0.15} />
                 <circle r={size / 2} fill={cfg.bg} />
                 <text textAnchor="middle" dominantBaseline="central" fontSize={size * (t > 0.5 ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
                   {t > 0.5 ? (spot.emoji || cfg.em) : cfg.em}
                 </text>
+                {/* phones: name under each icon (no hover on touch screens) */}
+                {labelShown.has(`${regionId}-${index}`) && (
+                  <text y={labelShown.get(`${regionId}-${index}`) === 'above' ? -size / 2 - 9 : size / 2 + 12} textAnchor="middle" className={`it-spot-label${hl ? ' is-hl' : ''}`}>
+                    {shortLabel(spot.label)}
+                  </text>
+                )}
               </g>
             );
           })}

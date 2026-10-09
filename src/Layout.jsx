@@ -134,9 +134,9 @@ function NavContent({ currentPageName }) {
           {/* Mobile menu */}
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Menu" aria-expanded={mobileMenuOpen}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'none', color: '#1A1A1A' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'none', color: '#1A1A1A', alignItems: 'center' }}
             className="show-mobile nav-icon-btn">
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileMenuOpen ? <X size={21} /> : <Menu size={21} />}
           </button>
         </div>
       </nav>
