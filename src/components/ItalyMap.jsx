@@ -66,19 +66,21 @@ export const SPOT_DESTINATIONS = Object.fromEntries(
   Object.entries(gastronomySpots).map(([regionId, spots]) => [regionId, spots.map((s) => resolveSpot(s, regionId).primary)]),
 );
 
-const MARKER = { national: 17, nationalCompact: 23, zoomed: 34, zoomedCompact: 28 };
+const MARKER = { national: 17, nationalCompact: 17, zoomed: 34, zoomedCompact: 28 };
 
 // Phones, national view: only a few signature icons per region (varied: ingredient, wine, dish…),
 // more for the big food regions — instead of all 160.
 const PHONE_PICKS = Object.fromEntries(Object.entries(gastronomySpots).map(([regionId, spots]) => {
   const producers = regionData[regionId]?.producerCount || 0;
-  const n = producers >= 40 ? 3 : producers >= 15 ? 2 : 1;
+  const n = producers >= 40 ? 5 : producers >= 15 ? 4 : 2;
   const picks = [];
+  // one of each type first (variety), then the rest in the curated order
   for (const type of ['ingredient', 'wine', 'dish', 'producer', 'experience']) {
     if (picks.length >= n) break;
     const i = spots.findIndex((sp) => sp.type === type);
     if (i >= 0) picks.push(i);
   }
+  for (let i = 0; i < spots.length && picks.length < n; i++) if (!picks.includes(i)) picks.push(i);
   return [regionId, new Set(picks)];
 }));
 const ZOOM_MS = 650;
@@ -241,7 +243,7 @@ export default function ItalyMap({
   const phoneNatOffsets = useMemo(() => {
     const keys = [], pts = [];
     for (const [regionId, list] of Object.entries(spotNat)) list.forEach((p, i) => { if (p && PHONE_PICKS[regionId]?.has(i)) { keys.push(`${regionId}-${i}`); pts.push(p); } });
-    const relaxed = relax(pts, MARKER.nationalCompact + 3);
+    const relaxed = relax(pts, MARKER.nationalCompact + 2);
     return Object.fromEntries(keys.map((k, i) => [k, [relaxed[i][0] - pts[i][0], relaxed[i][1] - pts[i][1]]]));
   }, [spotNat]);
   const zoomOffsets = useMemo(() => {
