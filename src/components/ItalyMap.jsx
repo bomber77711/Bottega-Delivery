@@ -95,7 +95,15 @@ const REGION_LABELS = {
   sicilia: { name: 'Sicily', at: [14.1, 37.55] },
   sardegna: { name: 'Sardinia', at: [9.0, 40.1] },
 };
-const LABEL_FONT = 8, LABEL_CHAR_W = 5.95; // DM Mono 8px with .14em tracking ≈ 5.95px per character
+// Region-name typeface (phones). PREVIEW ONLY: ?labelfont=sf | helvetica | arial | mono lets us compare on a real phone.
+const LABEL_FAMILIES = {
+  sf: { family: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif", size: 9, tracking: '.1em', weight: 600, charW: 6.6 },
+  helvetica: { family: "'Helvetica Neue', Helvetica, Arial, sans-serif", size: 9, tracking: '.1em', weight: 600, charW: 6.6 },
+  arial: { family: "Arial, 'Helvetica Neue', Helvetica, sans-serif", size: 9, tracking: '.1em', weight: 700, charW: 6.8 },
+  mono: { family: "'DM Mono', monospace", size: 8, tracking: '.14em', weight: 600, charW: 5.95 },
+};
+const LABEL_STYLE = LABEL_FAMILIES[(typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('labelfont')) || 'sf'] || LABEL_FAMILIES.sf;
+const LABEL_CHAR_W = LABEL_STYLE.charW;
 
 const MARKER = { national: 17, nationalCompact: 15, zoomed: 34, zoomedCompact: 28 };
 
@@ -488,7 +496,7 @@ export default function ItalyMap({
         .it-spot:focus-visible .it-ring { opacity: 1 !important; }
         .it-spot .it-ring { opacity: 0; transition: opacity .15s ease; pointer-events: none; }
         .it-spot:hover .it-ring { opacity: 1; }
-        .it-region-name { font: 600 ${LABEL_FONT}px 'DM Mono', monospace; letter-spacing: .14em; fill: #FFF6D8; filter: url(#it-name-glow); pointer-events: none; }
+        .it-region-name { font-family: ${LABEL_STYLE.family}; font-size: ${LABEL_STYLE.size}px; font-weight: ${LABEL_STYLE.weight}; letter-spacing: ${LABEL_STYLE.tracking}; fill: #FFF6D8; filter: url(#it-name-glow); pointer-events: none; }
         .it-region-name.is-on { fill: #FFF8E1; filter: url(#it-name-glow-on); }
         .it-ping { fill: none; stroke: #81C784; stroke-width: 1.5px; transform-box: fill-box; transform-origin: center; opacity: 0; animation: itPing .9s cubic-bezier(.2,.7,.3,1) forwards; }
         .it-ping-2 { animation-delay: .16s; }
