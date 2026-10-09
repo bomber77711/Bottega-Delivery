@@ -66,13 +66,9 @@ export const SPOT_DESTINATIONS = Object.fromEntries(
   Object.entries(gastronomySpots).map(([regionId, spots]) => [regionId, spots.map((s) => resolveSpot(s, regionId).primary)]),
 );
 
-// Phone labels for the national view (short forms of the long bilingual names).
-const SHORT_NAMES = { trentino_alto_adige: 'Trentino', friuli_venezia_giulia: 'Friuli', emilia_romagna: 'Emilia-R.', valle_daosta: "Aosta" };
-// [dx, dy] pixel nudges where the geometric centroid falls awkwardly.
-const LABEL_NUDGE = {};
-
 const MARKER = { national: 17, zoomed: 34, zoomedCompact: 28 };
 const ZOOM_MS = 650;
+const FLASH_MS = 480; // phones: how long the tapped region glows (with its name) before zooming
 const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 // Screen-space de-overlap: nudges markers apart (pairwise repulsion) so none hide another.
@@ -259,11 +255,27 @@ export default function ItalyMap({
   const toScreen = useCallback((p) => (p ? [p[0] * view.s + view.tx, p[1] * view.s + view.ty] : null), [view]);
   const zoomed = !!selectedRegion;
 
+  // Phones: tapping a region on the national map first lights it up — a ping and its name —
+  // then zooms in a beat later.
+  const [flash, setFlash] = useState(null); // { regionId, key }
+  const flashTimer = useRef(0);
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
+  useEffect(() => { if (selectedRegion) setFlash(null); }, [selectedRegion]);
+
   // ── Interaction handlers (stable identities so RegionPath memo holds) ──
   const selectRegion = useCallback((regionId) => {
     if (!regionData[regionId]) return;
+    if (compact && !selectedRegion) {
+      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce) {
+        clearTimeout(flashTimer.current);
+        setFlash({ regionId, key: Date.now() });
+        flashTimer.current = setTimeout(() => onRegionSelect?.(regionId), FLASH_MS);
+        return;
+      }
+    }
     onRegionSelect?.(regionId === selectedRegion ? null : regionId);
-  }, [onRegionSelect, selectedRegion]);
+  }, [onRegionSelect, selectedRegion, compact]);
   const selectRef = useRef(selectRegion);
   selectRef.current = selectRegion;
   const stableSelect = useCallback((id) => selectRef.current(id), []);
@@ -365,7 +377,11 @@ export default function ItalyMap({
         .it-spot:focus-visible .it-ring { opacity: 1 !important; }
         .it-spot .it-ring { opacity: 0; transition: opacity .15s ease; pointer-events: none; }
         .it-spot:hover .it-ring { opacity: 1; }
-        .it-region-label { font: 600 9.5px 'DM Sans', sans-serif; letter-spacing: .06em; text-transform: uppercase; fill: rgba(255,255,255,.6); paint-order: stroke; stroke: rgba(6,13,6,.7); stroke-width: 3px; pointer-events: none; }
+        .it-ping { fill: none; stroke: #81C784; stroke-width: 1.5px; transform-box: fill-box; transform-origin: center; opacity: 0; animation: itPing .9s cubic-bezier(.2,.7,.3,1) forwards; }
+        .it-ping-2 { animation-delay: .16s; }
+        .it-flash { font: 600 11px 'DM Mono', monospace; letter-spacing: .14em; fill: #C8E6C9; paint-order: stroke; stroke: rgba(6,13,6,.92); stroke-width: 4px; opacity: 0; animation: itFlash .48s ease-out forwards; }
+        @keyframes itPing { 0% { opacity: .9; transform: scale(.08) } 100% { opacity: 0; transform: scale(1) } }
+        @keyframes itFlash { 0% { opacity: 0; letter-spacing: .32em } 45% { opacity: 1; letter-spacing: .14em } 100% { opacity: 1; letter-spacing: .14em } }
         .it-spot-label { font: 600 10.5px 'DM Sans', sans-serif; fill: #fff; paint-order: stroke; stroke: rgba(6,13,6,.85); stroke-width: 3px; pointer-events: none; }
         .it-spot-label.is-hl { fill: #A5D6A7; }
         @keyframes itPulse { 0%,100% { opacity: .9 } 50% { opacity: .35 } }
@@ -404,11 +420,11 @@ export default function ItalyMap({
                   regionId={regionId}
                   d={d}
                   name={name}
-                  fill={isSel ? SELECTED_FILL : isHov ? HOVER_FILL : regionFill(data?.producerCount || 0)}
-                  stroke={isSel ? 'rgba(76,175,80,0.6)' : isHov ? 'rgba(76,175,80,0.4)' : 'rgba(255,255,255,0.1)'}
+                  fill={isSel || flash?.regionId === regionId ? SELECTED_FILL : isHov ? HOVER_FILL : regionFill(data?.producerCount || 0)}
+                  stroke={isSel || flash?.regionId === regionId ? 'rgba(76,175,80,0.6)' : isHov ? 'rgba(76,175,80,0.4)' : 'rgba(255,255,255,0.1)'}
                   strokeWidth={isSel ? 1.5 : isHov ? 1 : 0.5}
                   opacity={opacity}
-                  glow={isSel}
+                  glow={isSel || flash?.regionId === regionId}
                   journeyColor={activeJourney && !zoomed && inJourney ? activeJourney.color : null}
                   interactive={!!data}
                   onEnter={enterRegion}
@@ -428,12 +444,12 @@ export default function ItalyMap({
             ) : null;
           })()}
 
-          {/* Producer-density dots (national view only) */}
-          {!zoomed && !compact && (activeLayer === 'all' || activeLayer === 'producers') && Object.entries(centroidBase).map(([regionId, p]) => {
+          {/* Producer-density dots (national view only; on phones they replace the icons) */}
+          {!zoomed && (activeLayer === 'all' || activeLayer === 'producers') && Object.entries(centroidBase).map(([regionId, p]) => {
             const d = regionData[regionId];
             const pos = toScreen(p);
             if (!d || !pos) return null;
-            const r = d.producerCount >= 40 ? 5.5 : d.producerCount >= 20 ? 4.5 : d.producerCount >= 10 ? 3.5 : 2.5;
+            const r = (d.producerCount >= 40 ? 5.5 : d.producerCount >= 20 ? 4.5 : d.producerCount >= 10 ? 3.5 : 2.5) * (compact ? 1.15 : 1);
             const dim = activeJourney && !activeJourney.regions.includes(regionId);
             return (
               <g key={`dot-${regionId}`} opacity={dim ? 0.15 : 1} style={{ pointerEvents: 'none' }}>
@@ -443,15 +459,22 @@ export default function ItalyMap({
             );
           })}
 
-          {/* Phones, national view: region names instead of 160 icons */}
-          {compact && !zoomed && shapes.map(({ regionId, centroid, area }) => {
-            const label = SHORT_NAMES[regionId] || regionData[regionId]?.name;
-            if (!label || area < 650 || !centroid || Number.isNaN(centroid[0])) return null;
-            const [x, y] = toScreen([centroid[0] + (LABEL_NUDGE[regionId]?.[0] || 0), centroid[1] + (LABEL_NUDGE[regionId]?.[1] || 0)]);
+          {/* Phones: ping + name of the region just tapped (follows the zoom, then fades) */}
+          {flash && !zoomed && (() => {
+            const pos = toScreen(centroidBase[flash.regionId]);
+            const d = regionData[flash.regionId];
+            if (!pos || !d) return null;
+            const label = `${d.name.toUpperCase()} · ${d.producerCount} PRODUCERS`;
+            const half = label.length * 4.4 + 6; // keep the caption on screen near the edges
+            const tx = Math.min(Math.max(pos[0], half + 8), dims.width - half - 8);
             return (
-              <text key={`lbl-${regionId}`} x={x} y={y} textAnchor="middle" dominantBaseline="central" className="it-region-label">{label}</text>
+              <g key={flash.key} style={{ pointerEvents: 'none' }}>
+                <circle cx={pos[0]} cy={pos[1]} r={46} className="it-ping" />
+                <circle cx={pos[0]} cy={pos[1]} r={46} className="it-ping it-ping-2" />
+                <text x={tx} y={pos[1]} textAnchor="middle" dominantBaseline="central" className="it-flash">{label}</text>
+              </g>
             );
-          })}
+          })()}
 
           {/* Gastronomy markers — unscaled overlay, constant on-screen size */}
           {markers.map(({ regionId, index, spot, pos, isSel, journeyDim, t }) => {

@@ -171,7 +171,7 @@ export default function Layout({ children, currentPageName }) {
         const wrapperStyle = isFixed
           ? { paddingTop: 60, height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }
           : { paddingTop: 60, minHeight: '100vh', display: 'flex', flexDirection: 'column' };
-        return <div className={`page-shell${isPhone ? ' has-tabbar' : ''}`} style={wrapperStyle}>{children}</div>;
+        return <div className={`page-shell${isPhone ? ' has-tabbar' : ''}${isFixed ? ' is-fixed' : ''}`} style={wrapperStyle}>{children}</div>;
       })()}
       <DiscoveryFloat />
       {isPhone && <AddedToast />}
