@@ -66,7 +66,21 @@ export const SPOT_DESTINATIONS = Object.fromEntries(
   Object.entries(gastronomySpots).map(([regionId, spots]) => [regionId, spots.map((s) => resolveSpot(s, regionId).primary)]),
 );
 
-const MARKER = { national: 17, zoomed: 34, zoomedCompact: 28 };
+const MARKER = { national: 17, nationalCompact: 23, zoomed: 34, zoomedCompact: 28 };
+
+// Phones, national view: only a few signature icons per region (varied: ingredient, wine, dish…),
+// more for the big food regions — instead of all 160.
+const PHONE_PICKS = Object.fromEntries(Object.entries(gastronomySpots).map(([regionId, spots]) => {
+  const producers = regionData[regionId]?.producerCount || 0;
+  const n = producers >= 40 ? 3 : producers >= 15 ? 2 : 1;
+  const picks = [];
+  for (const type of ['ingredient', 'wine', 'dish', 'producer', 'experience']) {
+    if (picks.length >= n) break;
+    const i = spots.findIndex((sp) => sp.type === type);
+    if (i >= 0) picks.push(i);
+  }
+  return [regionId, new Set(picks)];
+}));
 const ZOOM_MS = 650;
 const FLASH_MS = 480; // phones: how long the tapped region glows (with its name) before zooming
 const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -224,6 +238,12 @@ export default function ItalyMap({
     const relaxed = relax(pts, MARKER.national - 3);
     return Object.fromEntries(keys.map((k, i) => [k, [relaxed[i][0] - pts[i][0], relaxed[i][1] - pts[i][1]]]));
   }, [spotNat]);
+  const phoneNatOffsets = useMemo(() => {
+    const keys = [], pts = [];
+    for (const [regionId, list] of Object.entries(spotNat)) list.forEach((p, i) => { if (p && PHONE_PICKS[regionId]?.has(i)) { keys.push(`${regionId}-${i}`); pts.push(p); } });
+    const relaxed = relax(pts, MARKER.nationalCompact + 3);
+    return Object.fromEntries(keys.map((k, i) => [k, [relaxed[i][0] - pts[i][0], relaxed[i][1] - pts[i][1]]]));
+  }, [spotNat]);
   const zoomOffsets = useMemo(() => {
     if (!selectedRegion || !spotReal[selectedRegion]) return {};
     const size = compact ? MARKER.zoomedCompact : MARKER.zoomed;
@@ -292,7 +312,7 @@ export default function ItalyMap({
   // One click per step: a marker outside the open region zooms into it; a marker inside the
   // open region goes straight to its best destination (product, producer, recipe, guide…).
   const activateSpot = useCallback((regionId, index) => {
-    if (regionId !== selectedRegion) { onRegionSelect?.(regionId); return; }
+    if (regionId !== selectedRegion) { selectRef.current(regionId); return; }
     const dest = SPOT_DESTINATIONS[regionId]?.[index];
     if (dest) navigate(dest.to);
   }, [selectedRegion, onRegionSelect, navigate]);
@@ -319,12 +339,12 @@ export default function ItalyMap({
     if (!nat) continue;
     const isSel = regionId === selectedRegion;
     if (zoomed && !isSel) continue; // other regions' markers are hidden while zoomed
-    if (compact && !zoomed) continue; // phones: clean national map — icons appear inside a region
     const journeyDim = activeJourney && !zoomed && !activeJourney.regions.includes(regionId);
     spots.forEach((spot, index) => {
       if (allowedTypes && !allowedTypes.includes(spot.type)) return;
+      if (compact && !zoomed && !PHONE_PICKS[regionId]?.has(index)) return; // phones: a few per region
       const key = `${regionId}-${index}`;
-      const a = toScreen(nat[index]), aOff = nationalOffsets[key] || [0, 0];
+      const a = toScreen(nat[index]), aOff = (compact ? phoneNatOffsets : nationalOffsets)[key] || [0, 0];
       if (!a) return;
       let pos = [a[0] + aOff[0], a[1] + aOff[1]];
       const t = isSel ? glide : 0;
@@ -338,7 +358,7 @@ export default function ItalyMap({
 
   // Phones: names under the icons, but never on top of each other or of another icon.
   // The highlighted card's name is placed first, then the rest in order; colliding ones are skipped.
-  const spotSize = (t) => lerp(MARKER.national, compact ? MARKER.zoomedCompact : MARKER.zoomed, t);
+  const spotSize = (t) => lerp(compact ? MARKER.nationalCompact : MARKER.national, compact ? MARKER.zoomedCompact : MARKER.zoomed, t);
   const shortLabel = (l) => (l.length > 16 ? l.slice(0, 15) + '…' : l);
   const labelShown = new Map(); // key → 'below' | 'above'
   if (compact && zoomed) {
@@ -379,9 +399,10 @@ export default function ItalyMap({
         .it-spot:hover .it-ring { opacity: 1; }
         .it-ping { fill: none; stroke: #81C784; stroke-width: 1.5px; transform-box: fill-box; transform-origin: center; opacity: 0; animation: itPing .9s cubic-bezier(.2,.7,.3,1) forwards; }
         .it-ping-2 { animation-delay: .16s; }
-        .it-flash { font: 600 11px 'DM Mono', monospace; letter-spacing: .14em; fill: #C8E6C9; paint-order: stroke; stroke: rgba(6,13,6,.92); stroke-width: 4px; opacity: 0; animation: itFlash .48s ease-out forwards; }
+        .it-flash { opacity: 0; animation: itFlash .48s ease-out forwards; }
+        .it-flash text { font: 600 11px 'DM Mono', monospace; letter-spacing: .12em; fill: #C8E6C9; }
         @keyframes itPing { 0% { opacity: .9; transform: scale(.08) } 100% { opacity: 0; transform: scale(1) } }
-        @keyframes itFlash { 0% { opacity: 0; letter-spacing: .32em } 45% { opacity: 1; letter-spacing: .14em } 100% { opacity: 1; letter-spacing: .14em } }
+        @keyframes itFlash { 0% { opacity: 0; transform: translateY(4px) } 40% { opacity: 1; transform: none } 100% { opacity: 1; transform: none } }
         .it-spot-label { font: 600 10.5px 'DM Sans', sans-serif; fill: #fff; paint-order: stroke; stroke: rgba(6,13,6,.85); stroke-width: 3px; pointer-events: none; }
         .it-spot-label.is-hl { fill: #A5D6A7; }
         @keyframes itPulse { 0%,100% { opacity: .9 } 50% { opacity: .35 } }
@@ -445,7 +466,7 @@ export default function ItalyMap({
           })()}
 
           {/* Producer-density dots (national view only; on phones they replace the icons) */}
-          {!zoomed && (activeLayer === 'all' || activeLayer === 'producers') && Object.entries(centroidBase).map(([regionId, p]) => {
+          {!zoomed && !compact && (activeLayer === 'all' || activeLayer === 'producers') && Object.entries(centroidBase).map(([regionId, p]) => {
             const d = regionData[regionId];
             const pos = toScreen(p);
             if (!d || !pos) return null;
@@ -459,23 +480,6 @@ export default function ItalyMap({
             );
           })}
 
-          {/* Phones: ping + name of the region just tapped (follows the zoom, then fades) */}
-          {flash && !zoomed && (() => {
-            const pos = toScreen(centroidBase[flash.regionId]);
-            const d = regionData[flash.regionId];
-            if (!pos || !d) return null;
-            const label = `${d.name.toUpperCase()} · ${d.producerCount} PRODUCERS`;
-            const half = label.length * 4.4 + 6; // keep the caption on screen near the edges
-            const tx = Math.min(Math.max(pos[0], half + 8), dims.width - half - 8);
-            return (
-              <g key={flash.key} style={{ pointerEvents: 'none' }}>
-                <circle cx={pos[0]} cy={pos[1]} r={46} className="it-ping" />
-                <circle cx={pos[0]} cy={pos[1]} r={46} className="it-ping it-ping-2" />
-                <text x={tx} y={pos[1]} textAnchor="middle" dominantBaseline="central" className="it-flash">{label}</text>
-              </g>
-            );
-          })()}
-
           {/* Gastronomy markers — unscaled overlay, constant on-screen size */}
           {markers.map(({ regionId, index, spot, pos, isSel, journeyDim, t }) => {
             const size = spotSize(t);
@@ -488,7 +492,7 @@ export default function ItalyMap({
                 key={`${regionId}-${index}`}
                 className="it-spot"
                 transform={`translate(${pos[0]} ${pos[1]})`}
-                opacity={journeyDim ? 0.15 : lerp(0.75, 1, t)}
+                opacity={journeyDim ? 0.15 : lerp(compact ? 0.95 : 0.75, 1, t)}
                 style={{ cursor: 'pointer', pointerEvents: markerInteractive ? 'auto' : 'none', transition: 'opacity .2s' }}
                 role="button"
                 tabIndex={isSel ? 0 : -1}
@@ -503,8 +507,8 @@ export default function ItalyMap({
                 <circle className="it-ring" r={size / 2 + 5} fill="rgba(76,175,80,0.22)" stroke="#81C784" strokeWidth={1.5} style={hl ? { opacity: 1 } : undefined} />
                 <circle r={size / 2 + 2} fill={cfg.bg} opacity={0.15} />
                 <circle r={size / 2} fill={cfg.bg} />
-                <text textAnchor="middle" dominantBaseline="central" fontSize={size * (t > 0.5 ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
-                  {t > 0.5 ? (spot.emoji || cfg.em) : cfg.em}
+                <text textAnchor="middle" dominantBaseline="central" fontSize={size * (t > 0.5 || compact ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
+                  {t > 0.5 || compact ? (spot.emoji || cfg.em) : cfg.em}
                 </text>
                 {/* phones: name under each icon (no hover on touch screens) */}
                 {labelShown.has(`${regionId}-${index}`) && (
@@ -515,6 +519,26 @@ export default function ItalyMap({
               </g>
             );
           })}
+          {/* Phones: ping + name of the region just tapped — drawn above the icons, before the zoom */}
+          {flash && !zoomed && (() => {
+            const pos = toScreen(centroidBase[flash.regionId]);
+            const d = regionData[flash.regionId];
+            if (!pos || !d) return null;
+            const label = `${d.name.toUpperCase()} · ${d.producerCount} PRODUCERS`;
+            const half = label.length * 3.95 + 10; // keep the caption on screen near the edges
+            const tx = Math.min(Math.max(pos[0], half + 8), dims.width - half - 8);
+            return (
+              <g key={flash.key} style={{ pointerEvents: 'none' }}>
+                <circle cx={pos[0]} cy={pos[1]} r={46} className="it-ping" />
+                <circle cx={pos[0]} cy={pos[1]} r={46} className="it-ping it-ping-2" />
+                <g className="it-flash">
+                  <rect x={tx - half - 4} y={pos[1] - 14} width={2 * half + 8} height={28} rx={14} fill="rgba(6,13,6,0.9)" stroke="rgba(129,199,132,0.55)" strokeWidth={1} />
+                  <text x={tx} y={pos[1] + 0.5} textAnchor="middle" dominantBaseline="central">{label}</text>
+                </g>
+              </g>
+            );
+          })()}
+
         </svg>
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.35)', fontSize: 13, gap: 8 }}>
