@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { X, ChevronRight, Star, ArrowRight } from 'lucide-react';
 import { regionData } from '@/components/regionData';
 import { gastronomySpots } from '@/components/gastronomySpots';
-import { TYPE_CONFIG, LAYER_TYPE_MAP, SPOT_DESTINATIONS } from '@/components/ItalyMap';
+import { TYPE_CONFIG, LAYER_TYPE_MAP, SPOT_DESTINATIONS, PHONE_GLYPH } from '@/components/ItalyMap';
 import { resolveSpot, searchExperiences, slugify } from '@/lib/catalog';
+import { Glyph, glyphFor, GLYPH_COLOR } from '@/components/map/glyphs';
+
+const TYPE_GLYPH = { producer: 'barn', ingredient: 'leaf', dish: 'fork-knife', wine: 'wine', experience: 'map-trifold' };
 
 /*
  * Phone-only region sheet (replaces the desktop side panel below 768px).
@@ -151,7 +154,7 @@ export default function RegionSheet({ regionId, extra, onClose, layer, onLayer, 
           <div className="rs-chips" role="toolbar" aria-label="Show on map">
             {CHIPS.filter((c) => !c.type || counts[c.type]).map((c) => (
               <button key={c.id} type="button" aria-pressed={layer === c.id} className={layer === c.id ? 'on' : ''} onClick={() => onLayer(c.id)}>
-                {c.type && <span aria-hidden>{TYPE_CONFIG[c.type].em}</span>}{c.label}{c.type && <em>{counts[c.type]}</em>}
+                {c.type && <Glyph name={TYPE_GLYPH[c.type]} size={15} color={layer === c.id ? "#A5D6A7" : GLYPH_COLOR[c.type]} />}{c.label}{c.type && <em>{counts[c.type]}</em>}
               </button>
             ))}
           </div>
@@ -161,8 +164,8 @@ export default function RegionSheet({ regionId, extra, onClose, layer, onLayer, 
               const cfg = TYPE_CONFIG[spot.type] || TYPE_CONFIG.producer;
               return (
                 <button key={index} type="button" className="rs-card" onClick={() => dest && navigate(dest.to)}>
-                  <span className="rs-card-ic" style={{ background: cfg.bg }}>{spot.emoji || cfg.em}</span>
-                  <span className="rs-card-type" style={{ color: cfg.bg }}>{cfg.label}</span>
+                  <span className="rs-card-ic" style={{ background: cfg.bg }}><Glyph name={glyphFor(spot)} size={PHONE_GLYPH === 'fill' ? 18 : 19} color="#fff" variant={PHONE_GLYPH} /></span>
+                  <span className="rs-card-type" style={{ color: GLYPH_COLOR[spot.type] }}>{cfg.label}</span>
                   <strong>{spot.label}</strong>
                   {dest && <span className="rs-card-go">{KIND_VERB[dest.kind] || 'Open'} <ChevronRight size={12} /></span>}
                 </button>
