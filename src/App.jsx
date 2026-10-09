@@ -7,18 +7,32 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { Navigate } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
+import { lazyPage, preloadAllPages } from './lib/lazyPage';
 // Route-level code splitting: each page ships as its own chunk.
-const Recipes = lazy(() => import('./pages/Recipes'));
-const RecipeDetail = lazy(() => import('./pages/RecipeDetail'));
-const TasteMap = lazy(() => import('./pages/TasteMap'));
-const Ingredient = lazy(() => import('./pages/Ingredient'));
-const Regions = lazy(() => import('./pages/Regions'));
-const RegionDetail = lazy(() => import('./pages/RegionDetail'));
-const CreatorProfile = lazy(() => import('./pages/CreatorProfile'));
-const TasteMaps = lazy(() => import('./pages/TasteMaps'));
-const ProducerDetail = lazy(() => import('./pages/ProducerDetail'));
-const Checkout = lazy(() => import('./pages/Checkout'));
+const Recipes = lazyPage(() => import('./pages/Recipes'));
+const RecipeDetail = lazyPage(() => import('./pages/RecipeDetail'));
+const TasteMap = lazyPage(() => import('./pages/TasteMap'));
+const Ingredient = lazyPage(() => import('./pages/Ingredient'));
+const Regions = lazyPage(() => import('./pages/Regions'));
+const RegionDetail = lazyPage(() => import('./pages/RegionDetail'));
+const CreatorProfile = lazyPage(() => import('./pages/CreatorProfile'));
+const TasteMaps = lazyPage(() => import('./pages/TasteMaps'));
+const ProducerDetail = lazyPage(() => import('./pages/ProducerDetail'));
+const Checkout = lazyPage(() => import('./pages/Checkout'));
+
+// After the first page has loaded, quietly download the code for the other pages in the
+// background so the first click on Regions/Producers/… is instant (skipped on data-saver / 2G).
+function usePrefetchPages() {
+  useEffect(() => {
+    const c = navigator.connection;
+    if (c && (c.saveData || /2g/.test(c.effectiveType || ''))) return;
+    const run = () => preloadAllPages();
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1));
+    const t = setTimeout(() => idle(run), 1500);
+    return () => clearTimeout(t);
+  }, []);
+}
 
 function PageFallback() {
   return (
@@ -99,6 +113,7 @@ const AuthenticatedApp = () => {
 
 
 function App() {
+  usePrefetchPages();
 
   return (
     <AuthProvider>
