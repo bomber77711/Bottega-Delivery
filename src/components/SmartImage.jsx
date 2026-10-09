@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 // <img> that never shows the browser's broken-image icon.
 // If the source fails (dead CDN link, offline, typo) it renders a branded tile instead:
 // a soft gradient in the category colour with an emoji and the item name.
-export default function SmartImage({ src, alt = '', emoji = '🍽️', tint = '#2E7D32', label, style, imgStyle, loading = 'lazy', ...rest }) {
+// phoneSrc: optional lighter variant used only below 768px (desktop keeps `src`, pixel-identical).
+export default function SmartImage({ src, phoneSrc, alt = '', emoji = '🍽️', tint = '#2E7D32', label, style, imgStyle, loading = 'lazy', ...rest }) {
   const [failed, setFailed] = useState(!src);
   useEffect(() => { setFailed(!src); }, [src]);
 
@@ -26,6 +27,8 @@ export default function SmartImage({ src, alt = '', emoji = '🍽️', tint = '#
   return (
     <img
       src={src}
+      srcSet={phoneSrc ? `${phoneSrc} 640w, ${src} 900w` : undefined}
+      sizes={phoneSrc ? '(max-width: 767.98px) 50vw, 900px' : undefined}
       alt={alt}
       loading={loading}
       decoding="async"

@@ -24,6 +24,7 @@ const buildDiscoveries = () => {
 };
 
 const discoveries = buildDiscoveries();
+export const randomDiscovery = () => discoveries[Math.floor(Math.random() * discoveries.length)];
 
 export default function DiscoveryFloat() {
   const [visible, setVisible] = useState(false);
@@ -56,8 +57,8 @@ export default function DiscoveryFloat() {
   };
 
   if (dismissed) return null;
-  // On phones the map's region sheet owns the bottom of the screen
-  if (isPhone && location.pathname === '/' && new URLSearchParams(location.search).has('region')) return null;
+  // On phones Discover lives in the ☰ "More" menu (bottom of the screen belongs to the tab bar).
+  if (isPhone) return null;
 
   return (
     <>

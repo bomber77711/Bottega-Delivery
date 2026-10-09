@@ -6,12 +6,11 @@ import { getRegionImage } from '../components/imageConfig';
 import { searchExperiences, resolveSpot } from '@/lib/catalog';
 import { MapPin, Maximize2, Minimize2, X, Star, ChevronRight, ArrowRight, Heart, Compass, Utensils, Users } from 'lucide-react';
 import AskBottega from '../components/AskBottega';
+import { foodJourneys } from '../components/foodJourneys';
+import RegionSheet, { SHEET_PEEK } from '../mobile/RegionSheet';
+import { useIsPhone } from '@/hooks/useIsPhone';
 
-const foodJourneys = [
-  { id: 'olive-oil-route', title: 'The Olive Oil Route', emoji: '🫒', description: 'Follow the ancient olive oil tradition from the Ligurian coast to the heel of Italy.', regions: ['liguria', 'toscana', 'puglia', 'sicilia'], color: '#D4A017' },
-  { id: 'wine-journey', title: 'The Wine Journey', emoji: '🍷', description: "Italy's greatest wine regions — from Barolo in Piedmont to Brunello in Tuscany and Amarone in Veneto.", regions: ['piemonte', 'toscana', 'veneto'], color: '#7B1FA2' },
-  { id: 'pasta-trail', title: 'The Pasta Trail', emoji: '🍝', description: "From Bolognese tagliatelle to Neapolitan spaghetti to Puglian orecchiette — Italy's pasta culture in three regions.", regions: ['emilia_romagna', 'campania', 'puglia'], color: '#E65100' },
-];
+
 
 const MAP_LAYERS = [
   { id: 'all', label: 'All' },
@@ -268,16 +267,16 @@ function AnimatedStat({ target, label, suffix = '' }) {
   );
 }
 
-function useContainerWidth(ref) {
-  const [w, setW] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1280));
+function useContainerSize(ref) {
+  const [size, setSize] = useState(() => (typeof window !== 'undefined' ? { w: window.innerWidth, h: window.innerHeight } : { w: 1280, h: 800 }));
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setW(el.clientWidth));
+    const ro = new ResizeObserver(() => setSize((s) => (s.w === el.clientWidth && s.h === el.clientHeight ? s : { w: el.clientWidth, h: el.clientHeight })));
     ro.observe(el);
     return () => ro.disconnect();
   }, [ref]);
-  return w;
+  return size;
 }
 
 // ══════════════════════════════════════════════
@@ -295,8 +294,10 @@ export default function Home() {
   const [showJourneys, setShowJourneys] = useState(false);
   const mapContainerRef = useRef(null);
   const scrollRef = useRef(null);
-  const mapWidth = useContainerWidth(mapContainerRef);
+  const { w: mapWidth, h: mapHeight } = useContainerSize(mapContainerRef);
   const compact = mapWidth < 768;
+  const phone = useIsPhone();
+  const [highlightSpot, setHighlightSpot] = useState(null); // phones: card centred in the region sheet
 
   // The selected region lives in the URL (?region=toscana): shareable, and Back closes it.
   const selectRegion = useCallback((id) => {
@@ -308,6 +309,18 @@ export default function Home() {
       return next;
     }, { replace: hadRegion });
   }, [setSearchParams]);
+
+  // Food Journeys open from the phone menu via /?journey=<id>
+  const urlJourney = searchParams.get('journey');
+  useEffect(() => {
+    if (!urlJourney) return;
+    const j = foodJourneys.find((x) => x.id === urlJourney);
+    if (j) setActiveJourney(j);
+    setSearchParams((prev) => { const next = new URLSearchParams(prev); next.delete('journey'); next.delete('region'); return next; }, { replace: true });
+  }, [urlJourney, setSearchParams]);
+
+  // Phones: each region opens on "All" — the category chips live inside the region sheet
+  useEffect(() => { if (compact) setActiveLayer('all'); }, [compact, selectedRegion]);
 
   useEffect(() => {
     const t = setInterval(() => setCardIdx(i => (i + 1) % extendedDiscovery.length), 8000);
@@ -334,14 +347,14 @@ export default function Home() {
 
   // Screen area covered by floating UI — the map frames the zoomed region inside what's left.
   const mapInsets = useMemo(() => compact
-    ? { top: 128, right: 14, bottom: selectedRegion ? Math.round((mapContainerRef.current?.clientHeight || 700) * 0.56) + 12 : 90, left: 14 }
+    ? { top: 56, right: 14, bottom: selectedRegion ? SHEET_PEEK + 10 : 36, left: 14 }
     : { top: 150, right: selectedRegion ? PANEL_W + 28 : 24, bottom: 36, left: 250 },
   [compact, selectedRegion]);
 
   const card = extendedDiscovery[cardIdx % extendedDiscovery.length];
 
   return (
-    <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', background: '#F0F7EE' }}>
+    <div ref={scrollRef} style={{ flex: 1, overflowY: phone ? 'hidden' : 'auto', background: '#F0F7EE' }}>
       <style>{`
         .rp-row { transition: background .15s ease; }
         .rp-row:hover { background: #E8F5E9 !important; }
@@ -377,15 +390,19 @@ export default function Home() {
               activeLayer={activeLayer}
               activeJourney={activeJourney}
               insets={mapInsets}
+              highlightSpot={compact ? highlightSpot : null}
             />
           </div>
 
-          {/* ── Ask Bottega ── */}
+          {/* ── Ask Bottega (phones: inside the 🔍 search screen) ── */}
+          {!compact && (
           <div style={{ position: 'absolute', top: compact ? 12 : 16, left: '50%', transform: 'translateX(-50%)', zIndex: 200, width: 420, maxWidth: 'calc(100% - 24px)' }}>
             <AskBottega onSelect={handleSearchSelect} />
           </div>
+          )}
 
-          {/* ── Food layers (horizontally scrollable on phones) ── */}
+          {/* ── Food layers (phones: chips inside the region sheet) ── */}
+          {!compact && (
           <div className="map-layers" role="toolbar" aria-label="Map layers" style={{
             position: 'absolute', top: compact ? 66 : 70, left: compact ? 12 : 16, right: compact ? 12 : 'auto', zIndex: 200,
             display: 'flex', alignItems: 'center', gap: 5, overflowX: 'auto', whiteSpace: 'nowrap',
@@ -401,6 +418,7 @@ export default function Home() {
               }}>{layer.label}</button>
             ))}
           </div>
+          )}
 
           {/* Status label (desktop) */}
           {!compact && (
@@ -424,7 +442,7 @@ export default function Home() {
 
           {/* Active journey card */}
           {activeJourney && !selectedRegion && (
-            <div style={{ position: 'absolute', top: compact ? 112 : 116, left: '50%', transform: 'translateX(-50%)', zIndex: 250, background: 'rgba(6,13,6,0.9)', backdropFilter: 'blur(16px)', border: `1px solid ${activeJourney.color}55`, borderRadius: 12, padding: '10px 16px', width: 420, maxWidth: 'calc(100% - 24px)', display: 'flex', alignItems: 'center', gap: 12, animation: 'fadeSlideIn 0.25s ease' }}>
+            <div style={{ position: 'absolute', top: compact ? 12 : 116, left: '50%', transform: 'translateX(-50%)', zIndex: 250, background: 'rgba(6,13,6,0.9)', backdropFilter: 'blur(16px)', border: `1px solid ${activeJourney.color}55`, borderRadius: 12, padding: '10px 16px', width: 420, maxWidth: 'calc(100% - 24px)', display: 'flex', alignItems: 'center', gap: 12, animation: 'fadeSlideIn 0.25s ease' }}>
               <span style={{ fontSize: 20 }}>{activeJourney.emoji}</span>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>{activeJourney.title}</p>
@@ -436,7 +454,7 @@ export default function Home() {
 
           {/* Selected region chip + back control */}
           {selectedRegion && (
-            <button onClick={() => selectRegion(null)} style={{ position: 'absolute', top: compact ? 112 : 116, left: compact ? 12 : 16, zIndex: 210, display: 'flex', alignItems: 'center', gap: 7, padding: '6px 14px', borderRadius: 100, background: 'rgba(6,13,6,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(76,175,80,0.45)', cursor: 'pointer', color: '#fff', animation: 'fadeSlideIn 0.2s ease' }}>
+            <button onClick={() => selectRegion(null)} style={{ position: 'absolute', top: compact ? 12 : 116, left: compact ? 12 : 16, zIndex: 210, display: 'flex', alignItems: 'center', gap: 7, padding: '6px 14px', borderRadius: 100, background: 'rgba(6,13,6,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(76,175,80,0.45)', cursor: 'pointer', color: '#fff', animation: 'fadeSlideIn 0.2s ease' }}>
               <span style={{ fontSize: 12 }}>←</span>
               <span style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12, fontWeight: 600 }}>All of Italy</span>
             </button>
@@ -449,13 +467,13 @@ export default function Home() {
             </div>
           )}
           {!selectedRegion && compact && (
-            <div style={{ position: 'absolute', bottom: 86, left: '50%', transform: 'translateX(-50%)', zIndex: 10, pointerEvents: 'none' }}>
+            <div style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 10, pointerEvents: 'none' }}>
               <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', margin: 0 }}>Tap a region to explore</p>
             </div>
           )}
 
-          {/* Food Journeys + discovery card (bottom-left); hidden on phones while a region is open */}
-          {!(compact && selectedRegion) && (
+          {/* Food Journeys + discovery card (bottom-left); phones: Food Journeys live in the ☰ menu */}
+          {!compact && (
             <div style={{ position: 'absolute', bottom: compact ? 14 : 20, left: compact ? 12 : 18, zIndex: 20, display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
               <div style={{ background: 'rgba(6,13,6,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(76,175,80,0.22)', borderRadius: 12, padding: '10px 14px', minWidth: 220 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: showJourneys ? 8 : 0 }}>
@@ -509,10 +527,24 @@ export default function Home() {
             </div>
           )}
 
-          <RegionPanel regionId={selectedRegion} onClose={() => selectRegion(null)} compact={compact} />
+          {compact ? (
+            <RegionSheet
+              regionId={selectedRegion}
+              extra={selectedRegion ? regionExtra[selectedRegion] : null}
+              onClose={() => selectRegion(null)}
+              layer={activeLayer}
+              onLayer={setActiveLayer}
+              onHighlight={setHighlightSpot}
+              containerHeight={mapHeight}
+            />
+          ) : (
+            <RegionPanel regionId={selectedRegion} onClose={() => selectRegion(null)} compact={compact} />
+          )}
         </div>
       </div>
 
+      {/* Phones: the home is one fixed screen — the map. Everything below is desktop only. */}
+      {!phone && (<>
       {/* ══ SECTION 3: DISCOVERY CARDS ══ */}
       <div style={{ padding: '32px 20px', maxWidth: 1400, margin: '0 auto' }}>
         <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>Today's Discoveries</h2>
@@ -540,7 +572,7 @@ export default function Home() {
 
       {/* ══ SECTION 4: METRICS ══ */}
       <div style={{ background: '#1B5E20', padding: '40px 24px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 24, textAlign: 'center' }}>
+        <div className="home-stats" style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 24, textAlign: 'center' }}>
           {[{ target: 20, label: 'Regions', suffix: '' }, { target: 450, label: 'Producers', suffix: '+' }, { target: 1200, label: 'Products', suffix: '+' }, { target: 80, label: 'Experiences', suffix: '+' }, { target: 120, label: 'Recipes', suffix: '+' }].map((s, i) => (
             <AnimatedStat key={i} target={s.target} label={s.label} suffix={s.suffix} />
           ))}
@@ -577,6 +609,7 @@ export default function Home() {
             onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}>About</a>
         </p>
       </div>
+      </>)}
     </div>
   );
 }

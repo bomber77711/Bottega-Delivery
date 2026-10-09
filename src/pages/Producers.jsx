@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { regionData } from '../components/regionData';
-import { Search, MapPin, Star, ChevronDown } from 'lucide-react';
+import { Search, MapPin, Star, ChevronDown, ChevronRight } from 'lucide-react';
+import { useIsPhone } from '@/hooks/useIsPhone';
 import { getProductImage } from '../components/imageConfig';
 
 function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/g, "").replace(/^-+/g, ""); }
@@ -16,6 +17,24 @@ const allProducers = Object.entries(regionData).flatMap(([regionId, region]) =>
 
 const regionOptions = Object.entries(regionData).map(([id, d]) => ({ id, name: d.name }));
 const categoryOptions = [...new Set(allProducers.map(p => p.category))].sort();
+
+// Phones: compact, fully tappable row (about 6 screens for 120 producers instead of 53).
+function ProducerRow({ producer }) {
+  const navigate = useNavigate();
+  return (
+    <button type="button" className="prod-row" onClick={() => navigate(`/producers/${slugify(producer.name)}`)}>
+      <img src={getProductImage(producer.category)} alt="" loading="lazy" decoding="async" />
+      <span className="prod-row-text">
+        <strong>{producer.name}</strong>
+        <span>{producer.city} · {producer.regionName}</span>
+        <span className="prod-row-meta"><em>{producer.category}</em><Star size={12} fill="#F59E0B" color="#F59E0B" /> {producer.rating.toFixed(1)}</span>
+      </span>
+      <ChevronRight size={18} color="#B5BFB5" />
+    </button>
+  );
+}
+
+const PAGE = 20;
 
 function ProducerCard({ producer }) {
   const navigate = useNavigate();
@@ -95,6 +114,9 @@ export default function Producers() {
     setRegionFilter(searchParams.get('region') || '');
   }, [searchParams]);
   const [categoryFilter, setCategoryFilter] = useState('');
+  const isPhone = useIsPhone();
+  const [shown, setShown] = useState(PAGE);
+  useEffect(() => { setShown(PAGE); }, [search, regionFilter, categoryFilter]);
 
   const filtered = useMemo(() => {
     return allProducers.filter(p => {
@@ -122,7 +144,7 @@ export default function Producers() {
           </p>
 
           {/* Search */}
-          <div style={{
+          <div className="filter-row" style={{
             display: 'flex', gap: 12, flexWrap: 'wrap'
           }}>
             <div style={{
@@ -190,6 +212,15 @@ export default function Producers() {
           <div style={{ textAlign: 'center', padding: '80px 0', color: '#aaa' }}>
             <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 28 }}>No producers found</p>
             <p style={{ fontSize: 14, marginTop: 8 }}>Try adjusting your filters</p>
+          </div>
+        ) : isPhone ? (
+          <div className="prod-list">
+            {filtered.slice(0, shown).map((producer) => <ProducerRow key={producer.id} producer={producer} />)}
+            {shown < filtered.length && (
+              <button type="button" className="load-more" onClick={() => setShown((n) => n + PAGE)}>
+                Show {Math.min(PAGE, filtered.length - shown)} more <span>· {filtered.length - shown} left</span>
+              </button>
+            )}
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>

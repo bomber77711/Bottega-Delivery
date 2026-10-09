@@ -4,6 +4,8 @@ import { regionData } from '../components/regionData';
 import { productsData } from '../components/productsData';
 import { recipesData } from '../components/recipesData';
 import { useCart } from '../components/cartStore';
+import { useIsPhone } from '@/hooks/useIsPhone';
+import StickyShopBar from '../mobile/StickyShopBar';
 import { ArrowLeft, Star, MapPin, ShoppingCart, Check, Award, Leaf, Clock, Users, ChevronRight } from 'lucide-react';
 
 const allProducers = Object.entries(regionData).flatMap(([regionId, region]) =>
@@ -210,6 +212,7 @@ function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace
 export default function ProducerDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isPhone = useIsPhone();
 
   const producer = allProducers.find(function(p) { return slugify(p.name) === id; });
 
@@ -241,7 +244,7 @@ export default function ProducerDetail() {
           style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.38) saturate(1.1)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.97) 100%)' }} />
 
-        <button onClick={() => navigate('/Producers')} style={{
+        <button className="pd-back" onClick={() => navigate('/Producers')} style={{
           position: 'absolute', top: 24, left: 32, zIndex: 20,
           display: 'flex', alignItems: 'center', gap: 7,
           background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)',
@@ -253,7 +256,7 @@ export default function ProducerDetail() {
           <ArrowLeft size={14} /> Back
         </button>
 
-        <div style={{
+        <div className="pd-badge" style={{
           position: 'absolute', top: 24, right: 32, zIndex: 20,
           display: 'inline-flex', alignItems: 'center', gap: 6,
           background: 'rgba(76,175,80,0.2)', backdropFilter: 'blur(8px)',
@@ -265,7 +268,7 @@ export default function ProducerDetail() {
           {'\u2714'} Verified Artisan
         </div>
 
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 48px 44px' }}>
+        <div className="pd-hero-text" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 48px 44px' }}>
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
             <div style={{ marginBottom: 14 }}>
               <span style={{
@@ -303,7 +306,7 @@ export default function ProducerDetail() {
 
       {/* STATS BAR */}
       <div style={{ background: '#fff', borderBottom: '1px solid #F0F0F0', boxShadow: '0 2px 16px rgba(0,0,0,0.05)' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px', display: 'flex', alignItems: 'stretch' }}>
+        <div className="pd-stats" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px', display: 'flex', alignItems: 'stretch' }}>
           {[
             { icon: <MapPin size={16} color="#2E7D32" />, label: 'Location', value: producer.city },
             { icon: <Star size={16} color="#F59E0B" />, label: 'Rating', value: `${producer.rating.toFixed(1)} / 5.0` },
@@ -324,7 +327,7 @@ export default function ProducerDetail() {
       </div>
 
       {/* OUR STORY + REGION SIDEBAR - inline, no tabs */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '48px 48px 0' }}>
+      <div className="pd-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '48px 48px 0' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '5fr 2fr', gap: 48, alignItems: 'start' }}>
           {/* Story content - main column */}
           <div>
@@ -413,7 +416,7 @@ export default function ProducerDetail() {
       </div>
 
       {/* PRODUCTS SECTION */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '48px 48px 60px' }}>
+      <div id="pd-products" className="pd-section-bottom" style={{ maxWidth: 1200, margin: '0 auto', padding: '48px 48px 60px' }}>
         <div style={{ marginBottom: 28 }}>
           <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, color: '#1A1A1A', marginBottom: 6 }}>
             {producerProducts.length > 0 ? `Products by ${producer.name}` : `Artisan Products from ${producer.regionName}`}
@@ -516,6 +519,11 @@ export default function ProducerDetail() {
           </div>
         </div>
       </div>
+      {isPhone && (
+        <StickyShopBar targetId="pd-products" count={regionProducts.length}
+          fromPrice={Math.min(...regionProducts.map((p) => p.price))}
+          label={producerProducts.length ? `From ${producer.name}` : `From ${producer.regionName}`} />
+      )}
     </div>
   );
 }

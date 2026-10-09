@@ -48,7 +48,7 @@ function ProductCard({ product }) {
   return (
     <article className="pr-card" style={{ background: '#fff', borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
       <div style={{ aspectRatio: '4 / 3', overflow: 'hidden', position: 'relative', background: '#EEF4EC' }}>
-        <SmartImage src={product.image} alt={product.name} emoji={cat?.emoji} tint={cat?.tint} label={product.name} />
+        <SmartImage src={product.image} phoneSrc={product.image?.replace(/\.webp$/, '-640.webp')} alt={product.name} emoji={cat?.emoji} tint={cat?.tint} label={product.name} />
         <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
           {product.certifications.map((c) => <CertBadge key={c} cert={c} />)}
         </div>
@@ -84,7 +84,7 @@ function CategoryCard({ cat, count, active, onClick }) {
       border: active ? '2px solid #4CAF50' : '2px solid transparent', background: '#DDE9DA',
       boxShadow: active ? '0 0 0 3px rgba(76,175,80,0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
     }}>
-      <SmartImage src={cat.image} alt="" emoji={cat.emoji} tint={cat.tint} />
+      <SmartImage src={cat.image} phoneSrc={cat.image?.replace(/\.webp$/, '-640.webp')} alt="" emoji={cat.emoji} tint={cat.tint} />
       <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.05) 65%)' }} />
       <span style={{ position: 'absolute', bottom: 9, left: 11, right: 8, color: '#fff', textAlign: 'left' }}>
         <span style={{ display: 'block', fontSize: 16, lineHeight: 1 }}>{cat.emoji}</span>
@@ -165,8 +165,8 @@ export default function Products() {
 
         {/* Search + filters */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 32 }}>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-            <label style={{ flex: '1 1 280px', maxWidth: 520, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 18px', background: '#fff', borderRadius: 100, border: '1px solid #DDEBDD', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+          <div className="pr-controls" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            <label className="pr-search" style={{ flex: '1 1 280px', maxWidth: 520, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 18px', background: '#fff', borderRadius: 100, border: '1px solid #DDEBDD', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
               <Search size={16} color="#888" />
               <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Search by product, producer, region…" aria-label="Search products"
                 style={{ border: 'none', outline: 'none', fontSize: 14, color: '#1A1A1A', flex: 1, minWidth: 0, background: 'none', fontFamily: "'DM Sans',sans-serif" }} />
@@ -176,14 +176,14 @@ export default function Products() {
               <option value="">All regions</option>
               {regionsWithProducts.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
             </select>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#555' }}>
+            <label className="pr-sort" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#555' }}>
               <SlidersHorizontal size={14} />
               <select value={sort} onChange={(e) => update({ sort: e.target.value })} aria-label="Sort products" style={{ padding: '11px 14px', borderRadius: 100, border: '1px solid #DDEBDD', background: '#fff', fontSize: 13, color: '#333', cursor: 'pointer' }}>
                 {SORTS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
               </select>
             </label>
           </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="pr-certs" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {CERT_FILTERS.map((f) => (
               <button key={f} onClick={() => update({ cert: f })} aria-pressed={cert === f} style={{
                 padding: '7px 16px', borderRadius: 100, fontSize: 13, fontWeight: 600, cursor: 'pointer',

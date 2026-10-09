@@ -59,6 +59,8 @@ try {
   for (const f of walk('src').filter((f) => /\.(jsx?|tsx?)$/.test(f))) {
     for (const m of fs.readFileSync(f, 'utf8').matchAll(/\/img\/[A-Za-z0-9_\/-]+\.(?:webp|jpe?g|png|svg)/g)) imgPaths.add(m[0]);
   }
+  // Products/categories also ship a phone variant (<name>-640.webp) built at runtime by Products.jsx.
+  for (const p of [...imgPaths]) if (p.startsWith('/img/products/') && !p.endsWith('-640.webp')) imgPaths.add(p.replace(/\.webp$/, '-640.webp'));
   const missingImgs = [...imgPaths].filter((p) => !fs.existsSync(path.join('public', p)));
   missingImgs.forEach((p) => bad.push(`missing image file: public${p}`));
 

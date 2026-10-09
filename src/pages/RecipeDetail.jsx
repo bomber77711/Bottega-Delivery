@@ -55,7 +55,7 @@ export default function RecipeDetail() {
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: '#FAF6F0' }}>
       {/* Hero */}
-      <div style={{ height: 380, position: 'relative', overflow: 'hidden' }}>
+      <div className="rd-hero" style={{ height: 380, position: 'relative', overflow: 'hidden' }}>
         <img src={recipe.image} alt={recipe.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 50%)' }} />
@@ -68,8 +68,8 @@ export default function RecipeDetail() {
 
       <div style={{ maxWidth: 820, margin: '0 auto', padding: '0 32px 80px' }}>
         {/* Header */}
-        <div style={{ background: '#fff', borderRadius: '0 0 20px 20px', padding: '32px 36px', marginBottom: 32, boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+        <div className="rd-head-card" style={{ background: '#fff', borderRadius: '0 0 20px 20px', padding: '32px 36px', marginBottom: 32, boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+          <div className="rd-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
                 <span style={{ background: '#FFF3E0', color: '#E65100', borderRadius: 100, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>{recipe.category}</span>
@@ -95,7 +95,7 @@ export default function RecipeDetail() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
+        <div className="rd-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
           {/* Cultural Story */}
           <div style={{ background: '#fff', borderRadius: 16, padding: '28px 30px', boxShadow: '0 2px 12px rgba(0,0,0,0.05)', gridColumn: '1 / -1' }}>
             <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', marginBottom: 14 }}>The Story</h2>
