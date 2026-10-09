@@ -7,20 +7,9 @@ import CartDrawer from './components/CartDrawer';
 import CommandBar from './components/CommandBar';
 import DiscoveryFloat from './components/DiscoveryFloat';
 
+// Brand logo (vector, traced from the 2026 investor deck). Served from /public so it's cached.
 function BottegaLogoInline() {
-  return (
-    <svg height="32" viewBox="0 0 240 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <text x="0" y="40" fontFamily="'DM Sans',sans-serif" fontWeight="800" fontSize="42" fill="#2E7D32">B</text>
-      <g transform="translate(32, 2)">
-        <ellipse cx="16" cy="30" rx="14" ry="15" fill="#D32F2F"/>
-        <ellipse cx="10" cy="21" rx="4" ry="6" fill="rgba(255,255,255,0.18)" transform="rotate(-20 10 21)"/>
-        <path d="M16 15 L13 6 L16 10 L19 6 Z" fill="#2E7D32"/>
-        <path d="M16 15 L7 10 L11 13 L9 7 Z" fill="#2E7D32"/>
-        <path d="M16 15 L25 10 L21 13 L23 7 Z" fill="#2E7D32"/>
-      </g>
-      <text x="63" y="40" fontFamily="'DM Sans',sans-serif" fontWeight="800" fontSize="42" fill="#2E7D32">TTEGA</text>
-    </svg>
-  );
+  return <img src="/brand/bottega-logo.svg" alt="Bottega" width={176} height={32} style={{ height: 32, width: 'auto', display: 'block' }} />;
 }
 
 function NavContent({ currentPageName }) {

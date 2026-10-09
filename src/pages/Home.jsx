@@ -569,7 +569,7 @@ export default function Home() {
 
       {/* ══ FOOTER ══ */}
       <div style={{ background: '#1A1A1A', padding: '32px 24px', textAlign: 'center' }}>
-        <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, fontWeight: 700, color: '#4CAF50', marginBottom: 8 }}>BOTTEGA</p>
+        <img src="/brand/bottega-logo.svg" alt="Bottega" width={154} height={28} loading="lazy" style={{ height: 28, width: 'auto', display: 'block', margin: '0 auto 10px' }} />
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
           <span>© 2026 Bottega Delivery · The Digital Atlas of Italian Gastronomy</span>
           <a href="/About" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontWeight: 600 }}
