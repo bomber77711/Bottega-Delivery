@@ -187,9 +187,9 @@ export default function ItalyMap({
   const proj = useMemo(() => {
     if (!dims.width || !dims.height) return null;
     // Italy fills the screen (like the original): it may tuck under the floating controls.
-    // phones: Italy edge to edge (Salento and the Aosta tip touch the sides), centred vertically;
-    // a Food Journey card sits at the top on phones → Italy moves below it
-    if (compact) return geoMercator().fitExtent([[-4, journeyOnPhone ? 112 : 20], [dims.width + 4, dims.height - 20]], ITALY_CORE);
+    // phones: Italy as wide as the screen allows with the whole border visible (8px side margins),
+    // centred vertically; a Food Journey card sits at the top on phones → Italy moves below it
+    if (compact) return geoMercator().fitExtent([[8, journeyOnPhone ? 112 : 20], [dims.width - 8, dims.height - 20]], ITALY_CORE);
     return geoMercator().fitExtent([[0, 72], [dims.width, dims.height + 30]], ITALY);
   }, [dims.width, dims.height, compact, journeyOnPhone]);
 
