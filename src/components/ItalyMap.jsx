@@ -6,10 +6,7 @@ import topology from './map/italy-regions.topo.json';
 import { regionData, regionCentroids } from './regionData';
 import { gastronomySpots } from './gastronomySpots';
 import { resolveSpot } from '@/lib/catalog';
-import { glyphFor, GlyphPath } from './map/glyphs';
 
-// Phones: solid markers — category-coloured disc with a solid white glyph
-export const PHONE_GLYPH = 'fill';
 
 /*
  * Interactive Italy map.
@@ -491,8 +488,8 @@ export default function ItalyMap({
         .it-spot:focus-visible .it-ring { opacity: 1 !important; }
         .it-spot .it-ring { opacity: 0; transition: opacity .15s ease; pointer-events: none; }
         .it-spot:hover .it-ring { opacity: 1; }
-        .it-region-name { font: 500 ${LABEL_FONT}px 'DM Mono', monospace; letter-spacing: .14em; fill: rgba(225,240,215,.55); paint-order: stroke; stroke: rgba(6,13,6,.4); stroke-width: 2px; pointer-events: none; }
-        .it-region-name.is-on { fill: #fff; font-weight: 600; stroke: rgba(6,13,6,.7); }
+        .it-region-name { font: 600 ${LABEL_FONT}px 'DM Mono', monospace; letter-spacing: .14em; fill: #FFF6D8; filter: url(#it-name-glow); pointer-events: none; }
+        .it-region-name.is-on { fill: #FFF8E1; filter: url(#it-name-glow-on); }
         .it-ping { fill: none; stroke: #81C784; stroke-width: 1.5px; transform-box: fill-box; transform-origin: center; opacity: 0; animation: itPing .9s cubic-bezier(.2,.7,.3,1) forwards; }
         .it-ping-2 { animation-delay: .16s; }
         @keyframes itPing { 0% { opacity: .9; transform: scale(.08) } 100% { opacity: 0; transform: scale(1) } }
@@ -514,6 +511,23 @@ export default function ItalyMap({
           onClick={() => { if (selectedRegion) onRegionSelect?.(null); }}
         >
           <defs>
+            {compact && (
+              <>
+                {/* phones: warm golden glow behind the region names */}
+                <filter id="it-name-glow" x="-15%" y="-80%" width="130%" height="260%">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="2.2" result="blur" />
+                  <feFlood floodColor="#FFD54F" floodOpacity="0.5" />
+                  <feComposite in2="blur" operator="in" result="glow" />
+                  <feMerge><feMergeNode in="glow" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+                <filter id="it-name-glow-on" x="-20%" y="-100%" width="140%" height="300%">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="3.2" result="blur" />
+                  <feFlood floodColor="#FFCA28" floodOpacity="0.95" />
+                  <feComposite in2="blur" operator="in" result="glow" />
+                  <feMerge><feMergeNode in="glow" /><feMergeNode in="glow" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+              </>
+            )}
             <pattern id="mapgrid" width="36" height="36" patternUnits="userSpaceOnUse">
               <path d="M 36 0 L 0 0 0 36" fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="0.5" />
             </pattern>
@@ -603,23 +617,11 @@ export default function ItalyMap({
                 {/* hit area: exactly the marker, plus a small touch margin when zoomed */}
                 <circle r={size / 2 + (isSel ? 6 : 1)} fill="transparent" />
                 <circle className="it-ring" r={size / 2 + 5} fill="rgba(76,175,80,0.22)" stroke="#81C784" strokeWidth={1.5} style={hl ? { opacity: 1 } : undefined} />
-                {compact ? (() => {
-                  // phones: refined glyphs instead of emoji
-                  return (
-                    <>
-                      <circle r={size / 2} fill={cfg.bg} stroke={hl ? '#fff' : 'rgba(255,255,255,0.28)'} strokeWidth={hl ? 1.6 : 0.75} />
-                      <GlyphPath name={glyphFor(spot)} size={size * (PHONE_GLYPH === 'fill' ? 0.56 : 0.6)} fill="#fff" variant={PHONE_GLYPH} />
-                    </>
-                  );
-                })() : (
-                  <>
-                    <circle r={size / 2 + 2} fill={cfg.bg} opacity={0.15} />
-                    <circle r={size / 2} fill={cfg.bg} />
-                    <text textAnchor="middle" dominantBaseline="central" fontSize={size * (t > 0.5 ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
-                      {t > 0.5 ? (spot.emoji || cfg.em) : cfg.em}
-                    </text>
-                  </>
-                )}
+                <circle r={size / 2 + 2} fill={cfg.bg} opacity={0.15} />
+                <circle r={size / 2} fill={cfg.bg} stroke={compact && hl ? '#fff' : undefined} strokeWidth={compact && hl ? 1.5 : undefined} />
+                <text textAnchor="middle" dominantBaseline="central" fontSize={size * (compact ? 0.62 : t > 0.5 ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
+                  {t > 0.5 || compact ? (spot.emoji || cfg.em) : cfg.em}
+                </text>
                 {/* phones: name under each icon (no hover on touch screens) */}
                 {labelShown.has(`${regionId}-${index}`) && (
                   <text y={labelShown.get(`${regionId}-${index}`) === 'above' ? -size / 2 - 9 : size / 2 + 12} textAnchor="middle" className={`it-spot-label${hl ? ' is-hl' : ''}`}>
