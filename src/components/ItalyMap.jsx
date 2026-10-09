@@ -95,14 +95,8 @@ const REGION_LABELS = {
   sicilia: { name: 'Sicily', at: [14.1, 37.55] },
   sardegna: { name: 'Sardinia', at: [9.0, 40.1] },
 };
-// Region-name typeface (phones). PREVIEW ONLY: ?labelfont=sf | helvetica | arial | mono lets us compare on a real phone.
-const LABEL_FAMILIES = {
-  sf: { family: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif", size: 9, tracking: '.1em', weight: 600, charW: 6.6 },
-  helvetica: { family: "'Helvetica Neue', Helvetica, Arial, sans-serif", size: 9, tracking: '.1em', weight: 600, charW: 6.6 },
-  arial: { family: "Arial, 'Helvetica Neue', Helvetica, sans-serif", size: 9, tracking: '.1em', weight: 700, charW: 6.8 },
-  mono: { family: "'DM Mono', monospace", size: 8, tracking: '.14em', weight: 600, charW: 5.95 },
-};
-const LABEL_STYLE = LABEL_FAMILIES[(typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('labelfont')) || 'sf'] || LABEL_FAMILIES.sf;
+// Region names on phones: the device's own UI font (San Francisco on iPhone, Roboto on Android).
+const LABEL_STYLE = { family: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Roboto, Arial, sans-serif", size: 9, tracking: '.1em', weight: 600, charW: 6.6 };
 const LABEL_CHAR_W = LABEL_STYLE.charW;
 
 const MARKER = { national: 17, nationalCompact: 15, zoomed: 34, zoomedCompact: 28 };
