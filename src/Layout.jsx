@@ -9,7 +9,7 @@ import DiscoveryFloat from './components/DiscoveryFloat';
 
 // Brand logo (vector, traced from the 2026 investor deck). Served from /public so it's cached.
 function BottegaLogoInline() {
-  return <img src="/brand/bottega-logo.svg" alt="Bottega" width={176} height={32} style={{ height: 32, width: 'auto', display: 'block' }} />;
+  return <img className="brand-logo" src="/brand/bottega-logo.svg" alt="Bottega" width={132} height={24} style={{ height: 24, width: 'auto', display: 'block' }} />;
 }
 
 function NavContent({ currentPageName }) {
