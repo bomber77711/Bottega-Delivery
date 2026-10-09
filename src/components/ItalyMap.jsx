@@ -74,6 +74,32 @@ export const SPOT_DESTINATIONS = Object.fromEntries(
   Object.entries(gastronomySpots).map(([regionId, spots]) => [regionId, spots.map((s) => resolveSpot(s, regionId).primary)]),
 );
 
+// Phones, national view: every region named (English), anchored by hand [lng, lat] so small regions
+// stay legible — a few sit just off the coast (Liguria, Marche, Molise) or above the Alps (Aosta).
+const REGION_LABELS = {
+  valle_daosta: { name: 'Aosta', at: [7.35, 46.08] },
+  piemonte: { name: 'Piedmont', at: [7.85, 44.75] },
+  lombardia: { name: 'Lombardy', at: [9.75, 45.62] },
+  trentino_alto_adige: { name: 'Trentino', at: [11.3, 46.42] },
+  veneto: { name: 'Veneto', at: [11.95, 45.55] },
+  friuli_venezia_giulia: { name: 'Friuli', at: [13.0, 46.22] },
+  liguria: { name: 'Liguria', at: [8.55, 43.98] },
+  emilia_romagna: { name: 'Emilia-Romagna', at: [11.05, 44.55] },
+  toscana: { name: 'Tuscany', at: [11.15, 43.3] },
+  umbria: { name: 'Umbria', at: [12.45, 42.92] },
+  marche: { name: 'Marche', at: [14.05, 43.55] },
+  lazio: { name: 'Lazio', at: [12.6, 41.72] },
+  abruzzo: { name: 'Abruzzo', at: [13.8, 42.28] },
+  molise: { name: 'Molise', at: [14.55, 41.62] },
+  campania: { name: 'Campania', at: [14.85, 40.85] },
+  puglia: { name: 'Apulia', at: [16.55, 41.08] },
+  basilicata: { name: 'Basilicata', at: [16.05, 40.42] },
+  calabria: { name: 'Calabria', at: [16.4, 39.1] },
+  sicilia: { name: 'Sicily', at: [14.1, 37.55] },
+  sardegna: { name: 'Sardinia', at: [9.0, 40.1] },
+};
+const LABEL_FONT = 8, LABEL_CHAR_W = 5.95; // DM Mono 8px with .14em tracking ≈ 5.95px per character
+
 const MARKER = { national: 17, nationalCompact: 15, zoomed: 34, zoomedCompact: 28 };
 
 // Phones, national view: only a few signature icons per region (varied: ingredient, wine, dish…),
@@ -248,11 +274,31 @@ export default function ItalyMap({
   }, [spotNat]);
   // Phones, national view: each icon sits at its real town, nudged apart but never across its
   // region's border; whatever doesn't fit in a small region is left out (it shows once zoomed).
+  // Phones: region name labels (base coords) + their boxes, which icons keep clear of.
+  const phoneLabels = useMemo(() => {
+    if (!compact || !proj) return [];
+    const labels = Object.entries(REGION_LABELS).map(([regionId, { name, at }]) => {
+      const [x, y] = proj(at);
+      return { regionId, name: name.toUpperCase(), x, y, w: name.length * LABEL_CHAR_W + 2 };
+    });
+    // safety net for small screens: a label touching an earlier one takes the nearest free nudge
+    const boxOf = (l, dx = 0, dy = 0) => [l.x + dx - l.w / 2 - 2, l.y + dy - 6, l.x + dx + l.w / 2 + 2, l.y + dy + 6];
+    const hit = (a, b) => !(a[2] < b[0] || a[0] > b[2] || a[3] < b[1] || a[1] > b[3]);
+    const NUDGES = [[0, 0], [0, -8], [0, 8], [-10, 0], [10, 0], [-10, -8], [10, 8], [10, -8], [-10, 8], [0, -16], [0, 16]];
+    labels.forEach((l, i) => {
+      const placed = labels.slice(0, i);
+      const n = NUDGES.find(([dx, dy]) => placed.every((o) => !hit(boxOf(l, dx, dy), boxOf(o))));
+      if (n) { l.x += n[0]; l.y += n[1]; }
+    });
+    return labels.map((l) => ({ ...l, box: boxOf(l) }));
+  }, [compact, proj]);
+
   const phonePos = useMemo(() => {
     if (!compact || !proj) return {};
     const r = MARKER.nationalCompact / 2, minDist = MARKER.nationalCompact + 2;
     const probe = [[0, 0], [r * 0.8, 0], [-r * 0.8, 0], [0, r * 0.8], [0, -r * 0.8]];
-    const inside = (regionId, [x, y]) => probe.every(([dx, dy]) => geoContains(REGION_FEATURE[regionId], proj.invert([x + dx, y + dy])));
+    const clear = ([x, y]) => phoneLabels.every(({ box: [x0, y0, x1, y1] }) => x + r < x0 || x - r > x1 || y + r < y0 || y - r > y1);
+    const inside = (regionId, [x, y]) => clear([x, y]) && probe.every(([dx, dy]) => geoContains(REGION_FEATURE[regionId], proj.invert([x + dx, y + dy])));
     const centre = Object.fromEntries(shapes.map((sh) => [sh.regionId, sh.centroid]));
     const items = [];
     for (const [regionId, picks] of Object.entries(PHONE_PICKS)) {
@@ -262,6 +308,11 @@ export default function ItalyMap({
         // coastal/border towns: slide toward the region's centre until the whole icon is inside
         const c = centre[regionId];
         for (let k = 0; k < 12 && c && !inside(regionId, p); k++) p = [p[0] + (c[0] - p[0]) * 0.25, p[1] + (c[1] - p[1]) * 0.25];
+        // still on a name label (or outside): search outward in a small spiral for a free spot
+        for (let k = 1; k <= 40 && !inside(regionId, p); k++) {
+          const a = k * 2.4, d = 3 + k * 1.2, q = [spotReal[regionId][index][0] + Math.cos(a) * d, spotReal[regionId][index][1] + Math.sin(a) * d];
+          if (inside(regionId, q)) p = q;
+        }
         if (inside(regionId, p)) items.push({ key: `${regionId}-${index}`, regionId, prio, p });
       });
     }
@@ -286,7 +337,7 @@ export default function ItalyMap({
       if (kept.every((k) => Math.hypot(k.p[0] - item.p[0], k.p[1] - item.p[1]) >= minDist - 1.5)) kept.push(item);
     }
     return Object.fromEntries(kept.map((k) => [k.key, k.p]));
-  }, [compact, proj, shapes, spotReal]);
+  }, [compact, proj, shapes, spotReal, phoneLabels]);
   const zoomOffsets = useMemo(() => {
     if (!selectedRegion || !spotReal[selectedRegion]) return {};
     const size = compact ? MARKER.zoomedCompact : MARKER.zoomed;
@@ -440,6 +491,8 @@ export default function ItalyMap({
         .it-spot:focus-visible .it-ring { opacity: 1 !important; }
         .it-spot .it-ring { opacity: 0; transition: opacity .15s ease; pointer-events: none; }
         .it-spot:hover .it-ring { opacity: 1; }
+        .it-region-name { font: 500 ${LABEL_FONT}px 'DM Mono', monospace; letter-spacing: .14em; fill: rgba(225,240,215,.55); paint-order: stroke; stroke: rgba(6,13,6,.4); stroke-width: 2px; pointer-events: none; }
+        .it-region-name.is-on { fill: #fff; }
         .it-ping { fill: none; stroke: #81C784; stroke-width: 1.5px; transform-box: fill-box; transform-origin: center; opacity: 0; animation: itPing .9s cubic-bezier(.2,.7,.3,1) forwards; }
         .it-ping-2 { animation-delay: .16s; }
         .it-flash { opacity: 0; animation: itFlash .48s ease-out forwards; }
@@ -522,6 +575,11 @@ export default function ItalyMap({
               </g>
             );
           })}
+
+          {/* Phones, national view: region names */}
+          {compact && !zoomed && phoneLabels.map(({ regionId, name, x, y }) => (
+            <text key={`lbl-${regionId}`} x={x} y={y} textAnchor="middle" dominantBaseline="central" className={`it-region-name${flash?.regionId === regionId ? ' is-on' : ''}`}>{name}</text>
+          ))}
 
           {/* Gastronomy markers — unscaled overlay, constant on-screen size */}
           {markers.map(({ regionId, index, spot, pos, isSel, journeyDim, t }) => {
