@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { geoMercator, geoPath } from 'd3-geo';
+import { geoContains, geoMercator, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import topology from './map/italy-regions.topo.json';
 import { regionData, regionCentroids } from './regionData';
@@ -32,6 +32,10 @@ const ITALY = (() => {
   fc.features.forEach((f) => { f.properties.regionId = ISTAT_TO_REGION[f.properties.reg_istat_code_num] || ''; });
   return fc;
 })();
+const REGION_FEATURE = Object.fromEntries(ITALY.features.map((f) => [f.properties.regionId, f]));
+// Mainland + Sicily + Sardinia corners (Aosta west, Alto Adige north, Salento east, Capo Passero south):
+// phones fit THIS box, so tiny far-off islands don't shrink or off-centre the map.
+const ITALY_CORE = { type: 'MultiPoint', coordinates: [[6.63, 36.64], [18.52, 47.09]] };
 
 // ── Visual config (exported so the legend uses the exact same scale) ──
 // The original Bottega palette: subtle dark greens, deliberately low-contrast.
@@ -66,13 +70,25 @@ export const SPOT_DESTINATIONS = Object.fromEntries(
   Object.entries(gastronomySpots).map(([regionId, spots]) => [regionId, spots.map((s) => resolveSpot(s, regionId).primary)]),
 );
 
-// Phone labels for the national view (short forms of the long bilingual names).
-const SHORT_NAMES = { trentino_alto_adige: 'Trentino', friuli_venezia_giulia: 'Friuli', emilia_romagna: 'Emilia-R.', valle_daosta: "Aosta" };
-// [dx, dy] pixel nudges where the geometric centroid falls awkwardly.
-const LABEL_NUDGE = {};
+const MARKER = { national: 17, nationalCompact: 15, zoomed: 34, zoomedCompact: 28 };
 
-const MARKER = { national: 17, zoomed: 34, zoomedCompact: 28 };
+// Phones, national view: only a few signature icons per region (varied: ingredient, wine, dish…),
+// more for the big food regions — instead of all 160.
+const PHONE_PICKS = Object.fromEntries(Object.entries(gastronomySpots).map(([regionId, spots]) => {
+  const producers = regionData[regionId]?.producerCount || 0;
+  const n = producers >= 40 ? 5 : producers >= 15 ? 4 : 2;
+  const picks = [];
+  // one of each type first (variety), then the rest in the curated order
+  for (const type of ['ingredient', 'wine', 'dish', 'producer', 'experience']) {
+    if (picks.length >= n) break;
+    const i = spots.findIndex((sp) => sp.type === type);
+    if (i >= 0) picks.push(i);
+  }
+  for (let i = 0; i < spots.length && picks.length < n; i++) if (!picks.includes(i)) picks.push(i);
+  return [regionId, new Set(picks)];
+}));
 const ZOOM_MS = 650;
+const FLASH_MS = 480; // phones: how long the tapped region glows (with its name) before zooming
 const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 // Screen-space de-overlap: nudges markers apart (pairwise repulsion) so none hide another.
@@ -171,12 +187,10 @@ export default function ItalyMap({
   const proj = useMemo(() => {
     if (!dims.width || !dims.height) return null;
     // Italy fills the screen (like the original): it may tuck under the floating controls.
-    return geoMercator().fitExtent(
-      // phones: no floating bars any more → Italy uses the whole map area
-      // (a Food Journey card sits at the top on phones → Italy moves below it)
-      compact ? [[12, journeyOnPhone ? 112 : 14], [dims.width - 12, dims.height - 40]] : [[0, 72], [dims.width, dims.height + 30]],
-      ITALY,
-    );
+    // phones: Italy as wide as the screen allows with the whole border visible (8px side margins),
+    // centred vertically; a Food Journey card sits at the top on phones → Italy moves below it
+    if (compact) return geoMercator().fitExtent([[8, journeyOnPhone ? 112 : 20], [dims.width - 8, dims.height - 20]], ITALY_CORE);
+    return geoMercator().fitExtent([[0, 72], [dims.width, dims.height + 30]], ITALY);
   }, [dims.width, dims.height, compact, journeyOnPhone]);
 
   // Path strings + bounds — computed once per projection, never on hover.
@@ -228,6 +242,47 @@ export default function ItalyMap({
     const relaxed = relax(pts, MARKER.national - 3);
     return Object.fromEntries(keys.map((k, i) => [k, [relaxed[i][0] - pts[i][0], relaxed[i][1] - pts[i][1]]]));
   }, [spotNat]);
+  // Phones, national view: each icon sits at its real town, nudged apart but never across its
+  // region's border; whatever doesn't fit in a small region is left out (it shows once zoomed).
+  const phonePos = useMemo(() => {
+    if (!compact || !proj) return {};
+    const r = MARKER.nationalCompact / 2, minDist = MARKER.nationalCompact + 2;
+    const probe = [[0, 0], [r * 0.8, 0], [-r * 0.8, 0], [0, r * 0.8], [0, -r * 0.8]];
+    const inside = (regionId, [x, y]) => probe.every(([dx, dy]) => geoContains(REGION_FEATURE[regionId], proj.invert([x + dx, y + dy])));
+    const centre = Object.fromEntries(shapes.map((sh) => [sh.regionId, sh.centroid]));
+    const items = [];
+    for (const [regionId, picks] of Object.entries(PHONE_PICKS)) {
+      if (!REGION_FEATURE[regionId] || !spotReal[regionId]) continue;
+      [...picks].forEach((index, prio) => {
+        let p = [...spotReal[regionId][index]];
+        // coastal/border towns: slide toward the region's centre until the whole icon is inside
+        const c = centre[regionId];
+        for (let k = 0; k < 12 && c && !inside(regionId, p); k++) p = [p[0] + (c[0] - p[0]) * 0.25, p[1] + (c[1] - p[1]) * 0.25];
+        if (inside(regionId, p)) items.push({ key: `${regionId}-${index}`, regionId, prio, p });
+      });
+    }
+    // constrained repulsion: a nudge is only accepted if the icon stays inside its own region
+    for (let it = 0; it < 40; it++) {
+      let moved = false;
+      for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+        const a = items[i], b = items[j];
+        let dx = b.p[0] - a.p[0], dy = b.p[1] - a.p[1], d = Math.hypot(dx, dy);
+        if (d >= minDist) continue;
+        if (d < 0.01) { dx = Math.cos(j * 2.4); dy = Math.sin(j * 2.4); d = 1; }
+        const push = (minDist - d) / 2, ux = dx / d, uy = dy / d;
+        const na = [a.p[0] - ux * push, a.p[1] - uy * push], nb = [b.p[0] + ux * push, b.p[1] + uy * push];
+        if (inside(a.regionId, na)) { a.p = na; moved = true; }
+        if (inside(b.regionId, nb)) { b.p = nb; moved = true; }
+      }
+      if (!moved) break;
+    }
+    // keep the most important icons; drop any that still overlap one already kept
+    const kept = [];
+    for (const item of [...items].sort((a, b) => a.prio - b.prio)) {
+      if (kept.every((k) => Math.hypot(k.p[0] - item.p[0], k.p[1] - item.p[1]) >= minDist - 1.5)) kept.push(item);
+    }
+    return Object.fromEntries(kept.map((k) => [k.key, k.p]));
+  }, [compact, proj, shapes, spotReal]);
   const zoomOffsets = useMemo(() => {
     if (!selectedRegion || !spotReal[selectedRegion]) return {};
     const size = compact ? MARKER.zoomedCompact : MARKER.zoomed;
@@ -259,11 +314,27 @@ export default function ItalyMap({
   const toScreen = useCallback((p) => (p ? [p[0] * view.s + view.tx, p[1] * view.s + view.ty] : null), [view]);
   const zoomed = !!selectedRegion;
 
+  // Phones: tapping a region on the national map first lights it up — a ping and its name —
+  // then zooms in a beat later.
+  const [flash, setFlash] = useState(null); // { regionId, key }
+  const flashTimer = useRef(0);
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
+  useEffect(() => { if (selectedRegion) setFlash(null); }, [selectedRegion]);
+
   // ── Interaction handlers (stable identities so RegionPath memo holds) ──
   const selectRegion = useCallback((regionId) => {
     if (!regionData[regionId]) return;
+    if (compact && !selectedRegion) {
+      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce) {
+        clearTimeout(flashTimer.current);
+        setFlash({ regionId, key: Date.now() });
+        flashTimer.current = setTimeout(() => onRegionSelect?.(regionId), FLASH_MS);
+        return;
+      }
+    }
     onRegionSelect?.(regionId === selectedRegion ? null : regionId);
-  }, [onRegionSelect, selectedRegion]);
+  }, [onRegionSelect, selectedRegion, compact]);
   const selectRef = useRef(selectRegion);
   selectRef.current = selectRegion;
   const stableSelect = useCallback((id) => selectRef.current(id), []);
@@ -280,7 +351,7 @@ export default function ItalyMap({
   // One click per step: a marker outside the open region zooms into it; a marker inside the
   // open region goes straight to its best destination (product, producer, recipe, guide…).
   const activateSpot = useCallback((regionId, index) => {
-    if (regionId !== selectedRegion) { onRegionSelect?.(regionId); return; }
+    if (regionId !== selectedRegion) { selectRef.current(regionId); return; }
     const dest = SPOT_DESTINATIONS[regionId]?.[index];
     if (dest) navigate(dest.to);
   }, [selectedRegion, onRegionSelect, navigate]);
@@ -307,12 +378,12 @@ export default function ItalyMap({
     if (!nat) continue;
     const isSel = regionId === selectedRegion;
     if (zoomed && !isSel) continue; // other regions' markers are hidden while zoomed
-    if (compact && !zoomed) continue; // phones: clean national map — icons appear inside a region
     const journeyDim = activeJourney && !zoomed && !activeJourney.regions.includes(regionId);
     spots.forEach((spot, index) => {
       if (allowedTypes && !allowedTypes.includes(spot.type)) return;
       const key = `${regionId}-${index}`;
-      const a = toScreen(nat[index]), aOff = nationalOffsets[key] || [0, 0];
+      if (compact && !zoomed && !phonePos[key]) return; // phones: a few per region, inside its borders
+      const a = toScreen(compact ? phonePos[key] || real[index] : nat[index]), aOff = compact ? [0, 0] : nationalOffsets[key] || [0, 0];
       if (!a) return;
       let pos = [a[0] + aOff[0], a[1] + aOff[1]];
       const t = isSel ? glide : 0;
@@ -326,7 +397,7 @@ export default function ItalyMap({
 
   // Phones: names under the icons, but never on top of each other or of another icon.
   // The highlighted card's name is placed first, then the rest in order; colliding ones are skipped.
-  const spotSize = (t) => lerp(MARKER.national, compact ? MARKER.zoomedCompact : MARKER.zoomed, t);
+  const spotSize = (t) => lerp(compact ? MARKER.nationalCompact : MARKER.national, compact ? MARKER.zoomedCompact : MARKER.zoomed, t);
   const shortLabel = (l) => (l.length > 16 ? l.slice(0, 15) + '…' : l);
   const labelShown = new Map(); // key → 'below' | 'above'
   if (compact && zoomed) {
@@ -365,7 +436,12 @@ export default function ItalyMap({
         .it-spot:focus-visible .it-ring { opacity: 1 !important; }
         .it-spot .it-ring { opacity: 0; transition: opacity .15s ease; pointer-events: none; }
         .it-spot:hover .it-ring { opacity: 1; }
-        .it-region-label { font: 600 9.5px 'DM Sans', sans-serif; letter-spacing: .06em; text-transform: uppercase; fill: rgba(255,255,255,.6); paint-order: stroke; stroke: rgba(6,13,6,.7); stroke-width: 3px; pointer-events: none; }
+        .it-ping { fill: none; stroke: #81C784; stroke-width: 1.5px; transform-box: fill-box; transform-origin: center; opacity: 0; animation: itPing .9s cubic-bezier(.2,.7,.3,1) forwards; }
+        .it-ping-2 { animation-delay: .16s; }
+        .it-flash { opacity: 0; animation: itFlash .48s ease-out forwards; }
+        .it-flash text { font: 600 11px 'DM Mono', monospace; letter-spacing: .12em; fill: #C8E6C9; }
+        @keyframes itPing { 0% { opacity: .9; transform: scale(.08) } 100% { opacity: 0; transform: scale(1) } }
+        @keyframes itFlash { 0% { opacity: 0; transform: translateY(4px) } 40% { opacity: 1; transform: none } 100% { opacity: 1; transform: none } }
         .it-spot-label { font: 600 10.5px 'DM Sans', sans-serif; fill: #fff; paint-order: stroke; stroke: rgba(6,13,6,.85); stroke-width: 3px; pointer-events: none; }
         .it-spot-label.is-hl { fill: #A5D6A7; }
         @keyframes itPulse { 0%,100% { opacity: .9 } 50% { opacity: .35 } }
@@ -404,11 +480,11 @@ export default function ItalyMap({
                   regionId={regionId}
                   d={d}
                   name={name}
-                  fill={isSel ? SELECTED_FILL : isHov ? HOVER_FILL : regionFill(data?.producerCount || 0)}
-                  stroke={isSel ? 'rgba(76,175,80,0.6)' : isHov ? 'rgba(76,175,80,0.4)' : 'rgba(255,255,255,0.1)'}
+                  fill={isSel || flash?.regionId === regionId ? SELECTED_FILL : isHov ? HOVER_FILL : regionFill(data?.producerCount || 0)}
+                  stroke={isSel || flash?.regionId === regionId ? 'rgba(76,175,80,0.6)' : isHov ? 'rgba(76,175,80,0.4)' : 'rgba(255,255,255,0.1)'}
                   strokeWidth={isSel ? 1.5 : isHov ? 1 : 0.5}
                   opacity={opacity}
-                  glow={isSel}
+                  glow={isSel || flash?.regionId === regionId}
                   journeyColor={activeJourney && !zoomed && inJourney ? activeJourney.color : null}
                   interactive={!!data}
                   onEnter={enterRegion}
@@ -428,28 +504,18 @@ export default function ItalyMap({
             ) : null;
           })()}
 
-          {/* Producer-density dots (national view only) */}
+          {/* Producer-density dots (national view only; on phones they replace the icons) */}
           {!zoomed && !compact && (activeLayer === 'all' || activeLayer === 'producers') && Object.entries(centroidBase).map(([regionId, p]) => {
             const d = regionData[regionId];
             const pos = toScreen(p);
             if (!d || !pos) return null;
-            const r = d.producerCount >= 40 ? 5.5 : d.producerCount >= 20 ? 4.5 : d.producerCount >= 10 ? 3.5 : 2.5;
+            const r = (d.producerCount >= 40 ? 5.5 : d.producerCount >= 20 ? 4.5 : d.producerCount >= 10 ? 3.5 : 2.5) * (compact ? 1.15 : 1);
             const dim = activeJourney && !activeJourney.regions.includes(regionId);
             return (
               <g key={`dot-${regionId}`} opacity={dim ? 0.15 : 1} style={{ pointerEvents: 'none' }}>
                 <circle cx={pos[0]} cy={pos[1]} r={r * 2.2} fill="rgba(76,175,80,0.14)" style={{ animation: 'itPulse 3s ease-in-out infinite', animationDelay: `${(Math.abs(p[0]) % 20) / 10}s` }} />
                 <circle cx={pos[0]} cy={pos[1]} r={r} fill="#66BB6A" stroke="rgba(10,10,10,0.55)" strokeWidth={1} />
               </g>
-            );
-          })}
-
-          {/* Phones, national view: region names instead of 160 icons */}
-          {compact && !zoomed && shapes.map(({ regionId, centroid, area }) => {
-            const label = SHORT_NAMES[regionId] || regionData[regionId]?.name;
-            if (!label || area < 650 || !centroid || Number.isNaN(centroid[0])) return null;
-            const [x, y] = toScreen([centroid[0] + (LABEL_NUDGE[regionId]?.[0] || 0), centroid[1] + (LABEL_NUDGE[regionId]?.[1] || 0)]);
-            return (
-              <text key={`lbl-${regionId}`} x={x} y={y} textAnchor="middle" dominantBaseline="central" className="it-region-label">{label}</text>
             );
           })}
 
@@ -465,7 +531,7 @@ export default function ItalyMap({
                 key={`${regionId}-${index}`}
                 className="it-spot"
                 transform={`translate(${pos[0]} ${pos[1]})`}
-                opacity={journeyDim ? 0.15 : lerp(0.75, 1, t)}
+                opacity={journeyDim ? 0.15 : lerp(compact ? 0.95 : 0.75, 1, t)}
                 style={{ cursor: 'pointer', pointerEvents: markerInteractive ? 'auto' : 'none', transition: 'opacity .2s' }}
                 role="button"
                 tabIndex={isSel ? 0 : -1}
@@ -480,8 +546,8 @@ export default function ItalyMap({
                 <circle className="it-ring" r={size / 2 + 5} fill="rgba(76,175,80,0.22)" stroke="#81C784" strokeWidth={1.5} style={hl ? { opacity: 1 } : undefined} />
                 <circle r={size / 2 + 2} fill={cfg.bg} opacity={0.15} />
                 <circle r={size / 2} fill={cfg.bg} />
-                <text textAnchor="middle" dominantBaseline="central" fontSize={size * (t > 0.5 ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
-                  {t > 0.5 ? (spot.emoji || cfg.em) : cfg.em}
+                <text textAnchor="middle" dominantBaseline="central" fontSize={size * (t > 0.5 || compact ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
+                  {t > 0.5 || compact ? (spot.emoji || cfg.em) : cfg.em}
                 </text>
                 {/* phones: name under each icon (no hover on touch screens) */}
                 {labelShown.has(`${regionId}-${index}`) && (
@@ -492,6 +558,26 @@ export default function ItalyMap({
               </g>
             );
           })}
+          {/* Phones: ping + name of the region just tapped — drawn above the icons, before the zoom */}
+          {flash && !zoomed && (() => {
+            const pos = toScreen(centroidBase[flash.regionId]);
+            const d = regionData[flash.regionId];
+            if (!pos || !d) return null;
+            const label = `${d.name.toUpperCase()} · ${d.producerCount} PRODUCERS`;
+            const half = label.length * 3.95 + 10; // keep the caption on screen near the edges
+            const tx = Math.min(Math.max(pos[0], half + 8), dims.width - half - 8);
+            return (
+              <g key={flash.key} style={{ pointerEvents: 'none' }}>
+                <circle cx={pos[0]} cy={pos[1]} r={46} className="it-ping" />
+                <circle cx={pos[0]} cy={pos[1]} r={46} className="it-ping it-ping-2" />
+                <g className="it-flash">
+                  <rect x={tx - half - 4} y={pos[1] - 14} width={2 * half + 8} height={28} rx={14} fill="rgba(6,13,6,0.9)" stroke="rgba(129,199,132,0.55)" strokeWidth={1} />
+                  <text x={tx} y={pos[1] + 0.5} textAnchor="middle" dominantBaseline="central">{label}</text>
+                </g>
+              </g>
+            );
+          })()}
+
         </svg>
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.35)', fontSize: 13, gap: 8 }}>

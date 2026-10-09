@@ -58,6 +58,10 @@
   nav.site-nav .nav-icon-btn svg { display: block; }
   .page-shell { padding-top: calc(56px + env(safe-area-inset-top)) !important; }
   .page-shell.has-tabbar { padding-bottom: calc(60px + env(safe-area-inset-bottom)) !important; }
+  /* Map pages: exactly the visible screen. iOS Safari's 100vh is taller than what's visible
+     (it ignores the address bar), which let the page scroll and showed a pale strip under the map. */
+  .page-shell.is-fixed { height: 100dvh !important; box-sizing: border-box; }
+  html:has(.page-shell.is-fixed), html:has(.page-shell.is-fixed) body { overflow: hidden; overscroll-behavior: none; height: 100%; }
 
   /* ── Home ────────────────────────────────────────────────── */
   .home-stats { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 20px 8px !important; }
