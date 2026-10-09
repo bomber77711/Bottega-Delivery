@@ -35,7 +35,7 @@ function RegionCard({ regionId, data }) {
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 10px 32px rgba(0,0,0,0.12)'; }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)'; }}>
       <div style={{ height: 180, position: 'relative', overflow: 'hidden' }}>
-        <img src={(WIKI[regionId] || WIKI.toscana)} alt={data.name}
+        <img src={(WIKI[regionId] || WIKI.toscana)} alt={data.name} loading="lazy" decoding="async"
           loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.78) saturate(1.1)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 55%)' }} />
         <div style={{ position: 'absolute', bottom: 12, left: 14 }}>
