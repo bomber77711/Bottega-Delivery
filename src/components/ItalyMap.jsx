@@ -492,13 +492,10 @@ export default function ItalyMap({
         .it-spot .it-ring { opacity: 0; transition: opacity .15s ease; pointer-events: none; }
         .it-spot:hover .it-ring { opacity: 1; }
         .it-region-name { font: 500 ${LABEL_FONT}px 'DM Mono', monospace; letter-spacing: .14em; fill: rgba(225,240,215,.55); paint-order: stroke; stroke: rgba(6,13,6,.4); stroke-width: 2px; pointer-events: none; }
-        .it-region-name.is-on { fill: #fff; }
+        .it-region-name.is-on { fill: #fff; font-weight: 600; stroke: rgba(6,13,6,.7); }
         .it-ping { fill: none; stroke: #81C784; stroke-width: 1.5px; transform-box: fill-box; transform-origin: center; opacity: 0; animation: itPing .9s cubic-bezier(.2,.7,.3,1) forwards; }
         .it-ping-2 { animation-delay: .16s; }
-        .it-flash { opacity: 0; animation: itFlash .48s ease-out forwards; }
-        .it-flash text { font: 600 11px 'DM Mono', monospace; letter-spacing: .12em; fill: #C8E6C9; }
         @keyframes itPing { 0% { opacity: .9; transform: scale(.08) } 100% { opacity: 0; transform: scale(1) } }
-        @keyframes itFlash { 0% { opacity: 0; transform: translateY(4px) } 40% { opacity: 1; transform: none } 100% { opacity: 1; transform: none } }
         .it-spot-label { font: 600 10.5px 'DM Sans', sans-serif; fill: #fff; paint-order: stroke; stroke: rgba(6,13,6,.85); stroke-width: 3px; pointer-events: none; }
         .it-spot-label.is-hl { fill: #A5D6A7; }
         @keyframes itPulse { 0%,100% { opacity: .9 } 50% { opacity: .35 } }
@@ -632,26 +629,17 @@ export default function ItalyMap({
               </g>
             );
           })}
-          {/* Phones: ping + name of the region just tapped — drawn above the icons, before the zoom */}
+          {/* Phones: the region just tapped pings (its name lights up) — drawn above the icons, before the zoom */}
           {flash && !zoomed && (() => {
             const pos = toScreen(centroidBase[flash.regionId]);
-            const d = regionData[flash.regionId];
-            if (!pos || !d) return null;
-            const label = `${d.name.toUpperCase()} · ${d.producerCount} PRODUCERS`;
-            const half = label.length * 3.95 + 10; // keep the caption on screen near the edges
-            const tx = Math.min(Math.max(pos[0], half + 8), dims.width - half - 8);
+            if (!pos) return null;
             return (
               <g key={flash.key} style={{ pointerEvents: 'none' }}>
                 <circle cx={pos[0]} cy={pos[1]} r={46} className="it-ping" />
                 <circle cx={pos[0]} cy={pos[1]} r={46} className="it-ping it-ping-2" />
-                <g className="it-flash">
-                  <rect x={tx - half - 4} y={pos[1] - 14} width={2 * half + 8} height={28} rx={14} fill="rgba(6,13,6,0.9)" stroke="rgba(129,199,132,0.55)" strokeWidth={1} />
-                  <text x={tx} y={pos[1] + 0.5} textAnchor="middle" dominantBaseline="central">{label}</text>
-                </g>
               </g>
             );
           })()}
-
         </svg>
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.35)', fontSize: 13, gap: 8 }}>
