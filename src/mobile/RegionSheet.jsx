@@ -154,7 +154,7 @@ export default function RegionSheet({ regionId, extra, onClose, layer, onLayer, 
           <div className="rs-chips" role="toolbar" aria-label="Show on map">
             {CHIPS.filter((c) => !c.type || counts[c.type]).map((c) => (
               <button key={c.id} type="button" aria-pressed={layer === c.id} className={layer === c.id ? 'on' : ''} onClick={() => onLayer(c.id)}>
-                {c.type && <Glyph name={TYPE_GLYPH[c.type]} size={15} color={layer === c.id ? '#A5D6A7' : GLYPH_COLOR[c.type]} variant="bold" />}{c.label}{c.type && <em>{counts[c.type]}</em>}
+                {c.type && <Glyph name={TYPE_GLYPH[c.type]} size={15} color={layer === c.id ? "#A5D6A7" : GLYPH_COLOR[c.type]} />}{c.label}{c.type && <em>{counts[c.type]}</em>}
               </button>
             ))}
           </div>

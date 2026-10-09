@@ -8,8 +8,8 @@ import { gastronomySpots } from './gastronomySpots';
 import { resolveSpot } from '@/lib/catalog';
 import { glyphFor, GlyphPath } from './map/glyphs';
 
-// Phones: solid markers — category-coloured disc with a white glyph ('bold' outline glyph or 'fill' solid glyph)
-export const PHONE_GLYPH = import.meta.env.VITE_PHONE_GLYPH || 'bold';
+// Phones: solid markers — category-coloured disc with a solid white glyph
+export const PHONE_GLYPH = 'fill';
 
 /*
  * Interactive Italy map.
