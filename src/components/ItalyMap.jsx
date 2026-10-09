@@ -422,6 +422,10 @@ export default function ItalyMap({
     tip.style.transform = `translate(${Math.max(8, x)}px, ${Math.max(8, y)}px)`;
   }, []);
 
+  // Phones: while zooming back out to Italy, names and icons fade in as the map settles.
+  const natFadeRaw = Math.max(0, Math.min(1, 1 - (view.s - 1) / 0.6));
+  const natFade = compact && !zoomed ? natFadeRaw * natFadeRaw : 1;
+
   // ── Derived marker list ──
   const allowedTypes = activeLayer !== 'all' ? LAYER_TYPE_MAP[activeLayer] || [] : null;
   const markers = [];
@@ -590,9 +594,18 @@ export default function ItalyMap({
           })}
 
           {/* Phones, national view: region names */}
-          {compact && !zoomed && phoneLabels.map(({ regionId, name, x, y }) => (
-            <text key={`lbl-${regionId}`} x={x} y={y} textAnchor="middle" dominantBaseline="central" className={`it-region-name${flash?.regionId === regionId ? ' is-on' : ''}`}>{name}</text>
-          ))}
+          {/* (they ride along with the zoom-out and fade in as Italy settles, instead of popping in at once) */}
+          {compact && !zoomed && (() => {
+            if (natFade <= 0) return null;
+            return (
+              <g opacity={natFade} style={{ pointerEvents: 'none' }}>
+                {phoneLabels.map(({ regionId, name, x, y }) => {
+                  const [sx, sy] = toScreen([x, y]);
+                  return <text key={`lbl-${regionId}`} x={sx} y={sy} textAnchor="middle" dominantBaseline="central" className={`it-region-name${flash?.regionId === regionId ? ' is-on' : ''}`}>{name}</text>;
+                })}
+              </g>
+            );
+          })()}
 
           {/* Gastronomy markers — unscaled overlay, constant on-screen size */}
           {markers.map(({ regionId, index, spot, pos, isSel, journeyDim, t }) => {
@@ -606,7 +619,7 @@ export default function ItalyMap({
                 key={`${regionId}-${index}`}
                 className="it-spot"
                 transform={`translate(${pos[0]} ${pos[1]})`}
-                opacity={journeyDim ? 0.15 : lerp(compact ? 0.95 : 0.75, 1, t)}
+                opacity={(journeyDim ? 0.15 : lerp(compact ? 0.95 : 0.75, 1, t)) * natFade}
                 style={{ cursor: 'pointer', pointerEvents: markerInteractive ? 'auto' : 'none', transition: 'opacity .2s' }}
                 role="button"
                 tabIndex={isSel ? 0 : -1}
