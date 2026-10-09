@@ -254,8 +254,8 @@
     background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1);
   }
   .rs-card:active { background: rgba(76, 175, 80, 0.16); }
-  .rs-card-ic { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 3px; }
-  .rs-card-type { font: 700 10px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; filter: brightness(1.9) saturate(0.8); }
+  .rs-card-ic { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 3px; border: 1px solid rgba(255, 255, 255, 0.22); }
+  .rs-card-type { font: 700 10px "DM Mono", monospace; text-transform: uppercase; letter-spacing: 0.08em; }
   .rs-card strong { font-size: 14px; line-height: 1.2; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .rs-card-go { margin-top: auto; display: flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 700; color: #81C784; }
   .rs-empty { color: rgba(255, 255, 255, 0.5); font-size: 13px; padding: 30px 0; }

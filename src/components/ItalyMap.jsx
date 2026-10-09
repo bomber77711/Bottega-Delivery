@@ -6,6 +6,10 @@ import topology from './map/italy-regions.topo.json';
 import { regionData, regionCentroids } from './regionData';
 import { gastronomySpots } from './gastronomySpots';
 import { resolveSpot } from '@/lib/catalog';
+import { glyphFor, GlyphPath } from './map/glyphs';
+
+// Phones: solid markers — category-coloured disc with a white glyph ('bold' outline glyph or 'fill' solid glyph)
+export const PHONE_GLYPH = import.meta.env.VITE_PHONE_GLYPH || 'bold';
 
 /*
  * Interactive Italy map.
@@ -544,11 +548,23 @@ export default function ItalyMap({
                 {/* hit area: exactly the marker, plus a small touch margin when zoomed */}
                 <circle r={size / 2 + (isSel ? 6 : 1)} fill="transparent" />
                 <circle className="it-ring" r={size / 2 + 5} fill="rgba(76,175,80,0.22)" stroke="#81C784" strokeWidth={1.5} style={hl ? { opacity: 1 } : undefined} />
-                <circle r={size / 2 + 2} fill={cfg.bg} opacity={0.15} />
-                <circle r={size / 2} fill={cfg.bg} />
-                <text textAnchor="middle" dominantBaseline="central" fontSize={size * (t > 0.5 || compact ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
-                  {t > 0.5 || compact ? (spot.emoji || cfg.em) : cfg.em}
-                </text>
+                {compact ? (() => {
+                  // phones: refined glyphs instead of emoji
+                  return (
+                    <>
+                      <circle r={size / 2} fill={cfg.bg} stroke={hl ? '#fff' : 'rgba(255,255,255,0.28)'} strokeWidth={hl ? 1.6 : 0.75} />
+                      <GlyphPath name={glyphFor(spot)} size={size * (PHONE_GLYPH === 'fill' ? 0.56 : 0.6)} fill="#fff" variant={PHONE_GLYPH} />
+                    </>
+                  );
+                })() : (
+                  <>
+                    <circle r={size / 2 + 2} fill={cfg.bg} opacity={0.15} />
+                    <circle r={size / 2} fill={cfg.bg} />
+                    <text textAnchor="middle" dominantBaseline="central" fontSize={size * (t > 0.5 ? 0.55 : 0.53)} style={{ userSelect: 'none', pointerEvents: 'none' }}>
+                      {t > 0.5 ? (spot.emoji || cfg.em) : cfg.em}
+                    </text>
+                  </>
+                )}
                 {/* phones: name under each icon (no hover on touch screens) */}
                 {labelShown.has(`${regionId}-${index}`) && (
                   <text y={labelShown.get(`${regionId}-${index}`) === 'above' ? -size / 2 - 9 : size / 2 + 12} textAnchor="middle" className={`it-spot-label${hl ? ' is-hl' : ''}`}>
