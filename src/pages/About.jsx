@@ -25,7 +25,7 @@ export default function About() {
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: '#F0F7EE' }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '56px 32px 64px' }}>
+      <div className="about-wrap" style={{ maxWidth: 1280, margin: '0 auto', padding: '56px 32px 64px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '55fr 45fr', gap: 64, alignItems: 'start' }}>
 
           {/* LEFT: Mission */}
@@ -85,7 +85,7 @@ export default function About() {
 
           {/* RIGHT: Stats card */}
           <div style={{ animation: 'fadeSlideIn 0.7s ease' }}>
-            <div style={{
+            <div className="about-card" style={{
               background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 60%, #388E3C 100%)',
               borderRadius: 24, padding: '40px', color: '#fff',
               boxShadow: '0 32px 80px rgba(46,125,50,0.3)'
@@ -132,7 +132,7 @@ export default function About() {
             </div>
 
             {/* Values row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16 }}>
+            <div className="about-values" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16 }}>
               {[
                 { icon: <Users size={18} />, label: 'Producer-first' },
                 { icon: <Globe size={18} />, label: 'Global reach' },

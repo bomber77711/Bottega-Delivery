@@ -6,6 +6,10 @@ import { CartProvider, useCart } from './components/cartStore';
 import CartDrawer from './components/CartDrawer';
 import CommandBar from './components/CommandBar';
 import DiscoveryFloat from './components/DiscoveryFloat';
+import { useIsPhone } from '@/hooks/useIsPhone';
+import BottomTabBar from './mobile/BottomTabBar';
+import AddedToast from './mobile/AddedToast';
+import MoreSheet from './mobile/MoreSheet';
 
 // Brand logo (vector, traced from the 2026 investor deck). Served from /public so it's cached.
 function BottegaLogoInline() {
@@ -52,7 +56,7 @@ function NavContent({ currentPageName }) {
 
   return (
     <>
-      <nav style={{
+      <nav className="site-nav" style={{
         position: 'fixed', top: 0, left: 0, right: 0, height: 60, zIndex: 1000,
         background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(12px)',
         borderBottom: '1px solid #E8F5E9',
@@ -96,8 +100,16 @@ function NavContent({ currentPageName }) {
             <kbd style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: '#aaa', background: '#eee', border: '1px solid #ddd', borderRadius: 4, padding: '1px 5px' }}>⌘K</kbd>
           </button>
 
+          {/* Search (phones) */}
+          <button onClick={() => setCmdOpen(true)} aria-label="Search" className="show-mobile nav-icon-btn"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'none', color: '#1A1A1A', alignItems: 'center' }}>
+            <Search size={21} />
+          </button>
+
           {/* Cart */}
           <button
+            className="nav-icon-btn nav-cart"
+            aria-label={`Cart${count ? `, ${count} items` : ''}`}
             onClick={() => setIsOpen(true)}
             style={{
               position: 'relative', background: 'none', border: 'none', cursor: 'pointer',
@@ -121,29 +133,16 @@ function NavContent({ currentPageName }) {
 
           {/* Mobile menu */}
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menu" aria-expanded={mobileMenuOpen}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'none', color: '#1A1A1A' }}
-            className="show-mobile">
+            className="show-mobile nav-icon-btn">
             {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div style={{
-          position: 'fixed', top: 60, left: 0, right: 0, zIndex: 999,
-          background: '#fff', borderBottom: '1px solid #E8F5E9',
-          padding: '12px 24px 20px'
-        }}>
-          {navLinks.map(link => (
-            <Link key={link.page} to={createPageUrl(link.page)}
-              onClick={() => setMobileMenuOpen(false)}
-              style={{ display: 'block', padding: '10px 0', fontSize: 16, fontWeight: 500, color: isActive(link.page) ? '#2E7D32' : '#1A1A1A', textDecoration: 'none' }}>
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      )}
+      {/* Phones: ☰ opens the "More" sheet */}
+      <MoreSheet open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
       <CartDrawer />
       <CommandBar isOpen={cmdOpen} onClose={() => setCmdOpen(false)} />
@@ -152,6 +151,7 @@ function NavContent({ currentPageName }) {
 }
 
 export default function Layout({ children, currentPageName }) {
+  const isPhone = useIsPhone();
   return (
     <CartProvider>
       <style>{`
@@ -171,9 +171,11 @@ export default function Layout({ children, currentPageName }) {
         const wrapperStyle = isFixed
           ? { paddingTop: 60, height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }
           : { paddingTop: 60, minHeight: '100vh', display: 'flex', flexDirection: 'column' };
-        return <div style={wrapperStyle}>{children}</div>;
+        return <div className={`page-shell${isPhone ? ' has-tabbar' : ''}`} style={wrapperStyle}>{children}</div>;
       })()}
       <DiscoveryFloat />
+      {isPhone && <AddedToast />}
+      {isPhone && <BottomTabBar currentPageName={currentPageName} />}
     </CartProvider>
   );
 }

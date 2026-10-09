@@ -540,7 +540,7 @@ export default function Home() {
 
       {/* ══ SECTION 4: METRICS ══ */}
       <div style={{ background: '#1B5E20', padding: '40px 24px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 24, textAlign: 'center' }}>
+        <div className="home-stats" style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 24, textAlign: 'center' }}>
           {[{ target: 20, label: 'Regions', suffix: '' }, { target: 450, label: 'Producers', suffix: '+' }, { target: 1200, label: 'Products', suffix: '+' }, { target: 80, label: 'Experiences', suffix: '+' }, { target: 120, label: 'Recipes', suffix: '+' }].map((s, i) => (
             <AnimatedStat key={i} target={s.target} label={s.label} suffix={s.suffix} />
           ))}

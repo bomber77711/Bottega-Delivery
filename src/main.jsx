@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 import '@/globals.css'
+import '@/mobile.css'
 
 // Safety net: any <img> anywhere in the app that fails to load is swapped for a soft branded
 // placeholder instead of the browser's broken-image icon + alt text.

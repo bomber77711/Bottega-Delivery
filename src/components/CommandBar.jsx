@@ -4,12 +4,16 @@ import { Search, X, ArrowRight } from 'lucide-react';
 import { regionData } from './regionData';
 import { recipesData } from './recipesData';
 import { creatorsData } from './creatorsData';
+import { productsData } from './productsData';
+import { ingredients } from './ingredientsData';
+import { slugify } from '@/lib/catalog';
+import { isPhoneNow } from '@/hooks/useIsPhone';
 
 const allResults = [
   // Regions
   ...Object.entries(regionData).map(([id, r]) => ({
     type: 'Region', icon: '🗺️', label: r.name, sub: `${r.producerCount} producers · ${r.experienceCount} experiences`,
-    href: `/ExploreMap`, color: '#2E7D32'
+    href: `/?region=${id}`, color: '#2E7D32'
   })),
   // Recipes
   ...recipesData.map(r => ({
@@ -19,12 +23,24 @@ const allResults = [
   // Producers (sample)
   ...Object.values(regionData).flatMap(r => r.producers.map(p => ({
     type: 'Producer', icon: '👨‍🌾', label: p.name, sub: `${p.city} · ${p.category}`,
-    href: `/Producers`, color: '#2E7D32'
+    href: `/producers/${slugify(p.name)}`, color: '#2E7D32'
   }))),
   // Creators
   ...creatorsData.map(c => ({
     type: 'Chef', icon: '👨‍🍳', label: c.name, sub: c.title,
-    href: `/Discover`, color: '#1565C0'
+    href: `/creators/${c.id}`, color: '#1565C0'
+  })),
+];
+
+// Phones: search is the main way in, so it also covers products and ingredient guides.
+const phoneExtras = [
+  ...productsData.map(p => ({
+    type: 'Product', icon: '🛒', label: p.name, sub: `${p.producer} · €${p.price.toFixed(2)}`,
+    href: `/Products?q=${encodeURIComponent(p.name)}`, color: '#2E7D32'
+  })),
+  ...Object.values(ingredients).map(i => ({
+    type: 'Ingredient', icon: '🌿', label: i.name, sub: i.regionName,
+    href: `/ingredients/${i.id}`, color: '#6B8E23'
   })),
 ];
 
@@ -51,9 +67,10 @@ export default function CommandBar({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  const pool = isPhoneNow() ? [...phoneExtras, ...allResults] : allResults;
   const filtered = query.length < 1
     ? allResults.slice(0, 8)
-    : allResults.filter(r =>
+    : pool.filter(r =>
         r.label.toLowerCase().includes(query.toLowerCase()) ||
         r.sub.toLowerCase().includes(query.toLowerCase()) ||
         r.type.toLowerCase().includes(query.toLowerCase())
@@ -65,13 +82,13 @@ export default function CommandBar({ isOpen, onClose }) {
   };
 
   return (
-    <div style={{
+    <div className="cmd-overlay" style={{
       position: 'fixed', inset: 0, zIndex: 9999,
       background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
       paddingTop: '14vh'
     }} onClick={onClose}>
-      <div style={{
+      <div className="cmd-panel" style={{
         background: '#111', border: '1px solid rgba(76,175,80,0.25)', borderRadius: 16,
         width: '100%', maxWidth: 580, boxShadow: '0 32px 80px rgba(0,0,0,0.6)',
         overflow: 'hidden', animation: 'fadeSlideIn 0.15s ease'
@@ -94,11 +111,12 @@ export default function CommandBar({ isOpen, onClose }) {
               <X size={14} />
             </button>
           )}
+          <button type="button" onClick={onClose} className="show-mobile" style={{ display: 'none', background: 'none', border: 'none', color: '#81C784', fontSize: 15, fontWeight: 600, padding: '8px 4px', cursor: 'pointer' }}>Cancel</button>
           <kbd style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, padding: '2px 6px' }}>ESC</kbd>
         </div>
 
         {/* Results */}
-        <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+        <div className="cmd-results" style={{ maxHeight: 400, overflowY: 'auto' }}>
           {filtered.length === 0 ? (
             <div style={{ padding: '32px 20px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>
               No results for "{query}"
