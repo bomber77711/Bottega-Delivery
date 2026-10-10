@@ -14,6 +14,11 @@ const TABS = [
 // iOS Safari's floating toolbar can sit over the bottom of the layout viewport. Measure how much of
 // the layout viewport is hidden below the visible area and lift the tab bar's content above it
 // (0 on browsers where nothing is hidden).
+const IOS_SAFARI_26 = typeof navigator !== 'undefined'
+  && /iP(hone|od)/.test(navigator.userAgent) && !/(CriOS|FxiOS|EdgiOS|OPiOS)/.test(navigator.userAgent)
+  && Number((navigator.userAgent.match(/Version\/(\d+)/) || [])[1]) >= 26
+  && !(typeof window !== 'undefined' && (window.navigator.standalone || window.matchMedia?.('(display-mode: standalone)').matches));
+
 function useToolbarOverlap() {
   useEffect(() => {
     const vv = window.visualViewport;
@@ -26,7 +31,10 @@ function useToolbarOverlap() {
       raf = 0;
       if (vv.scale > 1.01) return; // pinch-zoomed: leave as is
       const layoutBottom = probe.getBoundingClientRect().top;
-      const overlap = Math.round(layoutBottom - (vv.offsetTop + vv.height));
+      let overlap = Math.round(layoutBottom - (vv.offsetTop + vv.height));
+      // Safari 26 on iPhone draws its floating toolbar over the last ~13px of the page without
+      // reporting it; lift the tab bar's labels clear of it there.
+      if (overlap <= 0 && IOS_SAFARI_26) overlap = 16;
       document.documentElement.style.setProperty('--toolbar-overlap', `${Math.max(0, Math.min(120, overlap))}px`);
     };
     const schedule = () => { if (!raf) raf = requestAnimationFrame(measure); };
