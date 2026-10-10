@@ -15,41 +15,19 @@ const TABS = [
 // the layout viewport is hidden below the visible area and lift the tab bar's content above it
 // (0 on browsers where nothing is hidden).
 // iPhone Safari (iOS 15+) draws its bottom toolbar over the last ~13px of the page and doesn't
-// report it in any viewport API, so on iPhone Safari (not as a home-screen app) we lift the tabs.
+// report it in any viewport API, so on iPhone Safari (not as a home-screen app) the tabs are lifted.
 const IOS_SAFARI = typeof navigator !== 'undefined'
   && /iP(hone|od)/.test(navigator.userAgent) && /Safari\//.test(navigator.userAgent)
   && !/(CriOS|FxiOS|EdgiOS|OPiOS|GSA|Instagram|FBAN|FBAV)/.test(navigator.userAgent)
   && !(typeof window !== 'undefined' && (window.navigator.standalone || window.matchMedia?.('(display-mode: standalone)').matches));
 
+// A fixed lift, set once: measuring live made the bar jump while Safari's toolbar shrinks and
+// grows during scrolling.
 function useToolbarOverlap() {
   useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return undefined;
-    const probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;left:0;bottom:0;width:0;height:0;pointer-events:none;visibility:hidden';
-    document.body.appendChild(probe);
-    let raf = 0;
-    const measure = () => {
-      raf = 0;
-      if (vv.scale > 1.01) return; // pinch-zoomed: leave as is
-      const layoutBottom = probe.getBoundingClientRect().top;
-      let overlap = Math.round(layoutBottom - (vv.offsetTop + vv.height));
-      if (overlap <= 0 && IOS_SAFARI) overlap = 16;
-      document.documentElement.style.setProperty('--toolbar-overlap', `${Math.max(0, Math.min(120, overlap))}px`);
-    };
-    const schedule = () => { if (!raf) raf = requestAnimationFrame(measure); };
-    measure();
-    vv.addEventListener('resize', schedule);
-    vv.addEventListener('scroll', schedule);
-    window.addEventListener('orientationchange', schedule);
-    return () => {
-      cancelAnimationFrame(raf);
-      vv.removeEventListener('resize', schedule);
-      vv.removeEventListener('scroll', schedule);
-      window.removeEventListener('orientationchange', schedule);
-      probe.remove();
-      document.documentElement.style.removeProperty('--toolbar-overlap');
-    };
+    if (!IOS_SAFARI) return undefined;
+    document.documentElement.style.setProperty('--toolbar-overlap', '16px');
+    return () => document.documentElement.style.removeProperty('--toolbar-overlap');
   }, []);
 }
 
