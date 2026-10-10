@@ -310,6 +310,31 @@ export default function Home() {
     }, { replace: hadRegion });
   }, [setSearchParams]);
 
+  // Phones: the map home is an app screen — iOS Safari must not pan or rubber-band it.
+  // Touch moves are blocked unless they happen inside something that genuinely scrolls
+  // (region sheet text, card row, chips, search results, cart, menu). Pinch-zoom is blocked too.
+  useEffect(() => {
+    if (!phone) return undefined;
+    const scrollable = (el) => {
+      for (let n = el instanceof Element ? el : null; n && n !== document.body; n = n.parentElement) {
+        const cs = getComputedStyle(n);
+        if (/(auto|scroll)/.test(cs.overflowY) && n.scrollHeight > n.clientHeight + 1) return true;
+        if (/(auto|scroll)/.test(cs.overflowX) && n.scrollWidth > n.clientWidth + 1) return true;
+      }
+      return false;
+    };
+    const onMove = (e) => {
+      if (e.touches.length > 1 || !scrollable(e.target)) e.preventDefault();
+    };
+    const onGesture = (e) => e.preventDefault(); // iOS pinch
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('gesturestart', onGesture, { passive: false });
+    return () => {
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('gesturestart', onGesture);
+    };
+  }, [phone]);
+
   // Food Journeys open from the phone menu via /?journey=<id>
   const urlJourney = searchParams.get('journey');
   useEffect(() => {
