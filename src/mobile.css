@@ -57,11 +57,16 @@
   nav.site-nav .nav-icon-btn { width: 44px; height: 44px; justify-content: center; align-items: center !important; padding: 0 !important; line-height: 0; }
   nav.site-nav .nav-icon-btn svg { display: block; }
   .page-shell { padding-top: calc(56px + env(safe-area-inset-top)) !important; }
-  .page-shell.has-tabbar { padding-bottom: calc(60px + env(safe-area-inset-bottom)) !important; }
+  .page-shell.has-tabbar { padding-bottom: calc(60px + env(safe-area-inset-bottom) + var(--toolbar-overlap, 0px)) !important; }
   /* Map pages: exactly the visible screen. iOS Safari's 100vh is taller than what's visible
      (it ignores the address bar), which let the page scroll and showed a pale strip under the map. */
-  .page-shell.is-fixed { height: 100dvh !important; box-sizing: border-box; }
+  /* The page itself is pinned to the screen (position: fixed), so iOS has nothing to scroll or pan;
+     the map fills exactly what's left between the header and the tab bar. */
+  .page-shell.is-fixed { position: fixed !important; inset: 0; height: auto !important; box-sizing: border-box; }
+  .page-shell.is-fixed div:has(> #map-container) { height: 100%; }
+  .page-shell.is-fixed #map-container:not([style*="position: fixed"]) { height: 100% !important; min-height: 0 !important; }
   html:has(.page-shell.is-fixed), html:has(.page-shell.is-fixed) body { overflow: hidden; overscroll-behavior: none; height: 100%; }
+  html:has(.page-shell.is-fixed) body { position: fixed; inset: 0; width: 100%; }
 
   /* ── Home ────────────────────────────────────────────────── */
   .home-stats { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 20px 8px !important; }
@@ -102,7 +107,7 @@
   .tabbar {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 1001;
     display: grid; grid-template-columns: repeat(5, 1fr);
-    height: calc(60px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom);
+    height: calc(60px + env(safe-area-inset-bottom) + var(--toolbar-overlap, 0px)); padding-bottom: calc(env(safe-area-inset-bottom) + var(--toolbar-overlap, 0px));
     background: rgba(255, 255, 255, 0.96); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px);
     border-top: 1px solid rgba(0, 0, 0, 0.07);
   }
@@ -122,7 +127,7 @@
   /* ── "Added to cart" toast ───────────────────────────────── */
   .added-toast {
     position: fixed; left: 12px; right: 12px; z-index: 1002;
-    bottom: calc(60px + env(safe-area-inset-bottom) + 10px);
+    bottom: calc(60px + env(safe-area-inset-bottom) + var(--toolbar-overlap, 0px) + 10px);
     display: flex; align-items: center; gap: 10px; padding: 10px 8px 10px 12px;
     background: #1A1A1A; color: #fff; border-radius: 14px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
     animation: toastIn 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -197,7 +202,7 @@
 
   /* ── Sticky "Shop" bar on producer pages ─────────────────── */
   .shop-bar {
-    position: fixed; left: 12px; right: 12px; z-index: 999; bottom: calc(60px + env(safe-area-inset-bottom) + 10px);
+    position: fixed; left: 12px; right: 12px; z-index: 999; bottom: calc(60px + env(safe-area-inset-bottom) + var(--toolbar-overlap, 0px) + 10px);
     display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 16px;
     background: #fff; border-radius: 16px; box-shadow: 0 10px 34px rgba(0, 0, 0, 0.18); border: 1px solid #E8F0E6;
     transition: transform 0.25s ease, opacity 0.25s ease;

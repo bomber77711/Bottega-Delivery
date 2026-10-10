@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Map, ShoppingBasket, Users, Compass, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/components/cartStore';
@@ -10,8 +11,43 @@ const TABS = [
   { key: 'Experiences', label: 'Experiences', to: '/Experiences', Icon: Compass, match: ['Experiences'] },
 ];
 
+// iOS Safari's floating toolbar can sit over the bottom of the layout viewport. Measure how much of
+// the layout viewport is hidden below the visible area and lift the tab bar's content above it
+// (0 on browsers where nothing is hidden).
+function useToolbarOverlap() {
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return undefined;
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;left:0;bottom:0;width:0;height:0;pointer-events:none;visibility:hidden';
+    document.body.appendChild(probe);
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      if (vv.scale > 1.01) return; // pinch-zoomed: leave as is
+      const layoutBottom = probe.getBoundingClientRect().top;
+      const overlap = Math.round(layoutBottom - (vv.offsetTop + vv.height));
+      document.documentElement.style.setProperty('--toolbar-overlap', `${Math.max(0, Math.min(120, overlap))}px`);
+    };
+    const schedule = () => { if (!raf) raf = requestAnimationFrame(measure); };
+    measure();
+    vv.addEventListener('resize', schedule);
+    vv.addEventListener('scroll', schedule);
+    window.addEventListener('orientationchange', schedule);
+    return () => {
+      cancelAnimationFrame(raf);
+      vv.removeEventListener('resize', schedule);
+      vv.removeEventListener('scroll', schedule);
+      window.removeEventListener('orientationchange', schedule);
+      probe.remove();
+      document.documentElement.style.removeProperty('--toolbar-overlap');
+    };
+  }, []);
+}
+
 export default function BottomTabBar({ currentPageName }) {
   const { count, setIsOpen, isOpen } = useCart();
+  useToolbarOverlap();
   return (
     <nav className="tabbar" aria-label="Main">
       {TABS.map(({ key, label, to, Icon, match }) => {
