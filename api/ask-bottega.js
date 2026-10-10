@@ -5,6 +5,8 @@
 const ALLOWED_ORIGINS = [
   'https://bottega-delivery.com',
   'https://www.bottega-delivery.com',
+  'https://bottega.delivery',
+  'https://www.bottega.delivery',
   'http://localhost:5173',
 ];
 
