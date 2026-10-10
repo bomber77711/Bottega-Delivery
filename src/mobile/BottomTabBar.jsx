@@ -69,6 +69,7 @@ function ViewportDebug() {
         `vv ${Math.round(vv.width)}×${Math.round(vv.height)} top ${Math.round(vv.offsetTop)} left ${Math.round(vv.offsetLeft)} scale ${vv.scale?.toFixed?.(2)}`,
         `fixed-bottom ${Math.round(r.bottom)} · safe-bottom ${getComputedStyle(probe).paddingBottom} · tabbar ${tb ? `${Math.round(tb.top)}–${Math.round(tb.bottom)}` : '-'}`,
         `scroll ${Math.round(window.scrollX)},${Math.round(window.scrollY)} · doc ${document.documentElement.scrollWidth}×${document.documentElement.scrollHeight}`,
+        `wide: ${[...document.querySelectorAll('body *')].filter((el) => { const b = el.getBoundingClientRect(); return b.width && (b.right > document.documentElement.clientWidth + 0.5 || b.left < -0.5); }).slice(0, 4).map((el) => `${el.tagName.toLowerCase()}.${String(el.className?.baseVal ?? el.className ?? '').split(' ')[0]}(${Math.round(el.getBoundingClientRect().left)}→${Math.round(el.getBoundingClientRect().right)})`).join(' ') || 'none'}`,
         navigator.userAgent.replace(/^Mozilla\/5.0 /, '').slice(0, 120),
       ].join('\n'));
     };
@@ -79,10 +80,47 @@ function ViewportDebug() {
   return <pre style={{ position: 'fixed', top: 60, left: 6, right: 6, zIndex: 99999, margin: 0, padding: 8, borderRadius: 8, background: 'rgba(0,0,0,0.8)', color: '#0f0', font: '10px/1.4 monospace', whiteSpace: 'pre-wrap', pointerEvents: 'none' }}>{info}</pre>;
 }
 
+// Pages on phones only ever scroll up/down. iOS Safari can still slide the whole screen sideways
+// by a few px; once a one-finger gesture is clearly horizontal, cancel it — unless it started on
+// something that genuinely scrolls sideways (chip rows, card rows).
+function useNoSidewaysPan() {
+  useEffect(() => {
+    let sx = 0, sy = 0, axis = null, allowX = false;
+    const canScrollX = (el) => {
+      for (let n = el instanceof Element ? el : null; n && n !== document.documentElement; n = n.parentElement) {
+        const cs = getComputedStyle(n);
+        if (/(auto|scroll)/.test(cs.overflowX) && n.scrollWidth > n.clientWidth + 1) return true;
+      }
+      return false;
+    };
+    const onStart = (e) => {
+      if (e.touches.length !== 1) return;
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY; axis = null;
+      allowX = canScrollX(e.target);
+    };
+    const onMove = (e) => {
+      if (e.touches.length !== 1 || allowX) return;
+      if (!axis) {
+        const dx = Math.abs(e.touches[0].clientX - sx), dy = Math.abs(e.touches[0].clientY - sy);
+        if (dx < 3 && dy < 3) return;
+        axis = dx > dy ? 'x' : 'y';
+      }
+      if (axis === 'x') e.preventDefault();
+    };
+    document.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('touchmove', onMove, { passive: false });
+    return () => {
+      document.removeEventListener('touchstart', onStart);
+      document.removeEventListener('touchmove', onMove);
+    };
+  }, []);
+}
+
 export default function BottomTabBar({ currentPageName }) {
   const [debug] = useState(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('vp'));
   const { count, setIsOpen, isOpen } = useCart();
   useToolbarOverlap();
+  useNoSidewaysPan();
   return (
     <>
     {debug && <ViewportDebug />}
