@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Map, ShoppingBasket, Users, Compass, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/components/cartStore';
@@ -45,10 +45,39 @@ function useToolbarOverlap() {
   }, []);
 }
 
+// Diagnostics for real devices: open any page with ?vp=1 to see the viewport numbers on screen.
+function ViewportDebug() {
+  const [info, setInfo] = useState('');
+  useEffect(() => {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;left:0;bottom:0;width:0;height:0;padding-bottom:env(safe-area-inset-bottom);visibility:hidden';
+    document.body.appendChild(probe);
+    const tick = () => {
+      const vv = window.visualViewport || {};
+      const r = probe.getBoundingClientRect();
+      const tb = document.querySelector('.tabbar')?.getBoundingClientRect();
+      setInfo([
+        `inner ${window.innerWidth}×${window.innerHeight} · client ${document.documentElement.clientWidth}×${document.documentElement.clientHeight} · screen ${window.screen.width}×${window.screen.height}`,
+        `vv ${Math.round(vv.width)}×${Math.round(vv.height)} top ${Math.round(vv.offsetTop)} left ${Math.round(vv.offsetLeft)} scale ${vv.scale?.toFixed?.(2)}`,
+        `fixed-bottom ${Math.round(r.bottom)} · safe-bottom ${getComputedStyle(probe).paddingBottom} · tabbar ${tb ? `${Math.round(tb.top)}–${Math.round(tb.bottom)}` : '-'}`,
+        `scroll ${Math.round(window.scrollX)},${Math.round(window.scrollY)} · doc ${document.documentElement.scrollWidth}×${document.documentElement.scrollHeight}`,
+        navigator.userAgent.replace(/^Mozilla\/5.0 /, '').slice(0, 120),
+      ].join('\n'));
+    };
+    tick();
+    const iv = setInterval(tick, 500);
+    return () => { clearInterval(iv); probe.remove(); };
+  }, []);
+  return <pre style={{ position: 'fixed', top: 60, left: 6, right: 6, zIndex: 99999, margin: 0, padding: 8, borderRadius: 8, background: 'rgba(0,0,0,0.8)', color: '#0f0', font: '10px/1.4 monospace', whiteSpace: 'pre-wrap', pointerEvents: 'none' }}>{info}</pre>;
+}
+
 export default function BottomTabBar({ currentPageName }) {
+  const [debug] = useState(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('vp'));
   const { count, setIsOpen, isOpen } = useCart();
   useToolbarOverlap();
   return (
+    <>
+    {debug && <ViewportDebug />}
     <nav className="tabbar" aria-label="Main">
       {TABS.map(({ key, label, to, Icon, match }) => {
         const active = match.includes(currentPageName);
@@ -67,5 +96,6 @@ export default function BottomTabBar({ currentPageName }) {
         <span>Cart</span>
       </button>
     </nav>
+    </>
   );
 }

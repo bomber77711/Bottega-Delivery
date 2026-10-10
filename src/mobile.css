@@ -329,4 +329,9 @@
   .ask-input input { flex: 1; height: 46px; border-radius: 100px; border: 1px solid rgba(76, 175, 80, 0.35); background: rgba(255, 255, 255, 0.06); color: #fff; padding: 0 16px; font: 16px 'DM Sans', sans-serif; outline: none; }
   .ask-input button { width: 46px; height: 46px; border-radius: 50%; border: none; background: #2E7D32; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .ask-input button:disabled { background: rgba(76, 175, 80, 0.25); }
+
+  /* Toast container (shadcn): full width + a 16px offset made it stick out past the right edge,
+     which let iOS Safari pan the whole page sideways. Keep it inside the screen. */
+  .fixed[class*="z-[100]"] { left: 0 !important; right: 0 !important; width: auto !important; max-width: 100% !important; pointer-events: none; }
+  .fixed[class*="z-[100]"] > * { pointer-events: auto; }
 }
