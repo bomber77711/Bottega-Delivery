@@ -14,6 +14,7 @@ export const PAGES = {
     "Products": lazyPage(() => import('./pages/Products')),
     "Experiences": lazyPage(() => import('./pages/Experiences')),
     "Stories": lazyPage(() => import('./pages/Stories')),
+    "Team": lazyPage(() => import('./pages/Team')),
 }
 
 export const pagesConfig = {

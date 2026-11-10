@@ -5,8 +5,8 @@ import { photoCredits } from '../components/photoCredits';
 export default function About() {
   const team = [
     { initials: 'AV', name: 'Alessandro Vaccari', role: 'Founder & CEO', color: '#2E7D32' },
+    { initials: 'AA', name: 'Alexandra Akira', role: 'Co-Founder & CFO', color: '#388E3C' },
     { initials: 'MB', name: 'Michele Barchiesi', role: 'CMO', color: '#1B5E20' },
-    { initials: 'GG', name: 'Guillaume Griffith', role: 'CFO', color: '#388E3C' },
     { initials: 'ED', name: 'Edoardo Di Piero', role: 'CTO', color: '#4CAF50' },
   ];
 

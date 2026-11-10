@@ -49,6 +49,7 @@ function NavContent({ currentPageName }) {
     { label: 'Experiences', page: 'Experiences' },
     { label: 'Recipes', page: 'Recipes' },
     { label: 'Stories', page: 'Stories' },
+    { label: 'Team', page: 'Team' },
 
   ];
 
@@ -68,7 +69,7 @@ function NavContent({ currentPageName }) {
         </Link>
 
         {/* Center Nav */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center' }} className="hide-mobile">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center' }} className="hide-mobile nav-links">
           {navLinks.map(link => (
             <Link key={link.page} to={link.customPath || createPageUrl(link.page)} style={{
               padding: '6px 14px', borderRadius: 8, fontSize: 14, fontWeight: 500,
@@ -92,7 +93,7 @@ function NavContent({ currentPageName }) {
             padding: '7px 14px', borderRadius: 100,
             background: '#F5F5F5', border: '1px solid transparent',
             transition: 'all 0.2s ease', cursor: 'pointer', width: 180
-          }} className="hide-mobile"
+          }} className="hide-mobile nav-search"
             onMouseEnter={e => { e.currentTarget.style.border = '1px solid #4CAF50'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(76,175,80,0.1)'; }}
             onMouseLeave={e => { e.currentTarget.style.border = '1px solid transparent'; e.currentTarget.style.boxShadow = 'none'; }}>
             <Search size={14} color="#888" />
@@ -157,6 +158,17 @@ export default function Layout({ children, currentPageName }) {
       <style>{`
         .hide-mobile { }
         .show-mobile { display: none !important; }
+        /* Narrower laptops: keep all menu items + search + cart on one line */
+        @media (min-width: 769px) and (max-width: 1240px) {
+          .nav-links { gap: 0 !important; }
+          .nav-links a { padding: 6px 9px !important; font-size: 13.5px !important; }
+          .nav-search { width: 40px !important; padding: 9px 12px !important; }
+          .nav-search > :not(svg) { display: none !important; }
+          .nav-search { justify-content: center; }
+        }
+        @media (min-width: 769px) and (max-width: 940px) {
+          .nav-links a { padding: 6px 6px !important; font-size: 13px !important; }
+        }
         @media (max-width: 768px) {
           .hide-mobile { display: none !important; }
           .show-mobile { display: flex !important; }
