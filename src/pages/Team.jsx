@@ -13,57 +13,58 @@ const ADVISORS = [
   { slug: 'federico-pizzi', name: 'Federico Pizzi', role: 'Tax Advisor', bio: 'Taxation and financial advisor. Chartered accountant.' },
 ];
 
-function Person({ p }) {
+function Person({ p, cls }) {
   return (
-    <article className="team-card" style={{
-      background: '#fff', borderRadius: 16, overflow: 'hidden', border: '1px solid #E3EEE1',
-      boxShadow: '0 1px 2px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', minWidth: 0,
+    <article className={`team-card ${cls || ''}`} style={{
+      background: '#fff', borderRadius: 18, overflow: 'hidden', border: '1px solid #E3EEE1',
+      boxShadow: '0 2px 10px rgba(27,58,27,0.06)', display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0,
     }}>
-      <div style={{ aspectRatio: '1 / 1', background: '#fff', overflow: 'hidden' }}>
+      <div className="team-photo" style={{ flex: 1, minHeight: 0, background: '#fff', overflow: 'hidden' }}>
         <img src={`/img/team/${p.slug}.webp?v=3`} alt={p.name} width={480} height={480} loading="eager"
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 28%', display: 'block' }} />
       </div>
-      <div className="team-txt" style={{ padding: '12px 14px 14px' }}>
-        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#2E7D32' }}>{p.role}</span>
-        <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 700, color: '#1A1A1A', margin: '4px 0 6px', lineHeight: 1.2 }}>{p.name}</h3>
-        <p style={{ fontSize: 12, color: '#555', lineHeight: 1.5, margin: 0 }}>{p.bio}</p>
+      <div className="team-txt" style={{ padding: '14px 18px 16px', flex: 'none', minHeight: 146, boxSizing: 'border-box' }}>
+        <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#2E7D32' }}>{p.role}</span>
+        <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 19, fontWeight: 700, color: '#1A1A1A', margin: '3px 0 5px', lineHeight: 1.2 }}>{p.name}</h3>
+        <p style={{ fontSize: 13, color: '#555', lineHeight: 1.5, margin: 0 }}>{p.bio}</p>
       </div>
     </article>
   );
 }
 
-const LABEL = { fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#2E7D32', margin: '0 0 12px' };
-
 export default function Team() {
   return (
-    <div style={{ flex: 1, overflowY: 'auto', background: '#F0F7EE' }}>
-      <div className="team-wrap" style={{ maxWidth: 1240, margin: '0 auto', padding: '40px 32px 40px' }}>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#2E7D32', display: 'block', marginBottom: 10 }}>OUR TEAM</span>
-        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(30px, 3.6vw, 44px)', fontWeight: 700, color: '#1A1A1A', lineHeight: 1.12, margin: '0 0 26px' }}>
+    <div style={{ flex: 1, background: '#F0F7EE' }}>
+      <div className="team-wrap" style={{ maxWidth: 1240, margin: '0 auto', padding: '26px 32px 26px', height: 'calc(100dvh - var(--team-nav, 60px))', minHeight: 620, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(28px, 3.2vw, 40px)', fontWeight: 700, color: '#1A1A1A', lineHeight: 1.1, margin: '0 0 20px', flex: 'none' }}>
+          <span style={{ display: 'block', fontFamily: 'inherit', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#2E7D32', marginBottom: 8, fontFamily: 'system-ui, sans-serif' }}>OUR TEAM</span>
           The people <em style={{ color: '#4CAF50' }}>building Bottega</em>
         </h1>
-
-        <div className="team-row" style={{ display: 'grid', gridTemplateColumns: '4fr 3fr', gap: 28, alignItems: 'stretch' }}>
-          <section style={{ display: 'flex', flexDirection: 'column' }}>
-            <h2 style={LABEL}>Leadership</h2>
-            <div className="team-grid team-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 14, flex: 1 }}>
-              {LEADERSHIP.map((p) => <Person key={p.slug} p={p} />)}
-            </div>
-          </section>
-          <section style={{ display: 'flex', flexDirection: 'column' }}>
-            <h2 style={LABEL}>Commercial &amp; advisory</h2>
-            <div className="team-grid team-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14, flex: 1 }}>
-              {ADVISORS.map((p) => <Person key={p.slug} p={p} />)}
-            </div>
-          </section>
+        <div className="team-grid" style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: 'repeat(8, minmax(0, 1fr))', gridTemplateRows: 'repeat(2, minmax(0, 1fr))', gap: 18 }}>
+          {LEADERSHIP.map((p) => <Person key={p.slug} p={p} cls="tc-top" />)}
+          {ADVISORS.map((p, i) => <Person key={p.slug} p={p} cls={i === 0 ? 'tc-bot tc-first' : 'tc-bot'} />)}
         </div>
       </div>
       <style>{`
-        @media (max-width: 1100px) { .team-row { grid-template-columns: 1fr !important; gap: 22px !important; } .team-wrap { max-width: 860px !important; } }
+        .team-card { grid-column: span 2; }
+        .team-card.tc-first { grid-column: 2 / span 2; }
+        @media (min-width: 768px) and (max-height: 780px) {
+          .team-wrap { padding: 16px 32px 18px !important; }
+          .team-wrap h1 { font-size: 30px !important; margin-bottom: 14px !important; }
+          .team-wrap h1 > span { margin-bottom: 4px !important; }
+          .team-grid { gap: 14px !important; }
+          .team-txt { padding: 10px 16px 12px !important; min-height: 122px !important; }
+          .team-card h3 { font-size: 17px !important; margin: 2px 0 3px !important; }
+          .team-card p { font-size: 12px !important; line-height: 1.45 !important; }
+        }
         @media (max-width: 767.98px) {
-          .team-wrap { padding: 28px 16px 40px !important; }
-          .team-grid-4, .team-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
-          .team-txt { padding: 10px 12px 12px !important; }
+          .team-wrap { height: auto !important; min-height: 0 !important; padding: 24px 16px 40px !important; }
+          .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; grid-template-rows: none !important; gap: 12px !important; }
+          .team-card, .team-card.tc-first { grid-column: auto !important; }
+          .team-photo { flex: none !important; aspect-ratio: 1 / 1; }
+          .team-txt { padding: 10px 12px 12px !important; min-height: 0 !important; }
+          .team-card h3 { font-size: 16px !important; }
+          .team-card p { font-size: 12.5px !important; }
         }
       `}</style>
     </div>
