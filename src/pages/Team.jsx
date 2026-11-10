@@ -20,7 +20,7 @@ function Person({ p, cls }) {
       boxShadow: '0 2px 10px rgba(27,58,27,0.06)', display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0,
     }}>
       <div className="team-photo" style={{ flex: 1, minHeight: 0, background: '#fff', overflow: 'hidden' }}>
-        <img src={`/img/team/${p.slug}.webp?v=3`} alt={p.name} width={480} height={480} loading="eager"
+        <img src={`/img/team/${p.slug}.webp?v=4`} alt={p.name} width={480} height={480} loading="eager"
           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 28%', display: 'block' }} />
       </div>
       <div className="team-txt" style={{ padding: '14px 18px 16px', flex: 'none', minHeight: 146, boxSizing: 'border-box' }}>
