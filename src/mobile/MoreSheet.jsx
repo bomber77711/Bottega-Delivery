@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Landmark, ChefHat, BookOpen, Heart, Info, Sparkles, ChevronRight, X } from 'lucide-react';
+import { Landmark, ChefHat, BookOpen, Heart, Info, Sparkles, ChevronRight, X, Users } from 'lucide-react';
 import { randomDiscovery } from '@/components/DiscoveryFloat';
 import { foodJourneys } from '@/components/foodJourneys';
 import { regionData } from '@/components/regionData';
@@ -11,6 +11,7 @@ const LINKS = [
   { to: '/Recipes', label: 'Recipes', sub: 'Traditional dishes & their producers', Icon: ChefHat },
   { to: '/Stories', label: 'Stories', sub: 'People, places and traditions', Icon: BookOpen },
   { to: '/taste-maps', label: 'Taste Maps', sub: 'Curated collections', Icon: Heart },
+  { to: '/Team', label: 'Our Team', sub: 'The people building Bottega', Icon: Users },
   { to: '/About', label: 'About Bottega', sub: 'Our mission', Icon: Info },
 ];
 
